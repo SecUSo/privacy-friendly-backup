@@ -10,8 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/BackupAPI/BackupAPI" />
             <option value="$PROJECT_DIR$/BackupApp" />
+            <option value="$PROJECT_DIR$/privacy-friendly-backup-api/BackupAPI" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

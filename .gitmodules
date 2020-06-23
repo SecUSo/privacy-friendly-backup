@@ -1,0 +1,3 @@
+[submodule "BackupAPI"]
+	path = BackupAPI
+	url = https://github.com/SecUSo/privacy-friendly-backup-api.git
