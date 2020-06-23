@@ -1,0 +1,5 @@
+include ':BackupApp'
+rootProject.name = "Backup"
+
+include ':BackupAPI'
+project(':BackupAPI').projectDir = new File('BackupAPI/BackupAPI')
