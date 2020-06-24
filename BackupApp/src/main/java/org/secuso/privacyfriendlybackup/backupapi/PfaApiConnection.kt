@@ -4,66 +4,66 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.os.*
+import android.os.IBinder
 import org.secuso.privacyfriendlybackup.api.IPFAService
 import org.secuso.privacyfriendlybackup.api.pfa.PfaApi
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.MSG_AUTHENTICATE
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.MessageCodes
+import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
+import org.secuso.privacyfriendlybackup.api.pfa.PfaError
+
+const val API_VERSION = 1
 
 /**
  * @author Christopher Beckmann
  */
 class PfaApiConnection(
     private val mContext: Context,
-    private val mPFAServiceName: String) {
+    private val mPFAServiceName: String,
+    private val mPfaApiListener: IPfaApiListener? = null) {
 
-    //private var mMessenger: Messenger? = null
-    //private var mReplyMessenger: Messenger = Messenger(PFAHandler(mContext))
+    interface IPfaApiListener {
+        fun onBound(service : IPFAService?)
+        fun onError(error : PfaError)
+        fun onSuccess()
+    }
+
     private var mService : IPFAService? = null
 
     private val mConnection = object : ServiceConnection {
         override fun onServiceDisconnected(name: ComponentName?) {
-            //mMessenger = null
             mService = null
         }
-
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            //mMessenger = Messenger(service)
             mService = IPFAService.Stub.asInterface(service)
+            mPfaApiListener?.onBound(mService)
         }
     }
 
-    internal class PFAHandler(context: Context) : Handler() {
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                REPLY_AUTHENTICATION_OK -> {
-                    //msg.sendingUid
-                    TODO()
-                }
-                REPLY_AUTHENTICATION_ERROR -> handleErrorCode(msg.arg1)
-                else -> super.handleMessage(msg)
-            }
+    fun send(action : String) {
+        if(!isBound()) {
+            mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.SERVICE_NOT_BOUND, "Service is not bound."))
         }
-
-        private fun handleErrorCode(@MessageReplyErrorCodes code: Int) {
-            when(code) {
-                ERROR_AUTH_CERT_MISMATCH -> {
-                    TODO()
-                }
-                ERROR_AUTH_APPLICATION_NOT_FOUND -> {
-                    TODO()
-                }
-                else -> {
-                    TODO()
-                }
-            }
+        val result : Intent = mService!!.send(Intent().apply {
+            putExtra(PfaApi.EXTRA_API_VERSION, API_VERSION)
+            setAction(action)
+        })
+        when(result.getIntExtra(PfaApi.RESULT_CODE, -1)) {
+            PfaApi.RESULT_CODE_SUCCESS ->   mPfaApiListener?.onSuccess()
+            PfaApi.RESULT_CODE_ERROR ->     mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.GENERAL_ERROR, TODO()))
+            else ->                         mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.GENERAL_ERROR, "RESULT_CODE unknown."))
         }
     }
 
     fun connect() {
-        Intent(PfaApi.CONNECT_ACTION).also { intent ->
-            intent.setPackage(mPFAServiceName)
-            mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+        if(mService != null) {
+            Intent(PfaApi.PFA_CONNECT_ACTION).also { intent ->
+                // this is the name of the PFA to connect to
+                intent.setPackage(mPFAServiceName)
+                // this allows for other backup applications - the PFA will callback to this app
+                intent.putExtra(EXTRA_CONNECT_PACKAGE_NAME, mContext.packageName)
+                mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+            }
+        } else {
+            mPfaApiListener?.onBound(mService)
         }
     }
 
@@ -71,27 +71,7 @@ class PfaApiConnection(
         mContext.unbindService(mConnection)
     }
 
-    fun authenticate() {
-        send(MSG_AUTHENTICATE)
-        //send(MSG_SCHEDULE)
-    }
-
-    private fun send(@MessageCodes what : Int) {
-        if(!isBound()) return
-
-        val msg = Message.obtain(null, what, 0, 0).apply {
-            replyTo = mReplyMessenger
-        }
-
-        try {
-            mMessenger?.send(msg)
-        } catch (e : RemoteException) {
-            e.printStackTrace()
-        }
-    }
-
     fun isBound() : Boolean {
         return mService != null
     }
-
 }
