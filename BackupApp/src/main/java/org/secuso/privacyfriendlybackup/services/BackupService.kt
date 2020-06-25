@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.services
 
 import android.content.Intent
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.pfa.*
 
@@ -13,6 +14,15 @@ class BackupService : AbstractAuthService() {
     override val SUPPORTED_API_VERSIONS = listOf(1)
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
+
+        fun performBackup(input : ParcelFileDescriptor) {
+
+        }
+
+        fun performRestore() : ParcelFileDescriptor {
+            TODO()
+        }
+
         override fun send(data: Intent?): Intent {
             val result = canAccess(data)
             if(result != null) {
@@ -24,8 +34,7 @@ class BackupService : AbstractAuthService() {
 
         private fun handle(data: Intent): Intent {
             return when(data.action) {
-                ACTION_BACKUP -> {}
-                ACTION_RESTORE -> {}
+                //ACTION_BACKUP -> TODO()
                 else -> Intent().apply {
                     putExtra(RESULT_CODE, RESULT_CODE_ERROR)
                     putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action ${data.action} is unsupported."))
@@ -33,7 +42,6 @@ class BackupService : AbstractAuthService() {
             }
         }
     }
-
 
     override fun onBind(intent: Intent?): IBinder {
         return mBinder;
