@@ -6,8 +6,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import org.secuso.privacyfriendlybackup.api.IPFAService
-import org.secuso.privacyfriendlybackup.api.pfa.*
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.EXTRA_API_VERSION
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_ERROR
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_SUCCESS
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
+import org.secuso.privacyfriendlybackup.api.common.PfaApi
+import org.secuso.privacyfriendlybackup.api.common.PfaApi.EXTRA_CONNECT_PACKAGE_NAME
+import org.secuso.privacyfriendlybackup.api.common.PfaError
 
 const val API_VERSION = 1
 
@@ -17,7 +23,8 @@ const val API_VERSION = 1
 class PfaApiConnection(
     private val mContext: Context,
     private val mPFAServiceName: String,
-    private val mPfaApiListener: IPfaApiListener? = null) {
+    private val mPfaApiListener: IPfaApiListener? = null,
+    private val mApiVersion: Int = API_VERSION) {
 
     interface IPfaApiListener {
         fun onBound(service : IPFAService?)
@@ -41,10 +48,15 @@ class PfaApiConnection(
 
     fun send(action : String) {
         if(!isBound()) {
-            mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.SERVICE_NOT_BOUND, "Service is not bound."))
+            mPfaApiListener?.onError(
+                PfaError(
+                    PfaError.PfaErrorCode.SERVICE_NOT_BOUND,
+                    "Service is not bound."
+                )
+            )
         }
         val result : Intent = mService!!.send(Intent().apply {
-            putExtra(EXTRA_API_VERSION, API_VERSION)
+            putExtra(EXTRA_API_VERSION, mApiVersion)
             setAction(action)
         })
 
@@ -55,15 +67,34 @@ class PfaApiConnection(
                 mPfaApiListener?.onSuccess()
             }
             RESULT_CODE_ERROR -> {
-                val error : PfaError? = result.getParcelableExtra(RESULT_ERROR)
-                if(error != null) {
-                    mPfaApiListener?.onError(error)
-                } else {
-                    mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.GENERAL_ERROR, "Unknown error occurred. Couldn't load error."))
+                try {
+                    val error : PfaError? = result.getParcelableExtra(RESULT_ERROR)
+                    if(error != null) {
+                        mPfaApiListener?.onError(error)
+                    } else {
+                        mPfaApiListener?.onError(
+                            PfaError(
+                                PfaError.PfaErrorCode.GENERAL_ERROR,
+                                "Unknown error occurred. Couldn't load error."
+                            )
+                        )
+                    }
+                } catch (e : Exception) {
+                    mPfaApiListener?.onError(
+                        PfaError(
+                            PfaError.PfaErrorCode.GENERAL_ERROR,
+                            "Exception occurred: ${e.message}"
+                        )
+                    )
                 }
             }
             else -> {
-                mPfaApiListener?.onError(PfaError(PfaError.PfaErrorCode.GENERAL_ERROR, "RESULT_CODE unknown."))
+                mPfaApiListener?.onError(
+                    PfaError(
+                        PfaError.PfaErrorCode.GENERAL_ERROR,
+                        "RESULT_CODE unknown."
+                    )
+                )
             }
         }
     }

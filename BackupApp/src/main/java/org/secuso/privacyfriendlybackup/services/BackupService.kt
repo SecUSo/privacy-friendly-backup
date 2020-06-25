@@ -1,10 +1,13 @@
 package org.secuso.privacyfriendlybackup.services
 
 import android.content.Intent
-import android.os.IBinder
 import android.os.ParcelFileDescriptor
 import org.secuso.privacyfriendlybackup.api.IBackupService
-import org.secuso.privacyfriendlybackup.api.pfa.*
+import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_ERROR
+import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
+import org.secuso.privacyfriendlybackup.api.common.PfaError
 
 /**
  * @author Christopher Beckmann
@@ -15,11 +18,11 @@ class BackupService : AbstractAuthService() {
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
-        fun performBackup(input : ParcelFileDescriptor) {
-
+        override fun performBackup() {
+            TODO()
         }
 
-        fun performRestore() : ParcelFileDescriptor {
+        override fun performRestore()  {
             TODO()
         }
 
@@ -37,13 +40,14 @@ class BackupService : AbstractAuthService() {
                 //ACTION_BACKUP -> TODO()
                 else -> Intent().apply {
                     putExtra(RESULT_CODE, RESULT_CODE_ERROR)
-                    putExtra(RESULT_ERROR, PfaError(PfaError.PfaErrorCode.ACTION_ERROR, "Action ${data.action} is unsupported."))
+                    putExtra(RESULT_ERROR,
+                        PfaError(
+                            PfaError.PfaErrorCode.ACTION_ERROR,
+                            "Action ${data.action} is unsupported."
+                        )
+                    )
                 }
             }
         }
-    }
-
-    override fun onBind(intent: Intent?): IBinder {
-        return mBinder;
     }
 }

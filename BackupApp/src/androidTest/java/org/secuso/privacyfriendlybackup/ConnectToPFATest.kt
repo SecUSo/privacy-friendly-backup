@@ -8,8 +8,8 @@ import org.junit.runner.RunWith
 
 import org.junit.Assert.*
 import org.secuso.privacyfriendlybackup.api.IPFAService
-import org.secuso.privacyfriendlybackup.api.pfa.PfaApi
-import org.secuso.privacyfriendlybackup.api.pfa.PfaError
+import org.secuso.privacyfriendlybackup.api.common.PfaApi.ACTION_CONNECT
+import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.backupapi.PfaApiConnection
 
 /**
@@ -18,7 +18,7 @@ import org.secuso.privacyfriendlybackup.backupapi.PfaApiConnection
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+class ConnectToPFATest {
 
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -32,20 +32,21 @@ class ExampleInstrumentedTest {
     fun bindToService() {
         var testEnd = false
         var connection : PfaApiConnection? = null
+        var valid = false
 
         val listener = object : PfaApiConnection.IPfaApiListener {
             override fun onBound(service: IPFAService?) {
                 println("Bound service successfully.")
-                connection!!.send(PfaApi.ACTION_CONNECT)
+                connection!!.send(ACTION_CONNECT)
             }
             override fun onError(error: PfaError) {
                 println("Error: ${error.errorMessage}")
-                assertFalse("Error: ${error.errorMessage}", true)
                 testEnd = true
             }
             override fun onSuccess() {
                 println("Command sent successfully.")
                 connection!!.disconnect()
+                valid = true
                 testEnd = true
             }
             override fun onDisconnected() {
@@ -66,12 +67,14 @@ class ExampleInstrumentedTest {
                 connection.disconnect()
             }
         }
+        assertTrue(valid)
     }
 
     @Test
-    fun bindToServiceSendError() {
+    fun bindToServiceUnknownCommand() {
         var testEnd = false
         var connection : PfaApiConnection? = null
+        var valid = false
 
         val listener = object : PfaApiConnection.IPfaApiListener {
             override fun onBound(service: IPFAService?) {
@@ -80,7 +83,8 @@ class ExampleInstrumentedTest {
             }
             override fun onError(error: PfaError) {
                 println("Error: ${error.errorMessage}")
-                assert(true)
+                assertEquals(error.code, PfaError.PfaErrorCode.ACTION_ERROR)
+                valid = true
                 testEnd = true
             }
             override fun onSuccess() {
@@ -106,5 +110,49 @@ class ExampleInstrumentedTest {
                 connection.disconnect()
             }
         }
+        assertTrue(valid)
+    }
+
+    @Test
+    fun bindToServiceAPIUnsupported() {
+        var testEnd = false
+        var connection : PfaApiConnection? = null
+        var valid = false
+
+        val listener = object : PfaApiConnection.IPfaApiListener {
+            override fun onBound(service: IPFAService?) {
+                println("Bound service successfully.")
+                connection!!.send(ACTION_CONNECT)
+            }
+            override fun onError(error: PfaError) {
+                println("Error: ${error.errorMessage}")
+                assertEquals(error.code, PfaError.PfaErrorCode.API_VERSION_UNSUPPORTED)
+                valid = true
+                testEnd = true
+            }
+            override fun onSuccess() {
+                println("Command sent successfully.")
+                connection!!.disconnect()
+                testEnd = true
+            }
+            override fun onDisconnected() {
+                println("Disconnected")
+                testEnd = true
+            }
+        }
+
+        connection = PfaApiConnection(appContext, "org.secuso.example", listener, 0)
+        connection.connect()
+
+        try {
+            do {
+                Thread.sleep(1000)
+            } while(!testEnd)
+        } catch (e : InterruptedException) {
+            if(connection.isBound()) {
+                connection.disconnect()
+            }
+        }
+        assertTrue(valid)
     }
 }
