@@ -39,6 +39,8 @@ class BackupService : AbstractAuthService() {
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
         override fun performBackup(input: ParcelFileDescriptor?)  {
+            // TODO: check access?
+
             ParcelFileDescriptor.AutoCloseInputStream(input).use {
                 // TODO: save backup data
                 val backupData = it.readString()
@@ -47,11 +49,13 @@ class BackupService : AbstractAuthService() {
 
             // is the PFA waiting for commands?
             if(mMessenger != null) {
-                executeCommandsForPackageName2(mMessenger!!)
+                executeCommandsForPackageName(mMessenger!!)
             }
         }
 
         override fun performRestore(): ParcelFileDescriptor {
+            // TODO: check access?
+
             // write data to parcelfiledescriptor and return it
             val pipes = ParcelFileDescriptor.createPipe()
 
@@ -62,7 +66,7 @@ class BackupService : AbstractAuthService() {
 
             // is the PFA waiting for commands?
             if(mMessenger != null) {
-                executeCommandsForPackageName3(mMessenger!!)
+                executeCommandsForPackageName(mMessenger!!)
             }
 
             return pipes[0]
@@ -132,11 +136,14 @@ class BackupService : AbstractAuthService() {
 
             // TODO: get Command from database
 
-            Log.d(TAG, "sending MESSAGE_BACKUP")
-            messenger.send(Message.obtain(null, MESSAGE_BACKUP, 0, 0))
+            Log.d(TAG, "sending MESSAGE_DONE")
+            messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
         }
     }
 
+    /**
+     * only for testing
+     */
     fun executeCommandsForPackageName2(messenger: Messenger) {
         val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
 
@@ -151,6 +158,9 @@ class BackupService : AbstractAuthService() {
         }
     }
 
+    /**
+     * only for testing
+     */
     fun executeCommandsForPackageName3(messenger: Messenger) {
         val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
 
