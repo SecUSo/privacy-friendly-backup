@@ -18,11 +18,12 @@ class BackupService : AbstractAuthService() {
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
-        override fun performBackup() {
+        override fun performBackup(input: ParcelFileDescriptor?)  {
+
             TODO()
         }
 
-        override fun performRestore()  {
+        override fun performRestore(): ParcelFileDescriptor {
             TODO()
         }
 
