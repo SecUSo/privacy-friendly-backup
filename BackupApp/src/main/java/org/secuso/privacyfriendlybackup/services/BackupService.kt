@@ -131,6 +131,8 @@ class BackupService : AbstractAuthService() {
             }
 
             // TODO: get Command from database
+
+            Log.d(TAG, "sending MESSAGE_BACKUP")
             messenger.send(Message.obtain(null, MESSAGE_BACKUP, 0, 0))
         }
     }
@@ -144,6 +146,7 @@ class BackupService : AbstractAuthService() {
                 return@launch
             }
 
+            Log.d(TAG, "sending MESSAGE_RESTORE")
             messenger.send(Message.obtain(null, MESSAGE_RESTORE, 0, 0))
         }
     }
@@ -157,6 +160,7 @@ class BackupService : AbstractAuthService() {
                 return@launch
             }
 
+            Log.d(TAG, "sending MESSAGE_DONE")
             messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
         }
     }

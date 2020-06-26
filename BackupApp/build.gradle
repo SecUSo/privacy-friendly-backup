@@ -49,6 +49,7 @@ dependencies {
     // WorkManager
     def work_version = "2.3.4"
     implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
     testImplementation "androidx.work:work-testing:$work_version"
 }
