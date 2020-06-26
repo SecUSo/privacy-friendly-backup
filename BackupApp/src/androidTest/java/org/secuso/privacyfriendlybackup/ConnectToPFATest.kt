@@ -26,6 +26,7 @@ import org.secuso.privacyfriendlybackup.backupapi.PfaApiConnection
  */
 @RunWith(AndroidJUnit4::class)
 class ConnectToPFATest {
+    val TAG = "PFABackup"
 
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -50,21 +51,21 @@ class ConnectToPFATest {
 
         val listener = object : PfaApiConnection.IPfaApiListener {
             override fun onBound(service: IPFAService?) {
-                println("Bound service successfully.")
+                Log.d("$TAG ConnectToPFATest","Bound service successfully.")
                 connection!!.send(ACTION_CONNECT)
             }
             override fun onError(error: PfaError) {
-                println("Error: ${error.errorMessage}")
+                Log.d("$TAG ConnectToPFATest","Error: ${error.errorMessage}")
                 testEnd = true
             }
             override fun onSuccess() {
-                println("Command sent successfully.")
+                Log.d("$TAG ConnectToPFATest","Command sent successfully.")
                 connection!!.disconnect()
                 valid = true
                 testEnd = true
             }
             override fun onDisconnected() {
-                println("Disconnected")
+                Log.d("$TAG ConnectToPFATest","Disconnected")
                 testEnd = true
             }
         }
@@ -92,22 +93,22 @@ class ConnectToPFATest {
 
         val listener = object : PfaApiConnection.IPfaApiListener {
             override fun onBound(service: IPFAService?) {
-                println("Bound service successfully.")
+                Log.d("$TAG ConnectToPFATest","Bound service successfully.")
                 connection!!.send("UNKNOWN")
             }
             override fun onError(error: PfaError) {
-                println("Error: ${error.errorMessage}")
+                Log.d("$TAG ConnectToPFATest","Error: ${error.errorMessage}")
                 assertEquals(error.code, PfaError.PfaErrorCode.ACTION_ERROR)
                 valid = true
                 testEnd = true
             }
             override fun onSuccess() {
-                println("Command sent successfully.")
+                Log.d("$TAG ConnectToPFATest","Command sent successfully.")
                 connection!!.disconnect()
                 testEnd = true
             }
             override fun onDisconnected() {
-                println("Disconnected")
+                Log.d("$TAG ConnectToPFATest","Disconnected")
                 testEnd = true
             }
         }
