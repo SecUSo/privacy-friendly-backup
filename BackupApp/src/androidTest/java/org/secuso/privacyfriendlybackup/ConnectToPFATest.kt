@@ -1,12 +1,19 @@
 package org.secuso.privacyfriendlybackup
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import androidx.work.testing.SynchronousExecutor
+import androidx.work.testing.WorkManagerTestInitHelper
 
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.BeforeClass
 import org.secuso.privacyfriendlybackup.api.IPFAService
 import org.secuso.privacyfriendlybackup.api.common.PfaApi.ACTION_CONNECT
 import org.secuso.privacyfriendlybackup.api.common.PfaError
@@ -21,6 +28,13 @@ import org.secuso.privacyfriendlybackup.backupapi.PfaApiConnection
 class ConnectToPFATest {
 
     val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+
+    @Before
+    fun setUp() {
+        val config = Configuration.Builder().setMinimumLoggingLevel(Log.DEBUG).build()
+        WorkManagerTestInitHelper.initializeTestWorkManager(appContext, config)
+        WorkManager.getInstance(appContext)
+    }
 
     @Test
     fun useAppContext() {
