@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.openpgpapi
+package org.secuso.privacyfriendlybackup.worker
 
 import android.content.Context
 import android.content.Intent
@@ -89,7 +89,13 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         val outputStream = ByteArrayOutputStream()
 
         val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
-        openPgpApi.executeApiAsync(intent, inputStream, outputStream, OpenPGPCallback(this, outputStream, REQUEST_CODE_SIGN_AND_ENCRYPT))
+        openPgpApi.executeApiAsync(intent, inputStream, outputStream,
+            OpenPGPCallback(
+                this,
+                outputStream,
+                REQUEST_CODE_SIGN_AND_ENCRYPT
+            )
+        )
     }
 
     fun decryptAndVerify() {
@@ -101,7 +107,13 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
 
         val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
-        openPgpApi.executeApiAsync(intent, inputStream, outputStream, OpenPGPCallback(this, outputStream, REQUEST_CODE_DECRYPT_AND_VERIFY))
+        openPgpApi.executeApiAsync(intent, inputStream, outputStream,
+            OpenPGPCallback(
+                this,
+                outputStream,
+                REQUEST_CODE_DECRYPT_AND_VERIFY
+            )
+        )
     }
 
     override fun onError(e: Exception?) {

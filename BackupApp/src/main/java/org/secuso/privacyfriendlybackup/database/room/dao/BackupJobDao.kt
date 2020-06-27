@@ -1,11 +1,11 @@
-package org.secuso.privacyfriendlybackup.database.dao
+package org.secuso.privacyfriendlybackup.database.room.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import org.secuso.privacyfriendlybackup.database.model.BackupJob
+import org.secuso.privacyfriendlybackup.database.room.model.BackupJob
 
 @Dao
 interface BackupJobDao {
@@ -13,20 +13,23 @@ interface BackupJobDao {
     suspend fun getAll() : List<BackupJob>
 
     @Query("SELECT * FROM BackupJob WHERE uid = :uid")
-    suspend fun getBackupJobsForUid(uid : Int) : List<BackupJob>
+    suspend fun getJobsForUid(uid : Int) : List<BackupJob>
 
     @Query("SELECT * FROM BackupJob WHERE packageName = :packageName")
-    suspend fun getBackupJobsForPackage(packageName: String) : List<BackupJob>
+    suspend fun getJobsForPackage(packageName: String) : List<BackupJob>
 
     @Query("SELECT * FROM BackupJob WHERE uid = :uid")
-    suspend fun getBackupJobsForUidLiveData(uid : Int) : LiveData<List<BackupJob>>
+    suspend fun getJobsForUidLiveData(uid : Int) : LiveData<List<BackupJob>>
 
     @Query("SELECT * FROM BackupJob WHERE packageName = :packageName")
-    suspend fun getBackupJobsForPackageLiveData(packageName: String) : LiveData<List<BackupJob>>
+    suspend fun getJobsForPackageLiveData(packageName: String) : LiveData<List<BackupJob>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: BackupJob)
 
     @Query("DELETE FROM BackupJob WHERE uid = :uid")
     suspend fun deleteForUid(uid: Int)
+
+    @Query("DELETE FROM BackupJob WHERE packageName = :packageName AND `action` == :action")
+    suspend fun deleteJobForPackage(packageName: String?, action: String)
 }

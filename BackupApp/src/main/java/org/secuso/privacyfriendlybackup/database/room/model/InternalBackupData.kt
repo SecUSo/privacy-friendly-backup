@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.database.model
+package org.secuso.privacyfriendlybackup.database.room.model
 
 import android.os.Parcelable
 import androidx.room.Entity
@@ -9,11 +9,12 @@ import java.util.*
 
 @Parcelize
 @Entity(indices = [Index(value = ["packageName"])])
-data class BackupJob(
-    @PrimaryKey
-    val _id : Int,
+data class InternalBackupData(
+    @PrimaryKey(autoGenerate = true)
+    val _id : Int = 0,
     val uid : Int,
     val packageName : String,
     val timestamp : Date,
-    val action : BackupJobAction
+    val file : String,
+    val encrypted: Boolean
 ) : Parcelable

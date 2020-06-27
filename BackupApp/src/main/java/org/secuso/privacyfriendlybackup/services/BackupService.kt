@@ -6,25 +6,25 @@ import android.os.Message
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
 import org.secuso.privacyfriendlybackup.api.common.BackupApi
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
-import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_BACKUP
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_DONE
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_ERROR
-import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_RESTORE
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_ERROR
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_SUCCESS
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
 import org.secuso.privacyfriendlybackup.api.common.PfaError
-import org.secuso.privacyfriendlybackup.api.util.ApiFormatter
-import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
-import org.secuso.privacyfriendlybackup.api.util.readString
+import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
+import org.secuso.privacyfriendlybackup.api.util.*
+import org.secuso.privacyfriendlybackup.database.file.BackupDataStoreHelper
+import org.secuso.privacyfriendlybackup.database.room.BackupDatabase
+import org.secuso.privacyfriendlybackup.database.room.model.BackupJob
+import org.secuso.privacyfriendlybackup.database.room.model.BackupJobAction
+import java.io.File
 
 /**
  * @author Christopher Beckmann
@@ -33,40 +33,62 @@ class BackupService : AbstractAuthService() {
     val TAG = "PFABackup"
 
     var mMessenger: Messenger? = null
+    var mCurrentJob: BackupJob? = null
 
     override val SUPPORTED_API_VERSIONS = listOf(1)
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
-        override fun performBackup(input: ParcelFileDescriptor?)  {
-            // TODO: check access?
-
-            ParcelFileDescriptor.AutoCloseInputStream(input).use {
-                // TODO: save backup data
-                val backupData = it.readString()
-                Log.d(TAG, "Received Backup: $backupData");
+        override fun performBackup(input: ParcelFileDescriptor?) {
+            // is client allowed to call this?
+            if (!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
+                return
             }
+            val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, Binder.getCallingUid())
 
-            // is the PFA waiting for commands?
-            if(mMessenger != null) {
-                executeCommandsForPackageName(mMessenger!!)
+            runBlocking {
+                ParcelFileDescriptor.AutoCloseInputStream(input).use {
+                    BackupDataStoreHelper.storeBackupData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, it)
+                }
+
+                val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
+                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.BACKUP.name)
+
+                // is the PFA waiting for commands?
+                if (mMessenger != null) {
+                    executeCommandsForPackageName(mMessenger!!)
+                }
             }
         }
 
-        override fun performRestore(): ParcelFileDescriptor {
-            // TODO: check access?
+        override fun performRestore(): ParcelFileDescriptor? {
+            // is client allowed to call this?
+            if(!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
+                return null
+            }
+            val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, Binder.getCallingUid())
 
             // write data to parcelfiledescriptor and return it
             val pipes = ParcelFileDescriptor.createPipe()
 
-            // TODO: get restore data from database
-            ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
-                it.write("exampleData".toByteArray(Charsets.UTF_8))
+            // is the data to restore available?
+            if(mCurrentJob == null) {
+                return null
             }
 
-            // is the PFA waiting for commands?
-            if(mMessenger != null) {
-                executeCommandsForPackageName(mMessenger!!)
+            runBlocking {
+                val restoreData = BackupDataStoreHelper.getRestoreData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, mCurrentJob!!.dataId)
+                ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
+                    restoreData?.copyTo(it)
+                }
+
+                val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
+                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.RESTORE.name)
+
+                // is the PFA waiting for commands?
+                if(mMessenger != null) {
+                    executeCommandsForPackageName(mMessenger!!)
+                }
             }
 
             return pipes[0]
@@ -134,44 +156,26 @@ class BackupService : AbstractAuthService() {
                 return@launch
             }
 
-            // TODO: get Command from database
+            val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
+            val jobsForCallingApp = jobDao.getJobsForPackage(packageName)
 
-            Log.d(TAG, "sending MESSAGE_DONE")
-            messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
-        }
-    }
+            Log.d(TAG, "BackupJobs: $jobsForCallingApp loaded from database")
 
-    /**
-     * only for testing
-     */
-    fun executeCommandsForPackageName2(messenger: Messenger) {
-        val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
-
-        GlobalScope.launch(Dispatchers.Default) {
-            if(packageName.isNullOrEmpty()) {
-                messenger.send(Message.obtain(null, MESSAGE_ERROR, 0, 0))
-                return@launch
+            if(jobsForCallingApp.isEmpty()) {
+                Log.d(TAG, "sending MESSAGE_DONE")
+                messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
+            } else {
+                // get next job and send message
+                var currentJob : BackupJob? = null
+                for (job in jobsForCallingApp) {
+                    if(currentJob == null || job.action.prio < currentJob.action.prio) {
+                        currentJob = job
+                    }
+                }
+                Log.d(TAG, "sending ${currentJob!!.action.message}")
+                messenger.send(Message.obtain(null, currentJob!!.action.message, 0, 0))
+                mCurrentJob = currentJob
             }
-
-            Log.d(TAG, "sending MESSAGE_RESTORE")
-            messenger.send(Message.obtain(null, MESSAGE_RESTORE, 0, 0))
-        }
-    }
-
-    /**
-     * only for testing
-     */
-    fun executeCommandsForPackageName3(messenger: Messenger) {
-        val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
-
-        GlobalScope.launch(Dispatchers.Default) {
-            if(packageName.isNullOrEmpty()) {
-                messenger.send(Message.obtain(null, MESSAGE_ERROR, 0, 0))
-                return@launch
-            }
-
-            Log.d(TAG, "sending MESSAGE_DONE")
-            messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
         }
     }
 }
