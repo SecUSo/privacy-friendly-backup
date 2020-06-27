@@ -18,13 +18,11 @@ import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_COD
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_CODE_SUCCESS
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
 import org.secuso.privacyfriendlybackup.api.common.PfaError
-import org.secuso.privacyfriendlybackup.api.pfa.BackupDataStore
 import org.secuso.privacyfriendlybackup.api.util.*
 import org.secuso.privacyfriendlybackup.database.file.BackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.database.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.database.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.database.room.model.BackupJobAction
-import java.io.File
 
 /**
  * @author Christopher Beckmann
@@ -52,7 +50,7 @@ class BackupService : AbstractAuthService() {
                 }
 
                 val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
-                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.BACKUP.name)
+                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.PFA_BACKUP.name)
 
                 // is the PFA waiting for commands?
                 if (mMessenger != null) {
@@ -77,13 +75,13 @@ class BackupService : AbstractAuthService() {
             }
 
             runBlocking {
-                val restoreData = BackupDataStoreHelper.getRestoreData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, mCurrentJob!!.dataId)
+                val restoreData = BackupDataStoreHelper.getRestoreData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, mCurrentJob!!.dataId!!)
                 ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
                     restoreData?.copyTo(it)
                 }
 
                 val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
-                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.RESTORE.name)
+                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.PFA_RESTORE.name)
 
                 // is the PFA waiting for commands?
                 if(mMessenger != null) {

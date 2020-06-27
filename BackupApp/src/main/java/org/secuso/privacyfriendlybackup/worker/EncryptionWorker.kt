@@ -16,10 +16,7 @@ import java.io.ByteArrayOutputStream
 import java.lang.ref.WeakReference
 
 
-const val PREF_OPENPGP_PROVIDER = "PREF_OPENPGP_PROVIDER"
 
-const val REQUEST_CODE_SIGN_AND_ENCRYPT = 9912
-const val REQUEST_CODE_DECRYPT_AND_VERIFY = 9913
 
 /**
  *
@@ -30,6 +27,13 @@ const val REQUEST_CODE_DECRYPT_AND_VERIFY = 9913
  * @author Christopher Beckmann
  */
 class EncryptionWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params), OpenPgpServiceConnection.OnBound {
+
+    companion object {
+        val PREF_OPENPGP_PROVIDER = "PREF_OPENPGP_PROVIDER"
+
+        val REQUEST_CODE_SIGN_AND_ENCRYPT = 9912
+        val REQUEST_CODE_DECRYPT_AND_VERIFY = 9913
+    }
 
     var workDone = false
     var errorOccurred = false
@@ -127,6 +131,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         val requestCode: Int
     ) : OpenPgpApi.IOpenPgpCallback {
         val worker = WeakReference(worker)
+
 
         override fun onReturn(result: Intent) {
             when(result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {

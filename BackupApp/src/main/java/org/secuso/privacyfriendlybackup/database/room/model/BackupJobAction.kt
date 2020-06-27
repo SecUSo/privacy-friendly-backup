@@ -4,6 +4,6 @@ import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_BACKUP
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_RESTORE
 
 enum class BackupJobAction(val prio : Int, val message: Int) {
-    BACKUP(1, MESSAGE_BACKUP),
-    RESTORE(2, MESSAGE_RESTORE);
+    PFA_BACKUP(1, MESSAGE_BACKUP),
+    PFA_RESTORE(2, MESSAGE_RESTORE)
 }
