@@ -19,10 +19,10 @@ import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_COD
 import org.secuso.privacyfriendlybackup.api.common.CommonApiConstants.RESULT_ERROR
 import org.secuso.privacyfriendlybackup.api.common.PfaError
 import org.secuso.privacyfriendlybackup.api.util.*
-import org.secuso.privacyfriendlybackup.database.file.BackupDataStoreHelper
-import org.secuso.privacyfriendlybackup.database.room.BackupDatabase
-import org.secuso.privacyfriendlybackup.database.room.model.BackupJob
-import org.secuso.privacyfriendlybackup.database.room.model.BackupJobAction
+import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
+import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
+import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
+import org.secuso.privacyfriendlybackup.data.room.model.PFAJobAction
 
 /**
  * @author Christopher Beckmann
@@ -31,7 +31,7 @@ class BackupService : AbstractAuthService() {
     val TAG = "PFABackup"
 
     var mMessenger: Messenger? = null
-    var mCurrentJob: BackupJob? = null
+    var mCurrentJob: PFAJob? = null
 
     override val SUPPORTED_API_VERSIONS = listOf(1)
 
@@ -46,11 +46,12 @@ class BackupService : AbstractAuthService() {
 
             runBlocking {
                 ParcelFileDescriptor.AutoCloseInputStream(input).use {
-                    BackupDataStoreHelper.storeBackupData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, it)
+                    InternalBackupDataStoreHelper.storeBackupData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, it)
                 }
 
-                val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
-                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.PFA_BACKUP.name)
+                val db = BackupDatabase.getInstance(this@BackupService)
+                val jobDao = db.pfaJobDao()
+                jobDao.deleteJobForPackage(callingPackageName, PFAJobAction.PFA_BACKUP.name)
 
                 // is the PFA waiting for commands?
                 if (mMessenger != null) {
@@ -75,13 +76,13 @@ class BackupService : AbstractAuthService() {
             }
 
             runBlocking {
-                val restoreData = BackupDataStoreHelper.getRestoreData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, mCurrentJob!!.dataId!!)
+                val restoreData = InternalBackupDataStoreHelper.getInternalData(this@BackupService, mCurrentJob!!.dataId!!).first
                 ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
                     restoreData?.copyTo(it)
                 }
 
-                val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
-                jobDao.deleteJobForPackage(callingPackageName, BackupJobAction.PFA_RESTORE.name)
+                val jobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
+                jobDao.deleteJobForPackage(callingPackageName, PFAJobAction.PFA_RESTORE.name)
 
                 // is the PFA waiting for commands?
                 if(mMessenger != null) {
@@ -154,7 +155,7 @@ class BackupService : AbstractAuthService() {
                 return@launch
             }
 
-            val jobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
+            val jobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
             val jobsForCallingApp = jobDao.getJobsForPackage(packageName)
 
             Log.d(TAG, "BackupJobs: $jobsForCallingApp loaded from database")
@@ -164,7 +165,7 @@ class BackupService : AbstractAuthService() {
                 messenger.send(Message.obtain(null, MESSAGE_DONE, 0, 0))
             } else {
                 // get next job and send message
-                var currentJob : BackupJob? = null
+                var currentJob : PFAJob? = null
                 for (job in jobsForCallingApp) {
                     if(currentJob == null || job.action.prio < currentJob.action.prio) {
                         currentJob = job

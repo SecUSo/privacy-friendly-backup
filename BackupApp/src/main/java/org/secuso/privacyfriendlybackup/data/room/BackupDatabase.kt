@@ -1,20 +1,22 @@
-package org.secuso.privacyfriendlybackup.database.room
+package org.secuso.privacyfriendlybackup.data.room
 
 import android.content.Context
 import androidx.room.*
-import org.secuso.privacyfriendlybackup.database.room.converters.Converters
-import org.secuso.privacyfriendlybackup.database.room.dao.BackupMetaDataDao
-import org.secuso.privacyfriendlybackup.database.room.dao.BackupJobDao
-import org.secuso.privacyfriendlybackup.database.room.dao.InternalBackupDataDao
-import org.secuso.privacyfriendlybackup.database.room.model.InternalBackupData
-import org.secuso.privacyfriendlybackup.database.room.model.StoredBackupMetaData
-import org.secuso.privacyfriendlybackup.database.room.model.BackupJob
+import org.secuso.privacyfriendlybackup.data.room.converters.Converters
+import org.secuso.privacyfriendlybackup.data.room.dao.BackupJobDao
+import org.secuso.privacyfriendlybackup.data.room.dao.BackupMetaDataDao
+import org.secuso.privacyfriendlybackup.data.room.dao.PFAJobDao
+import org.secuso.privacyfriendlybackup.data.room.dao.InternalBackupDataDao
+import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
+import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
+import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
 
-@Database(entities = [StoredBackupMetaData::class, BackupJob::class, InternalBackupData::class], version = 1, exportSchema = true)
+@Database(entities = [StoredBackupMetaData::class, PFAJob::class, InternalBackupData::class], version = 1, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class BackupDatabase : RoomDatabase() {
 
     abstract fun backupMetaDataDao(): BackupMetaDataDao
+    abstract fun pfaJobDao(): PFAJobDao
     abstract fun backupJobDao(): BackupJobDao
     abstract fun internalBackupDataDao(): InternalBackupDataDao
 

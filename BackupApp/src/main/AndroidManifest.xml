@@ -8,6 +8,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".BackupApplication"
         android:theme="@style/AppTheme">
 
         <activity
@@ -17,6 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.UserInteractionRequiredActivity"
+            android:label=""
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/AppTheme.Transparent"/>
 
         <service
             android:name=".services.BackupService"

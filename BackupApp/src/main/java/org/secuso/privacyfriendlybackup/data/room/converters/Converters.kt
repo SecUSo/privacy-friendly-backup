@@ -1,7 +1,7 @@
-package org.secuso.privacyfriendlybackup.database.room.converters
+package org.secuso.privacyfriendlybackup.data.room.converters
 
 import androidx.room.TypeConverter
-import org.secuso.privacyfriendlybackup.database.room.model.BackupJobAction
+import org.secuso.privacyfriendlybackup.data.room.model.PFAJobAction
 import java.util.*
 
 class Converters {
@@ -16,12 +16,12 @@ class Converters {
     }
 
     @TypeConverter
-    fun backupJobActionFromString(value: String?): BackupJobAction? {
-        return value?.let { BackupJobAction.valueOf(value) }
+    fun backupJobActionFromString(value: String?): PFAJobAction? {
+        return value?.let { PFAJobAction.valueOf(value) }
     }
 
     @TypeConverter
-    fun backupJobActionToString(jobAction: BackupJobAction?): String? {
+    fun backupJobActionToString(jobAction: PFAJobAction?): String? {
         return jobAction?.name
     }
 }

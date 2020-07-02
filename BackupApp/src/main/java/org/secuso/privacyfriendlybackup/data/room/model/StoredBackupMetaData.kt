@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.database.room.model
+package org.secuso.privacyfriendlybackup.data.room.model
 
 import android.os.Parcelable
 import androidx.room.Entity
@@ -12,11 +12,10 @@ import java.util.*
 data class StoredBackupMetaData(
     @PrimaryKey(autoGenerate = true)
     val _id : Int = 0,
-    val uid : Int,
     val packageName : String,
     val timestamp : Date,
     val storageService : String,
-    val path : String,
-    val hash : String,
+    val filename : String,
+    val hash : String?,
     val encrypted : Boolean
 ) : Parcelable

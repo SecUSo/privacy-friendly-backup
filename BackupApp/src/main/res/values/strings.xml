@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Backup</string>
+    <string name="channel_name">Default</string>
+    <string name="channel_description">Default notification channel</string>
+    <string name="notification_user_interaction_required_title">Attention required</string>
+    <string name="notification_user_interaction_required_content">Settings for the background encryption missing. Please click this notification to proceed.</string>
 </resources>

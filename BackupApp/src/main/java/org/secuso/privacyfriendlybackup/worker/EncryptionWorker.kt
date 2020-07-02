@@ -1,21 +1,27 @@
 package org.secuso.privacyfriendlybackup.worker
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.preference.PreferenceManager
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import org.openintents.openpgp.IOpenPgpService2
 import org.openintents.openpgp.OpenPgpDecryptionResult
 import org.openintents.openpgp.OpenPgpSignatureResult
 import org.openintents.openpgp.util.OpenPgpApi
 import org.openintents.openpgp.util.OpenPgpServiceConnection
+import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
+import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
+import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
+import org.secuso.privacyfriendlybackup.ui.UserInteractionRequiredActivity
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.ref.WeakReference
-
-
 
 
 /**
@@ -29,23 +35,38 @@ import java.lang.ref.WeakReference
 class EncryptionWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params), OpenPgpServiceConnection.OnBound {
 
     companion object {
-        val PREF_OPENPGP_PROVIDER = "PREF_OPENPGP_PROVIDER"
+        val DATA_OPENPGP_PROVIDER = "DATA_OPENPGP_PROVIDER"
+        val DATA_CALLING_PACKAGE_NAME = "DATA_CALLING_PACKAGE_NAME"
+        val DATA_ID_TO_WORK_WITH = "DATA_ID_TO_ENCRYPT"
+        val DATA_ENCRYPT = "DATA_ENCRYPT"
+        val DATA_KEY_ID = "DATA_KEY_ID"
+        val DATA_SIGNING_KEY_ID = "DATA_SIGNING_KEY_ID"
+        val DATA_PASSPHRASE = "DATA_PASSWPHRASE"
 
         val REQUEST_CODE_SIGN_AND_ENCRYPT = 9912
         val REQUEST_CODE_DECRYPT_AND_VERIFY = 9913
+
+        val NOTIFICATION_ID = 9000
+
+        val TAG = "EncryptionWorker"
     }
 
     var workDone = false
     var errorOccurred = false
 
-    val mPref = PreferenceManager.getDefaultSharedPreferences(context)
+    val dataId = inputData.getLong(DATA_ID_TO_WORK_WITH, -1)
+    val cryptoProviderPackage = inputData.getString(DATA_OPENPGP_PROVIDER)
+    val encrypt = inputData.getBoolean(DATA_ENCRYPT, true)
+    val selectedKeyIds = inputData.getLongArray(DATA_KEY_ID)
+    val signingKey = inputData.getLong(DATA_SIGNING_KEY_ID, -1L)
+    val passphrase = inputData.getString(DATA_PASSPHRASE)
+    var internalData : InternalBackupData? = null
 
     lateinit var mConnection: OpenPgpServiceConnection
 
     override suspend fun doWork(): Result {
-        val cryptoProviderPackage = mPref.getString(PREF_OPENPGP_PROVIDER, "org.sufficientlysecure.keychain")
-
-        if(cryptoProviderPackage.isNullOrEmpty()) {
+        Log.d(TAG, "started running")
+        if(cryptoProviderPackage.isNullOrEmpty() || dataId == -1L) {
             return Result.failure()
         }
 
@@ -71,56 +92,82 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     }
 
     override fun onBound(service: IOpenPgpService2?) {
-        // TODO: encryption or decryption ?
-        performEncryption()
-        // or
-        decryptAndVerify()
+        if(encrypt) {
+            performEncryption()
+        } else {
+            decryptAndVerify()
+        }
     }
 
     private fun performEncryption() {
-        val intent = Intent().apply {
-            action = OpenPgpApi.ACTION_SIGN_AND_ENCRYPT
-            // TODO one of these has to be put
-            // putExtra(OpenPgpApi.EXTRA_USER_ID)
-            // putExtra(OpenPgpApi.EXTRA_KEY_IDS)
-            // TODO : load passphrase
-            // putExtra(OpenPgpApi.EXTRA_PASSPHRASE, "")
-            // TODO: filename add to metadata?
-            //putExtra(OpenPgpApi.EXTRA_ORIGINAL_FILENAME, "")
-            putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, true)
-        }
-        val inputStream = ByteArrayInputStream( /* TODO : DATA from database? */ "data".toByteArray())
-        val outputStream = ByteArrayOutputStream()
+        try {
+            runBlocking {
+                val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(
+                    context,
+                    dataId
+                )
+                internalData = data
+                val outputStream = ByteArrayOutputStream()
+                val openPgpApi = OpenPgpApi(context, mConnection.service)
 
-        val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
-        openPgpApi.executeApiAsync(intent, inputStream, outputStream,
-            OpenPGPCallback(
-                this,
-                outputStream,
-                REQUEST_CODE_SIGN_AND_ENCRYPT
-            )
-        )
+                val intent = Intent().apply {
+                    action = OpenPgpApi.ACTION_SIGN_AND_ENCRYPT
+
+                    if (selectedKeyIds != null && !selectedKeyIds.isEmpty()) {
+                        putExtra(OpenPgpApi.EXTRA_KEY_IDS, selectedKeyIds)
+                    }
+
+                    if (signingKey != -1L) {
+                        putExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, signingKey)
+                    }
+
+                    if (!passphrase.isNullOrEmpty()) {
+                        putExtra(OpenPgpApi.EXTRA_PASSPHRASE, passphrase)
+                    }
+
+                    Log.d(TAG, data.file)
+                    putExtra(OpenPgpApi.EXTRA_ORIGINAL_FILENAME, data.file)
+                    putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, true)
+                }
+
+                openPgpApi.executeApiAsync(
+                    intent, inputStream, outputStream,
+                    OpenPGPCallback(
+                        this@EncryptionWorker,
+                        outputStream,
+                        REQUEST_CODE_SIGN_AND_ENCRYPT
+                    )
+                )
+            }
+        } catch (e : Exception) {
+            onError(e)
+        }
     }
 
     fun decryptAndVerify() {
-        val intent = Intent().apply {
-            action = OpenPgpApi.ACTION_DECRYPT_VERIFY
-        }
-        val inputStream = ByteArrayInputStream( /* TODO : DATA from database? */ "data".toByteArray())
-        val outputStream = ByteArrayOutputStream()
+        runBlocking {
+            val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
+            internalData = data
+            val outputStream = ByteArrayOutputStream()
+            val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
 
+            val intent = Intent().apply {
+                action = OpenPgpApi.ACTION_DECRYPT_VERIFY
+            }
 
-        val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
-        openPgpApi.executeApiAsync(intent, inputStream, outputStream,
-            OpenPGPCallback(
-                this,
-                outputStream,
-                REQUEST_CODE_DECRYPT_AND_VERIFY
+            openPgpApi.executeApiAsync(intent, inputStream, outputStream,
+                OpenPGPCallback(
+                    this@EncryptionWorker,
+                    outputStream,
+                    REQUEST_CODE_DECRYPT_AND_VERIFY
+                )
             )
-        )
+        }
     }
 
     override fun onError(e: Exception?) {
+        Log.d(TAG, "Error occurred.")
+        e?.printStackTrace()
         errorOccurred = true
         workDone = true
     }
@@ -137,8 +184,10 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             when(result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
                 OpenPgpApi.RESULT_CODE_SUCCESS -> {
 
-                    val resultData = outputStream.toString("UTF-8")
-                    // TODO: do something with the encrypted / decrypted data
+                    Log.d(TAG, "RESULT_CODE_SUCCESS")
+
+                    // store data
+                    worker.get()?.storeData(outputStream, requestCode)
 
                     when(requestCode) {
                         REQUEST_CODE_DECRYPT_AND_VERIFY -> {
@@ -151,25 +200,71 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                             // do nothing
                         }
                     }
+                    worker.get()?.workDone = true
                 }
                 OpenPgpApi.RESULT_CODE_ERROR -> {
                     worker.get()?.onError(null)
+
+                    Log.d(TAG, "RESULT_CODE_ERROR")
                 }
                 OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED -> {
-                    worker.get()?.onError(null)
 
-                    /*
-                    val pi: PendingIntent = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT)!!
+                    Log.d(TAG, "RESULT_CODE_USER_INTERACTION_REQUIRED")
 
-                    GlobalScope.launch(Dispatchers.Main) {
-                        context.startIntentSenderFromChild(
-                            this, pi.intentSender,
-                            requestCode, null, 0, 0, 0
-                        )
+                    //worker.get()?.onError(null)
+                    val pi: PendingIntent? = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT)
+                    pi ?: run {
+                        worker.get()?.onError(null)
+                        return
                     }
-                    */
+                    worker.get()?.postUserInteractionNotification(requestCode, pi)
                 }
             }
+        }
+    }
+
+    private fun storeData(outputStream: ByteArrayOutputStream, requestCode: Int) {
+        GlobalScope.launch(Dispatchers.IO) {
+            var encrypted = when(requestCode) {
+                REQUEST_CODE_DECRYPT_AND_VERIFY -> false
+                REQUEST_CODE_SIGN_AND_ENCRYPT -> true
+                else -> true
+            }
+            InternalBackupDataStoreHelper.storeBackupData(context, internalData!!.uid, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
+            InternalBackupDataStoreHelper.clearData(context, dataId)
+            // TODO: call more worker here?
+        }
+    }
+
+    private fun postUserInteractionNotification(requestCode: Int, pi: PendingIntent) {
+        GlobalScope.launch(Dispatchers.Main) {
+
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID).apply {
+                setContentTitle(context.getString(R.string.notification_user_interaction_required_title))
+                setContentText(context.getString(R.string.notification_user_interaction_required_content))
+                setSmallIcon(R.mipmap.ic_launcher)
+                setAutoCancel(true)
+
+                val intent = Intent(context, UserInteractionRequiredActivity::class.java).apply {
+                    putExtra(OpenPgpApi.RESULT_INTENT, pi)
+                    putExtra(UserInteractionRequiredActivity.EXTRA_REQUEST_CODE, requestCode)
+                    putExtra(DATA_ID_TO_WORK_WITH, dataId)
+                    putExtra(DATA_ENCRYPT, encrypt)
+                    putExtra(DATA_OPENPGP_PROVIDER, cryptoProviderPackage)
+                    putExtra(DATA_KEY_ID, selectedKeyIds)
+                    putExtra(DATA_PASSPHRASE, passphrase)
+                    putExtra(DATA_SIGNING_KEY_ID, signingKey)
+                }
+                val pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                setContentIntent(pendingIntent)
+            }.build()
+
+            with(NotificationManagerCompat.from(context)) {
+                notify(NOTIFICATION_ID, notification)
+            }
+
+            // end this worker and wait for user interaction
+            onError(null)
         }
     }
 
