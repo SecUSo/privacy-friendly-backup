@@ -15,7 +15,6 @@ import java.util.*
 ])
 data class BackupJob(
     @PrimaryKey(autoGenerate = true) val _id : Int = 0,
-    val uid : Int,
     @ColumnInfo(name = "packageName") val packageName : String,
     val timestamp : Date,
     @ColumnInfo(name = "action") val action : BackupJobAction,

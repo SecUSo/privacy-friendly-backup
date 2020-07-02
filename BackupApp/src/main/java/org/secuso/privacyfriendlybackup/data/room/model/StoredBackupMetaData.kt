@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.android.parcel.Parcelize
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
 @Parcelize
@@ -14,7 +15,7 @@ data class StoredBackupMetaData(
     val _id : Int = 0,
     val packageName : String,
     val timestamp : Date,
-    val storageService : String,
+    val storageService : StorageType,
     val filename : String,
     val hash : String?,
     val encrypted : Boolean

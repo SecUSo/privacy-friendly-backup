@@ -7,11 +7,12 @@ import org.secuso.privacyfriendlybackup.data.room.dao.BackupJobDao
 import org.secuso.privacyfriendlybackup.data.room.dao.BackupMetaDataDao
 import org.secuso.privacyfriendlybackup.data.room.dao.PFAJobDao
 import org.secuso.privacyfriendlybackup.data.room.dao.InternalBackupDataDao
+import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
 import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
 
-@Database(entities = [StoredBackupMetaData::class, PFAJob::class, InternalBackupData::class], version = 1, exportSchema = true)
+@Database(entities = [StoredBackupMetaData::class, PFAJob::class, InternalBackupData::class, BackupJob::class], version = 1, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class BackupDatabase : RoomDatabase() {
 

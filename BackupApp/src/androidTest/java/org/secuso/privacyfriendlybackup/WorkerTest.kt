@@ -19,9 +19,7 @@ import org.secuso.privacyfriendlybackup.api.worker.CreateBackupWorker
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.worker.EncryptionWorker
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_ENCRYPT
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_ID_TO_WORK_WITH
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_OPENPGP_PROVIDER
+import org.secuso.privacyfriendlybackup.worker.datakeys.*
 import java.util.*
 import java.util.concurrent.Executors
 
@@ -61,7 +59,7 @@ class WorkerTest {
         val worker : EncryptionWorker = TestListenableWorkerBuilder<EncryptionWorker>(appContext).apply {
             setInputData(workDataOf(
                 DATA_OPENPGP_PROVIDER to "org.sufficientlysecure.keychain",
-                DATA_ID_TO_WORK_WITH to dataId,
+                DATA_ID to dataId,
                 DATA_ENCRYPT to true
             ))
         }.build()

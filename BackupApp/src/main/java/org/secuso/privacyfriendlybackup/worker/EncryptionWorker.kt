@@ -19,6 +19,7 @@ import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
 import org.secuso.privacyfriendlybackup.ui.UserInteractionRequiredActivity
+import org.secuso.privacyfriendlybackup.worker.datakeys.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.lang.ref.WeakReference
@@ -35,14 +36,6 @@ import java.lang.ref.WeakReference
 class EncryptionWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params), OpenPgpServiceConnection.OnBound {
 
     companion object {
-        val DATA_OPENPGP_PROVIDER = "DATA_OPENPGP_PROVIDER"
-        val DATA_CALLING_PACKAGE_NAME = "DATA_CALLING_PACKAGE_NAME"
-        val DATA_ID_TO_WORK_WITH = "DATA_ID_TO_ENCRYPT"
-        val DATA_ENCRYPT = "DATA_ENCRYPT"
-        val DATA_KEY_ID = "DATA_KEY_ID"
-        val DATA_SIGNING_KEY_ID = "DATA_SIGNING_KEY_ID"
-        val DATA_PASSPHRASE = "DATA_PASSWPHRASE"
-
         val REQUEST_CODE_SIGN_AND_ENCRYPT = 9912
         val REQUEST_CODE_DECRYPT_AND_VERIFY = 9913
 
@@ -54,7 +47,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     var workDone = false
     var errorOccurred = false
 
-    val dataId = inputData.getLong(DATA_ID_TO_WORK_WITH, -1)
+    val dataId = inputData.getLong(DATA_ID, -1)
     val cryptoProviderPackage = inputData.getString(DATA_OPENPGP_PROVIDER)
     val encrypt = inputData.getBoolean(DATA_ENCRYPT, true)
     val selectedKeyIds = inputData.getLongArray(DATA_KEY_ID)
@@ -149,7 +142,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
             internalData = data
             val outputStream = ByteArrayOutputStream()
-            val openPgpApi : OpenPgpApi = OpenPgpApi(context, mConnection.service)
+            val openPgpApi = OpenPgpApi(context, mConnection.service)
 
             val intent = Intent().apply {
                 action = OpenPgpApi.ACTION_DECRYPT_VERIFY
@@ -248,7 +241,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                 val intent = Intent(context, UserInteractionRequiredActivity::class.java).apply {
                     putExtra(OpenPgpApi.RESULT_INTENT, pi)
                     putExtra(UserInteractionRequiredActivity.EXTRA_REQUEST_CODE, requestCode)
-                    putExtra(DATA_ID_TO_WORK_WITH, dataId)
+                    putExtra(DATA_ID, dataId)
                     putExtra(DATA_ENCRYPT, encrypt)
                     putExtra(DATA_OPENPGP_PROVIDER, cryptoProviderPackage)
                     putExtra(DATA_KEY_ID, selectedKeyIds)

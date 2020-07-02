@@ -9,13 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.work.*
 import org.openintents.openpgp.util.OpenPgpApi
 import org.secuso.privacyfriendlybackup.worker.EncryptionWorker
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_CALLING_PACKAGE_NAME
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_ENCRYPT
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_ID_TO_WORK_WITH
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_KEY_ID
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_OPENPGP_PROVIDER
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_PASSPHRASE
-import org.secuso.privacyfriendlybackup.worker.EncryptionWorker.Companion.DATA_SIGNING_KEY_ID
+import org.secuso.privacyfriendlybackup.worker.datakeys.*
 
 class UserInteractionRequiredActivity : AppCompatActivity() {
 
@@ -41,7 +35,7 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
 
         pi = intent.getParcelableExtra(OpenPgpApi.RESULT_INTENT)
         requestCode = intent.getIntExtra(EXTRA_REQUEST_CODE, -1)
-        dataId = intent.getLongExtra(DATA_ID_TO_WORK_WITH, -1)
+        dataId = intent.getLongExtra(DATA_ID, -1)
         cryptoProviderPackage = intent.getStringExtra(DATA_OPENPGP_PROVIDER)
         encrypt = intent.getBooleanExtra(DATA_ENCRYPT, true)
         selectedKeyIds = intent.getLongArrayExtra(DATA_KEY_ID)
@@ -90,7 +84,7 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
                 EncryptionWorker.REQUEST_CODE_SIGN_AND_ENCRYPT -> {
                     encryptionWorker = OneTimeWorkRequestBuilder<EncryptionWorker>().setInputData(
                         workDataOf(
-                            DATA_ID_TO_WORK_WITH to dataId,
+                            DATA_ID to dataId,
                             DATA_OPENPGP_PROVIDER to cryptoProviderPackage,
                             DATA_ENCRYPT to encrypt,
                             DATA_KEY_ID to selectedKeyIds,

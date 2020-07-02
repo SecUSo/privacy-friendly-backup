@@ -12,14 +12,11 @@ interface BackupJobDao {
     @Query("SELECT * FROM BackupJob")
     suspend fun getAll() : List<BackupJob>
 
-    @Query("SELECT * FROM BackupJob WHERE uid = :uid")
-    suspend fun getJobsForUid(uid : Int) : List<BackupJob>
+    @Query("SELECT * FROM BackupJob WHERE _id = :id")
+    suspend fun getJobForId(id : Long) : BackupJob
 
     @Query("SELECT * FROM BackupJob WHERE packageName = :packageName")
     suspend fun getJobsForPackage(packageName: String) : List<BackupJob>
-
-    @Query("SELECT * FROM BackupJob WHERE uid = :uid")
-    fun getJobsForUidLiveData(uid : Int) : LiveData<List<BackupJob>>
 
     @Query("SELECT * FROM BackupJob WHERE packageName = :packageName")
     fun getJobsForPackageLiveData(packageName: String) : LiveData<List<BackupJob>>
@@ -27,8 +24,8 @@ interface BackupJobDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: BackupJob) : Long
 
-    @Query("DELETE FROM BackupJob WHERE uid = :uid")
-    suspend fun deleteForUid(uid: Int)
+    @Query("DELETE FROM BackupJob WHERE _id = :id")
+    suspend fun deleteForId(id: Long)
 
     @Query("DELETE FROM BackupJob WHERE packageName = :packageName AND `action` == :action")
     suspend fun deleteJobForPackage(packageName: String?, action: String)

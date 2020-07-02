@@ -13,7 +13,7 @@ interface BackupMetaDataDao {
     suspend fun getAll() : List<StoredBackupMetaData>
 
     @Query("SELECT * FROM StoredBackupMetaData WHERE _id = :id")
-    suspend fun getFromId(id : Long) : StoredBackupMetaData
+    suspend fun getFromId(id : Long) : StoredBackupMetaData?
 
     @Query("SELECT * FROM StoredBackupMetaData WHERE packageName = :packageName")
     suspend fun getFromPackage(packageName: String) : List<StoredBackupMetaData>
