@@ -87,5 +87,4 @@ object ExternalBackupDataStoreHelper {
             files?.map { it.name } ?: emptyList()
         }
     }
-
 }
