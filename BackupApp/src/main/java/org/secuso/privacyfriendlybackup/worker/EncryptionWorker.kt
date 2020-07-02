@@ -223,7 +223,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                 REQUEST_CODE_SIGN_AND_ENCRYPT -> true
                 else -> true
             }
-            InternalBackupDataStoreHelper.storeBackupData(context, internalData!!.uid, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
+            InternalBackupDataStoreHelper.storeBackupData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
             InternalBackupDataStoreHelper.clearData(context, dataId)
             // TODO: call more worker here?
         }

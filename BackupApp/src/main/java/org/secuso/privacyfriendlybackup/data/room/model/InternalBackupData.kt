@@ -12,7 +12,6 @@ import java.util.*
 data class InternalBackupData(
     @PrimaryKey(autoGenerate = true)
     val _id : Long = 0,
-    val uid : Int,
     val packageName : String,
     val timestamp : Date,
     val file : String,

@@ -24,14 +24,13 @@ object InternalBackupDataStoreHelper {
 
     const val BACKUP_DIR = "backupData"
 
-    suspend fun storeBackupData(context: Context, uid: Int, packageName: String, inputStream: InputStream, encrypted: Boolean = false) : Long {
-        val dataId = storeData(context, uid, packageName, inputStream, encrypted)
+    suspend fun storeBackupData(context: Context, packageName: String, inputStream: InputStream, encrypted: Boolean = false) : Long {
+        val dataId = storeData(context, packageName, inputStream, encrypted)
 
         val backupJobDao = BackupDatabase.getInstance(context).backupJobDao()
         val date = Date()
 
         val store = BackupJob(
-            uid = uid,
             timestamp = date,
             packageName = packageName,
             action = BackupJobAction.BACKUP_STORE,
@@ -42,7 +41,6 @@ object InternalBackupDataStoreHelper {
         val next = backupJobDao.insert(store)
 
         val encrypt = BackupJob(
-            uid = uid,
             timestamp = date,
             packageName = packageName,
             action = BackupJobAction.BACKUP_ENCRYPT,
@@ -55,7 +53,7 @@ object InternalBackupDataStoreHelper {
         return dataId
     }
 
-    suspend fun storeData(context: Context, uid: Int, packageName: String, inputStream: InputStream, encrypted : Boolean = false) : Long {
+    suspend fun storeData(context: Context, packageName: String, inputStream: InputStream, encrypted : Boolean = false) : Long {
         val date = Date()
 
         val path = File(context.filesDir, BACKUP_DIR)
@@ -67,7 +65,6 @@ object InternalBackupDataStoreHelper {
 
         // save filename into db
         val data = InternalBackupData(
-            uid = uid,
             packageName = packageName,
             timestamp = date,
             file = fileName,

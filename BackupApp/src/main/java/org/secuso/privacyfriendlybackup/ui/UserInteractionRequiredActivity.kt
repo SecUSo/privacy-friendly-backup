@@ -100,7 +100,7 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
                 }
             }
 
-            // save in preferences for future
+            // TODO save in preferences for future
             //PreferenceManager.getDefaultSharedPreferences(this)
 
             WorkManager.getInstance(this).beginUniqueWork("$callingPackageName($dataId)", ExistingWorkPolicy.REPLACE, encryptionWorker!!).enqueue()

@@ -3,6 +3,7 @@ package org.secuso.privacyfriendlybackup.data.room.converters
 import androidx.room.TypeConverter
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJobAction
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
 class Converters {
@@ -13,7 +14,7 @@ class Converters {
 
     @TypeConverter
     fun dateToTimestamp(date: Date?): Long? {
-        return date?.time?.toLong()
+        return date?.time
     }
 
     @TypeConverter
@@ -34,5 +35,15 @@ class Converters {
     @TypeConverter
     fun backupJobActionToString(jobAction: BackupJobAction?): String? {
         return jobAction?.name
+    }
+
+    @TypeConverter
+    fun storageTypeFromString(value: String?): StorageType? {
+        return value?.let { StorageType.valueOf(value) }
+    }
+
+    @TypeConverter
+    fun storageTypeToString(type: StorageType?): String? {
+        return type?.name
     }
 }

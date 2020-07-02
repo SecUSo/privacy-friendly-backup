@@ -46,7 +46,7 @@ class BackupService : AbstractAuthService() {
 
             runBlocking {
                 ParcelFileDescriptor.AutoCloseInputStream(input).use {
-                    InternalBackupDataStoreHelper.storeBackupData(this@BackupService, Binder.getCallingUid(), callingPackageName!!, it)
+                    InternalBackupDataStoreHelper.storeBackupData(this@BackupService, callingPackageName!!, it)
                 }
 
                 val db = BackupDatabase.getInstance(this@BackupService)

@@ -5,6 +5,9 @@ import androidx.room.*
 import kotlinx.android.parcel.Parcelize
 import java.util.*
 
+/**
+ * This table holds the Jobs for PFAs. If the action is RESTORE, then the dataId should be set, to provide the restore data.
+ */
 @Parcelize
 @Entity(indices = [Index(value = ["packageName", "action"], unique = true)])
 data class PFAJob(

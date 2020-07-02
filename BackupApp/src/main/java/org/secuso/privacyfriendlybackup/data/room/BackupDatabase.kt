@@ -44,9 +44,7 @@ abstract class BackupDatabase : RoomDatabase() {
         private fun buildDatabase(context: Context): BackupDatabase {
             return Room.databaseBuilder(context, BackupDatabase::class.java,
                 DB_NAME
-            )
-                .fallbackToDestructiveMigration()
-                .build()
+            ).fallbackToDestructiveMigration().build()
         }
     }
 }

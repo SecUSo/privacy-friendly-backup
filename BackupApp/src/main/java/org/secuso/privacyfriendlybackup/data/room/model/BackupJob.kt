@@ -7,7 +7,7 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 /**
- * This table holds the Jobs for the PFAs. If the action is RESTORE, then the dataId should be set, to provide the restore data.
+ * This table holds the Jobs for Backups.
  */
 @Parcelize
 @Entity(indices = [Index(value = ["packageName", "action"], unique = true), Index(value = ["dataId"])], foreignKeys = [

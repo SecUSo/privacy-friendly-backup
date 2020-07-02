@@ -6,6 +6,4 @@ class WebserviceProvider {
         //val SERVICES = []
     }
 
-
-
 }
