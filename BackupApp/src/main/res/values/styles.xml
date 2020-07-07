@@ -16,4 +16,23 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="SearchViewTheme" parent="Widget.AppCompat.SearchView.ActionBar">
+        <!-- <item name="layout">@layout/toolbar_search_view</item> -->
+        <item name="closeIcon">@drawable/ic_close_24</item>
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlHighlight">@color/middleblue</item>
+        <item name="autoCompleteTextViewStyle">@style/Widget.AppCompat.Light.AutoCompleteTextView</item>
+        <!-- <item name="suggestionRowLayout">@layout/search_view_suggestion_row</item> -->
+        <item name="android:maxWidth">9999dp</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

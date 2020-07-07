@@ -71,12 +71,14 @@ object ExternalBackupDataStoreHelper {
             val file = File(path, metadata.filename)
 
             return@withContext BackupDataStorageRepository.BackupData(
+                metadata._id,
                 metadata.filename,
                 metadata.packageName,
                 metadata.timestamp,
                 file.inputStream().readBytes(),
                 metadata.encrypted,
-                StorageType.EXTERNAL
+                StorageType.EXTERNAL,
+                true
             )
         }
     }

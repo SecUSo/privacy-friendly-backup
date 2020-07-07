@@ -12,6 +12,9 @@ interface BackupMetaDataDao {
     @Query("SELECT * FROM StoredBackupMetaData")
     suspend fun getAll() : List<StoredBackupMetaData>
 
+    @Query("SELECT * FROM StoredBackupMetaData")
+    fun getAllLive() : LiveData<List<StoredBackupMetaData>>
+
     @Query("SELECT * FROM StoredBackupMetaData WHERE _id = :id")
     suspend fun getFromId(id : Long) : StoredBackupMetaData?
 

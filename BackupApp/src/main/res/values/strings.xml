@@ -4,4 +4,10 @@
     <string name="channel_description">Default notification channel</string>
     <string name="notification_user_interaction_required_title">Attention required</string>
     <string name="notification_user_interaction_required_content">Settings for the background encryption missing. Please click this notification to proceed.</string>
+    <string name="title_item_list">Items</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="menu_title_search">Search</string>
+    <string name="menu_title_select_all">Select all</string>
+    <string name="menu_title_sort">Sort</string>
+    <string name="menu_title_delete">Delete</string>
 </resources>

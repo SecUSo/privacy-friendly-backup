@@ -2,10 +2,12 @@ package org.secuso.privacyfriendlybackup.data
 
 import android.content.Context
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
@@ -19,12 +21,14 @@ class BackupDataStorageRepository(
 ) {
 
     data class BackupData(
+        val id : Long = 0,
         val filename : String,
         val packageName : String,
         val timestamp : Date,
         val data : ByteArray?,
         val encrypted : Boolean,
-        val storageType : StorageType
+        val storageType : StorageType,
+        val available : Boolean = false
     )
 
     suspend fun storeFile(context: Context, packageName: String, dataId : Long, storageType: StorageType = StorageType.EXTERNAL) {
@@ -54,30 +58,34 @@ class BackupDataStorageRepository(
         return data
     }
 
-    suspend fun listAvailableBackups(context: Context) : LiveData<List<Pair<BackupData, Boolean>>> {
-        val livedata = MutableLiveData<List<Pair<BackupData, Boolean>>>()
+    suspend fun listAvailableBackups(context: Context) : LiveData<List<BackupData>> {
+        val livedata = MediatorLiveData<List<BackupData>>()
 
-        val result : MutableList<Pair<BackupData, Boolean>> = ArrayList()
+        val metaListLiveData = database.backupMetaDataDao().getAllLive()
+        livedata.addSource(metaListLiveData) { metalist ->
+            val result : MutableList<BackupData> = ArrayList()
 
-        withContext(IO) {
-            val metaList = database.backupMetaDataDao().getAll()
-            val externalFilenames = ExternalBackupDataStoreHelper.listAvailableData(context)
-            for(meta in metaList) {
-                when(meta.storageService) {
-                    StorageType.EXTERNAL -> {
-                        val available = externalFilenames.contains(meta.filename)
-                        val backupDataInfo = BackupData(
-                            filename = meta.filename,
-                            packageName = meta.packageName,
-                            timestamp = meta.timestamp,
-                            data = null,
-                            encrypted  = meta.encrypted,
-                            storageType = meta.storageService
-                        )
-                        result.add(backupDataInfo to available)
-                    }
-                    StorageType.CLOUD -> {
-                        TODO()
+            runBlocking {
+                val externalFilenames = ExternalBackupDataStoreHelper.listAvailableData(context)
+                for(meta in metalist) {
+                    when(meta.storageService) {
+                        StorageType.EXTERNAL -> {
+                            val available = externalFilenames.contains(meta.filename)
+                            val backupDataInfo = BackupData(
+                                id = meta._id,
+                                filename = meta.filename,
+                                packageName = meta.packageName,
+                                timestamp = meta.timestamp,
+                                data = null,
+                                encrypted  = meta.encrypted,
+                                storageType = meta.storageService,
+                                available = available
+                            )
+                            result.add(backupDataInfo)
+                        }
+                        StorageType.CLOUD -> {
+                            TODO()
+                        }
                     }
                 }
             }
