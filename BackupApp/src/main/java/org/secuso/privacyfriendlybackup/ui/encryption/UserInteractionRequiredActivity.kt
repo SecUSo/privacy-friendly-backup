@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.encryption
 
 import android.app.PendingIntent
 import android.content.Intent

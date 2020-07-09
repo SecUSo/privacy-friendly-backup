@@ -1,0 +1,53 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/pref_category_encryption">
+
+        <org.secuso.privacyfriendlybackup.ui.encryption.OpenPgpAppPreference
+            app:key="pref_encryption_crypto_provider"
+            app:title="@string/pref_encryption_crypto_provider"/>
+
+        <SwitchPreferenceCompat
+            app:key="pref_enable_encryption"
+            app:title="@string/pref_encryption_enable"
+            app:summaryOn="@string/pref_encryption_enable_on"
+            app:summaryOff="@string/pref_encryption_enable_off" />
+
+        <org.secuso.privacyfriendlybackup.ui.encryption.OpenPgpKeyPreference
+            app:dependency="pref_enable_encryption"
+            app:key="pref_encryption_key"
+            app:title="@string/pref_encryption_select_key" />
+
+        <EditTextPreference
+            app:dependency="pref_enable_encryption"
+            app:key="pref_encryption_passphrase"
+            app:title="@string/pref_encryption_passphrase" />
+
+
+
+        <!-- <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sync_header">
+
+        <SwitchPreferenceCompat
+            app:key="sync"
+            app:title="" />
+
+        <SwitchPreferenceCompat
+            app:dependency="sync"
+            app:key="attachment"
+            app:summaryOff="@string/attachment_summary_off"
+            app:summaryOn="@string/attachment_summary_on"
+            app:title="@string/attachment_title" /> -->
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

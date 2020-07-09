@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.app.Application
 import androidx.lifecycle.*
@@ -9,7 +9,7 @@ import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
-import org.secuso.privacyfriendlybackup.ui.BackupOverviewFragment.Mode
+import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment.Mode
 import java.io.ByteArrayInputStream
 
 class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {

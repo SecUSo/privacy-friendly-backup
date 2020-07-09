@@ -2,31 +2,24 @@ package org.secuso.privacyfriendlybackup.ui
 
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import org.secuso.privacyfriendlybackup.R
 
 /**
  * An activity representing a single Item detail screen. This
  * activity is only used on narrow width devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a [ItemListActivity].
+ * in a [MainActivity].
  */
-class ItemDetailActivity : AppCompatActivity() {
+class DisplayMenuItemActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_detail)
-        setSupportActionBar(findViewById(R.id.detail_toolbar))
+        setContentView(R.layout.activity_fragment_display)
+        setSupportActionBar(findViewById(R.id.toolbar))
 
-        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own detail action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-
-        // Show the Up button in the action bar.
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // savedInstanceState is non-null when there is fragment state
@@ -41,18 +34,21 @@ class ItemDetailActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
-            val fragment = ItemDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putString(
-                        ItemDetailFragment.ARG_ITEM_ID,
-                        intent.getStringExtra(ItemDetailFragment.ARG_ITEM_ID)
-                    )
+            val fragment = try {
+                    MainActivity.MenuItem.valueOf(intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!).fragment.newInstance()
+                } catch (e: IllegalArgumentException) {
+                    null
+                } catch (e: NullPointerException) {
+                    null
                 }
-            }
 
-            supportFragmentManager.beginTransaction()
-                .add(R.id.item_detail_container, fragment)
-                .commit()
+            if(fragment != null) {
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.fragment_container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
+                    .commit()
+            } else {
+                finish()
+            }
         }
     }
 
@@ -66,10 +62,19 @@ class ItemDetailActivity : AppCompatActivity() {
                 //
                 // http://developer.android.com/design/patterns/navigation.html#up-vs-back
 
-                navigateUpTo(Intent(this, ItemListActivity::class.java))
+                navigateUpTo(Intent(this, MainActivity::class.java))
 
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(MainActivity.MenuItem.MENU_MAIN_ENCRYPTION.name)
+        if(fragment != null && fragment.isVisible) {
+            fragment.onActivityResult(requestCode, resultCode, data)
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -67,7 +67,9 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_backup, parent, false))
+        ViewHolder(
+            LayoutInflater.from(parent.getContext()).inflate(R.layout.item_backup, parent, false)
+        )
 
     override fun getItemId(position: Int): Long =
         sortedList[position].id

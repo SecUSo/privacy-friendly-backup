@@ -10,4 +10,20 @@
     <string name="menu_title_select_all">Select all</string>
     <string name="menu_title_sort">Sort</string>
     <string name="menu_title_delete">Delete</string>
+    <string name="menu_main_backup">Backup Overview</string>
+    <string name="menu_main_apps">Available Applications</string>
+    <string name="menu_main_encryption">Encryption Settings</string>
+    <string name="menu_main_settings">Backup Settings</string>
+    <string name="menu_main_help">Help</string>
+    <string name="menu_main_about">About</string>
+    <string name="pref_category_encryption">Encryption Settings</string>
+    <string name="pref_encryption_enable">Enable encryption</string>
+    <string name="pref_encryption_passphrase">Passphrase</string>
+    <string name="pref_encryption_select_key">Select key</string>
+    <string name="pref_encryption_enable_on">Encryption is enabled</string>
+    <string name="pref_encryption_enable_off">Data will be stored unencrypted</string>
+    <string name="pref_encryption_select_key_summary">Click to select an encryption key</string>
+    <string name="pref_encryption_crypto_provider">Choose Crypto Provider</string>
+
+
 </resources>

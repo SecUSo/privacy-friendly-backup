@@ -88,7 +88,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-common-java8:2.2.0'
 
-    implementation 'androidx.preference:preference:1.1.1'
+    // Preferences
+    def preference_version = "1.1.1"
+    implementation "androidx.preference:preference:$preference_version"
+    implementation "androidx.preference:preference-ktx:$preference_version"
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'

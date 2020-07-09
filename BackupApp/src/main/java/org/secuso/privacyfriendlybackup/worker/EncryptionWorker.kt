@@ -18,7 +18,7 @@ import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
-import org.secuso.privacyfriendlybackup.ui.UserInteractionRequiredActivity
+import org.secuso.privacyfriendlybackup.ui.encryption.UserInteractionRequiredActivity
 import org.secuso.privacyfriendlybackup.worker.datakeys.*
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream

@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -6,14 +6,8 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.content.res.Resources
-import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
-import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.appcompat.widget.SearchView
@@ -27,17 +21,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.R
-import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
-import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
-import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
-import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
-import java.io.ByteArrayInputStream
+import org.secuso.privacyfriendlybackup.ui.MainActivity
+import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
 
-class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAdapterCallback,
+class BackupOverviewFragment : Fragment(),
+    FilterableBackupAdapter.ManageListAdapterCallback,
     SearchView.OnQueryTextListener {
 
     companion object {
-        fun newInstance() = BackupOverviewFragment()
+        fun newInstance() =
+            BackupOverviewFragment()
     }
 
     /**
@@ -71,7 +64,8 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
     private var toolbarDeleteIcon: MenuItem? = null
     private var searchIcon: MenuItem? = null
     private var selectAllIcon: MenuItem? = null
-    private var oldMode : Mode = Mode.NORMAL
+    private var oldMode : Mode =
+        Mode.NORMAL
 
     // ui
     private lateinit var toolbar : Toolbar
@@ -79,9 +73,6 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this).get(BackupOverviewViewModel::class.java)
-        adapter = FilterableBackupAdapter(requireContext(), this)
 
         setHasOptionsMenu(true)
 
@@ -97,12 +88,38 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
         return inflater.inflate(R.layout.fragment_backup_overview, container, false)
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-    }
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this).get(BackupOverviewViewModel::class.java)
+        adapter =
+            FilterableBackupAdapter(
+                requireContext(),
+                this
+            )
+
+        toolbar = requireActivity().findViewById(R.id.toolbar)
+        appBar = requireActivity().findViewById(R.id.app_bar)
+
+        fragment_backup_overview_list.adapter = adapter
+        fragment_backup_overview_list.layoutManager = when {
+            isXLargeTablet() -> {
+                GridLayoutManager(context,if (isPortrait()) 2 else 3,GridLayoutManager.VERTICAL,false)
+            }
+            isLargeTablet() -> {
+                GridLayoutManager(context,if (isPortrait()) 1 else 2,GridLayoutManager.VERTICAL,false)
+            }
+            else -> {
+                LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+            }
+        }
+
+        fab.setOnClickListener {
+            if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
+                // TODO: delete selected items
+                onDisableDeleteMode()
+            }
+        }
 
         viewModel.backupLiveData.observe(viewLifecycleOwner) { data ->
             adapter.setData(data)
@@ -154,33 +171,6 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
             }
 
             oldMode = mode
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        toolbar = requireActivity().findViewById(R.id.toolbar)
-        appBar = requireActivity().findViewById(R.id.app_bar)
-
-        fragment_backup_overview_list.adapter = adapter
-        fragment_backup_overview_list.layoutManager = when {
-            isXLargeTablet() -> {
-                GridLayoutManager(context,if (isPortrait()) 2 else 3,GridLayoutManager.VERTICAL,false)
-            }
-            isLargeTablet() -> {
-                GridLayoutManager(context,if (isPortrait()) 1 else 2,GridLayoutManager.VERTICAL,false)
-            }
-            else -> {
-                LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-            }
-        }
-
-        fab.setOnClickListener {
-            if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
-                // TODO: delete selected items
-                onDisableDeleteMode()
-            }
         }
     }
 
@@ -295,6 +285,8 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
     override fun onEnableDeleteMode() {
         viewModel.enableMode(Mode.DELETE)
 
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24)
+
         adapter.enableDeleteMode()
 
         toolbarDeleteIcon?.isVisible = false
@@ -306,11 +298,33 @@ class BackupOverviewFragment : Fragment(), FilterableBackupAdapter.ManageListAda
     fun onDisableDeleteMode() {
         viewModel.disableMode(Mode.DELETE)
 
+        if(!isPortrait() && isXLargeTablet()) {
+            toolbar.navigationIcon = null
+        }
+
         toolbarDeleteIcon?.isVisible = true
         selectAllIcon?.isVisible = false
 
         fab.hide()
         adapter.disableDeleteMode()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val activity = requireActivity()
+
+        if(isLargeTablet()) {
+            if(activity is BackupOverviewActivity && !isPortrait()) {
+                activity.finish()
+            } else if(activity is MainActivity && isPortrait()){
+                val intent = activity.intent.apply {
+                    putExtra(SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.ordinal)
+                }
+                activity.finish()
+                activity.startActivity(intent)
+            }
+        }
     }
 
     override fun onItemClick(id: Long) {
