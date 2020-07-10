@@ -1,10 +1,7 @@
 package org.secuso.privacyfriendlybackup.data.room.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 
 @Dao
@@ -23,6 +20,9 @@ interface BackupJobDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: BackupJob) : Long
+
+    @Update
+    suspend fun update(data: BackupJob) : Long
 
     @Query("DELETE FROM BackupJob WHERE _id = :id")
     suspend fun deleteForId(id: Long)

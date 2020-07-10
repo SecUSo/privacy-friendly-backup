@@ -24,6 +24,7 @@
     <string name="pref_encryption_enable_off">Data will be stored unencrypted</string>
     <string name="pref_encryption_select_key_summary">Click to select an encryption key</string>
     <string name="pref_encryption_crypto_provider">Choose Crypto Provider</string>
+    <string name="fragment_title_encryption">Encryption Settings</string>
 
 
 </resources>

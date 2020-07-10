@@ -16,7 +16,7 @@ import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
 class BackupDataStorageRepository(
-    private val webserviceProvider : WebserviceProvider,
+    private val webserviceProvider : WebserviceProvider = WebserviceProvider(),
     private val database : BackupDatabase
 ) {
 
@@ -38,7 +38,7 @@ class BackupDataStorageRepository(
         }
     }
 
-    suspend fun getFile(context: Context, metadataId : Long) : LiveData<BackupData> {
+    suspend fun getFileLiveData(context: Context, metadataId : Long) : LiveData<BackupData> {
         val data = MutableLiveData<BackupData>()
 
         withContext(IO) {
@@ -56,6 +56,18 @@ class BackupDataStorageRepository(
         }
 
         return data
+    }
+
+    suspend fun getFile(context: Context, metadataId : Long) : BackupData? {
+        val metadata = database.backupMetaDataDao().getFromId(metadataId)
+            ?: throw IllegalArgumentException("Provided metadataId is not valid.")
+
+        return when (metadata.storageService) {
+            StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.getData(context, metadata)
+            StorageType.CLOUD -> {
+                TODO()
+            }
+        }
     }
 
     suspend fun listAvailableBackups(context: Context) : LiveData<List<BackupData>> {

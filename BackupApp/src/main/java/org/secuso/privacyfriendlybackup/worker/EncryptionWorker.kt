@@ -47,6 +47,8 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     var workDone = false
     var errorOccurred = false
 
+
+    val backupJobId = inputData.getLong(DATA_JOB_ID, -1)
     val dataId = inputData.getLong(DATA_ID, -1)
     val cryptoProviderPackage = inputData.getString(DATA_OPENPGP_PROVIDER)
     val encrypt = inputData.getBoolean(DATA_ENCRYPT, true)
@@ -77,10 +79,10 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         mConnection.unbindFromService()
 
         // did we have an error?
-        if(errorOccurred || timeout <= 0) {
-            return Result.failure()
+        return if(errorOccurred || timeout <= 0) {
+            Result.failure()
         } else {
-            return Result.success()
+            Result.success()
         }
     }
 
@@ -106,7 +108,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                 val intent = Intent().apply {
                     action = OpenPgpApi.ACTION_SIGN_AND_ENCRYPT
 
-                    if (selectedKeyIds != null && !selectedKeyIds.isEmpty()) {
+                    if (selectedKeyIds != null && selectedKeyIds.isNotEmpty()) {
                         putExtra(OpenPgpApi.EXTRA_KEY_IDS, selectedKeyIds)
                     }
 

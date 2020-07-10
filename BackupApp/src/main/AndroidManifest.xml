@@ -23,7 +23,6 @@
         </activity>
         <activity
             android:name=".ui.DisplayMenuItemActivity"
-            android:label="@string/title_item_detail"
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

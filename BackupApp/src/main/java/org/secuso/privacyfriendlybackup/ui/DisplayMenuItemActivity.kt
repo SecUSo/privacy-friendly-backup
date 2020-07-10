@@ -17,7 +17,7 @@ class DisplayMenuItemActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment_display)
+        setContentView(R.layout.activity_display_menu_item)
         setSupportActionBar(findViewById(R.id.toolbar))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -44,7 +44,7 @@ class DisplayMenuItemActivity : AppCompatActivity() {
 
             if(fragment != null) {
                 supportFragmentManager.beginTransaction()
-                    .add(R.id.fragment_container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
+                    .add(R.id.container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
                     .commit()
             } else {
                 finish()

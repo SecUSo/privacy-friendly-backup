@@ -38,11 +38,11 @@ class PlaceholderFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val rootView = inflater.inflate(R.layout.item_detail, container, false)
+        val rootView = inflater.inflate(R.layout.item_placeholder, container, false)
 
         // Show the dummy content as text in a TextView.
         //item?.let {
-        //    rootView.findViewById<TextView>(R.id.item_detail).text = it.details
+        //    rootView.findViewById<TextView>(R.id.item_placeholder).text = it.details
         //}
 
         return rootView

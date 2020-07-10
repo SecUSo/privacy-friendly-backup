@@ -8,4 +8,4 @@
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
     tools:context=".ui.MainActivity"
-    tools:listitem="@layout/item_list_content" />
+    tools:listitem="@layout/item_main_menu" />

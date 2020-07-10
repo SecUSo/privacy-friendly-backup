@@ -56,8 +56,8 @@ class MainActivity : AppCompatActivity() {
         const val SELECTED_MENU_ITEM = "SELECTED_MENU_ITEM"
 
         val items : List<MenuItem> = listOf(
-            MenuItem.MENU_MAIN_BACKUP_OVERVIEW,
             MenuItem.MENU_MAIN_APPS,
+            MenuItem.MENU_MAIN_BACKUP_OVERVIEW,
             MenuItem.MENU_MAIN_ENCRYPTION,
             MenuItem.MENU_MAIN_SETTINGS,
             MenuItem.MENU_MAIN_HELP,
@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_list)
+        setContentView(R.layout.activity_main)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_list_content, parent, false)
+                .inflate(R.layout.item_main_menu, parent, false)
             return ViewHolder(view)
         }
 

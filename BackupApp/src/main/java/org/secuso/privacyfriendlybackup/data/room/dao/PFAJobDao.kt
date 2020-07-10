@@ -1,10 +1,7 @@
 package org.secuso.privacyfriendlybackup.data.room.dao
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
 
 @Dao
@@ -26,6 +23,9 @@ interface PFAJobDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: PFAJob)
+
+    @Update
+    suspend fun update(data: PFAJob)
 
     @Query("DELETE FROM PFAJob WHERE uid = :uid")
     suspend fun deleteForUid(uid: Int)

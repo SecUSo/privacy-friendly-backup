@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.ui.encryption
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.DialogFragment
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -28,6 +29,14 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
     var providerPref : OpenPgpAppPreference? = null
     var passphrasePref : EditTextPreference? = null
     var keyPref : OpenPgpKeyPreference? = null
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        val toolbar : Toolbar = requireActivity().findViewById(R.id.toolbar)
+        toolbar.title = getString(R.string.fragment_title_encryption)
+        requireActivity().actionBar?.title = getString(R.string.fragment_title_encryption)
+    }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
         val f : DialogFragment

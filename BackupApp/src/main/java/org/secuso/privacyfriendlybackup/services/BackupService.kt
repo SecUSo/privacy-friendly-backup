@@ -22,7 +22,7 @@ import org.secuso.privacyfriendlybackup.api.util.*
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
-import org.secuso.privacyfriendlybackup.data.room.model.PFAJobAction
+import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
 
 /**
  * @author Christopher Beckmann

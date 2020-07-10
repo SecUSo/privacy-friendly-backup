@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
         app:layoutManager="LinearLayoutManager"
         tools:context="org.secuso.privacyfriendlybackup.ui.MainActivity"
-        tools:listitem="@layout/item_list_content" />
+        tools:listitem="@layout/item_main_menu" />
 
     <FrameLayout
         android:id="@+id/item_detail_container"

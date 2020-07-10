@@ -1,8 +1,8 @@
 package org.secuso.privacyfriendlybackup.data.room.converters
 
 import androidx.room.TypeConverter
-import org.secuso.privacyfriendlybackup.data.room.model.BackupJobAction
-import org.secuso.privacyfriendlybackup.data.room.model.PFAJobAction
+import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
+import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
