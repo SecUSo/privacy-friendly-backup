@@ -5,11 +5,13 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.annotation.ColorRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -23,6 +25,7 @@ import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.ui.MainActivity
 import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
+import org.secuso.privacyfriendlybackup.ui.common.Mode
 
 class BackupOverviewFragment : Fragment(),
     FilterableBackupAdapter.ManageListAdapterCallback,
@@ -33,29 +36,6 @@ class BackupOverviewFragment : Fragment(),
             BackupOverviewFragment()
     }
 
-    /**
-     * Modes for management
-     */
-    enum class Mode(var value: Int, @ColorRes var color: Int) {
-        NORMAL(0, R.color.colorPrimary),
-        SEARCH(1, R.color.colorAccent),
-        DELETE(2, R.color.middlegrey),
-        SEARCH_AND_DELETE(3, R.color.middleblue);
-
-        fun isActiveIn(currentMode: Mode): Boolean {
-            return currentMode.value and value == value
-        }
-
-        companion object {
-            operator fun get(i: Int): Mode {
-                for (mode in values()) {
-                    if (mode.value == i) return mode
-                }
-                return NORMAL
-            }
-        }
-    }
-
     private var currentDeleteCount: Int = 0
 
     private lateinit var viewModel: BackupOverviewViewModel
@@ -64,8 +44,7 @@ class BackupOverviewFragment : Fragment(),
     private var toolbarDeleteIcon: MenuItem? = null
     private var searchIcon: MenuItem? = null
     private var selectAllIcon: MenuItem? = null
-    private var oldMode : Mode =
-        Mode.NORMAL
+    private var oldMode : Mode = Mode.NORMAL
 
     // ui
     private lateinit var toolbar : Toolbar
@@ -116,8 +95,19 @@ class BackupOverviewFragment : Fragment(),
 
         fab.setOnClickListener {
             if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
-                // TODO: delete selected items
-                onDisableDeleteMode()
+
+                val builder = AlertDialog.Builder(requireContext()).apply {
+                    setTitle(R.string.dialog_delete_confimation_title)
+                    setMessage(R.string.dialog_delete_confimation_message)
+                    setNegativeButton(R.string.dialog_delete_confimation_negative, null)
+                    setPositiveButton(R.string.dialog_delete_confimation_positive) { dialog, _ ->
+                        viewModel.deleteData(adapter.getDeleteList())
+                        dialog.dismiss()
+                        onDisableDeleteMode()
+                    }
+                }
+                builder.show()
+
             }
         }
 

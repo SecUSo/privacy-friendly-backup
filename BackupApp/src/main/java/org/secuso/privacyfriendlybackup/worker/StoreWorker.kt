@@ -62,7 +62,10 @@ class StoreWorker(val context: Context, params: WorkerParameters) : CoroutineWor
 
         val storageType = StorageType.valueOf(job.location!!)
 
+        // store and delete from internal storage
         repository.storeFile(context, job.packageName, job.dataId!!, storageType)
+        InternalBackupDataStoreHelper.clearData(context, job.dataId!!)
+
         return Result.success()
     }
 

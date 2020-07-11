@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.data.room.model
 
 import android.os.Parcelable
+import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 import kotlinx.android.parcel.Parcelize
@@ -31,4 +32,9 @@ data class BackupJob(
     var nextJob : Long? = null,
     var active : Boolean = false,
     var location: String? = null
-) : Parcelable
+) : Parcelable {
+    object DIFFCALLBACK : DiffUtil.ItemCallback<BackupJob>() {
+        override fun areItemsTheSame(o: BackupJob, n: BackupJob): Boolean = o._id == n._id
+        override fun areContentsTheSame(o: BackupJob, n: BackupJob): Boolean = o == n
+    }
+}

@@ -19,6 +19,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.ui.application.ApplicationOverviewFragment
 import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewActivity
 import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 import org.secuso.privacyfriendlybackup.ui.encryption.EncryptionSettingsFragment
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         _activity: Class<out Activity>
     ) {
         MENU_MAIN_BACKUP_OVERVIEW(R.drawable.ic_backup_24, R.string.menu_main_backup, BackupOverviewFragment::class.java, BackupOverviewActivity::class.java),
-        MENU_MAIN_APPS(R.drawable.ic_apps_24, R.string.menu_main_apps, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),
+        MENU_MAIN_APPS(R.drawable.ic_apps_24, R.string.menu_main_apps, ApplicationOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_ENCRYPTION(R.drawable.ic_encryption_24, R.string.menu_main_encryption, EncryptionSettingsFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_SETTINGS(R.drawable.ic_settings_24, R.string.menu_main_settings, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_HELP(R.drawable.ic_help_outline_24, R.string.menu_main_help, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),

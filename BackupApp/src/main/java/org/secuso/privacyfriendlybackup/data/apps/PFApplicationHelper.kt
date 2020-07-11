@@ -21,22 +21,22 @@ object PFApplicationHelper {
     fun getAvailablePFAs(context: Context) : List<PFAInfo> {
         val pm: PackageManager = context.packageManager
         val intent = Intent(PfaApi.PFA_CONNECT_ACTION)
-        val resolveInfo = pm.queryIntentActivities(intent, PackageManager.MATCH_ALL)
+        val resolveInfo = pm.queryIntentServices(intent, 0)
 
         val results = mutableListOf<PFAInfo>()
 
         for (ri in resolveInfo) {
             var installDate: Long = 0
             try {
-                installDate = pm.getPackageInfo(ri.activityInfo.packageName, 0).firstInstallTime
+                installDate = pm.getPackageInfo(ri.serviceInfo.packageName, 0).firstInstallTime
             } catch (e: PackageManager.NameNotFoundException) {
                 e.printStackTrace()
             }
             results.add(PFAInfo(
-                ri.activityInfo.applicationInfo.loadLabel(pm).toString(),
-                ri.activityInfo.packageName,
-                ri.activityInfo.applicationInfo.loadIcon(pm),
-                ri.activityInfo.iconResource,
+                ri.serviceInfo.applicationInfo.loadLabel(pm).toString(),
+                ri.serviceInfo.packageName,
+                ri.serviceInfo.applicationInfo.loadIcon(pm),
+                ri.serviceInfo.iconResource,
                 installDate
             ))
         }

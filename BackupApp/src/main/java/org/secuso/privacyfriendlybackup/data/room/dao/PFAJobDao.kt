@@ -22,7 +22,7 @@ interface PFAJobDao {
     fun getJobsForPackageLiveData(packageName: String) : LiveData<List<PFAJob>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(data: PFAJob)
+    suspend fun insert(data: PFAJob) : Long
 
     @Update
     suspend fun update(data: PFAJob)

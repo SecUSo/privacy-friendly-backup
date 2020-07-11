@@ -9,6 +9,9 @@ interface BackupJobDao {
     @Query("SELECT * FROM BackupJob")
     suspend fun getAll() : List<BackupJob>
 
+    @Query("SELECT * FROM BackupJob")
+    fun getAllLive() : LiveData<List<BackupJob>>
+
     @Query("SELECT * FROM BackupJob WHERE _id = :id")
     suspend fun getJobForId(id : Long) : BackupJob
 
@@ -22,7 +25,7 @@ interface BackupJobDao {
     suspend fun insert(data: BackupJob) : Long
 
     @Update
-    suspend fun update(data: BackupJob) : Long
+    suspend fun update(data: BackupJob)
 
     @Query("DELETE FROM BackupJob WHERE _id = :id")
     suspend fun deleteForId(id: Long)

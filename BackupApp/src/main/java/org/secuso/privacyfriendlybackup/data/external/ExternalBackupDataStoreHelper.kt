@@ -83,6 +83,14 @@ object ExternalBackupDataStoreHelper {
         }
     }
 
+    suspend fun deleteData(context: Context, metadata : StoredBackupMetaData) {
+        withContext(Dispatchers.IO) {
+            val path = File(context.getExternalFilesDir(null), BACKUP_DIR)
+            val file = File(path, metadata.filename)
+            file.delete()
+        }
+    }
+
     suspend fun listAvailableData(context: Context) : List<String> {
         return withContext(Dispatchers.IO) {
             val files = File(context.getExternalFilesDir(null), BACKUP_DIR).listFiles { _, name -> name.toLowerCase(Locale.ENGLISH).endsWith(".backup") }

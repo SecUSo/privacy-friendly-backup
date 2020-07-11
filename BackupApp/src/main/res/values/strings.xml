@@ -25,6 +25,10 @@
     <string name="pref_encryption_select_key_summary">Click to select an encryption key</string>
     <string name="pref_encryption_crypto_provider">Choose Crypto Provider</string>
     <string name="fragment_title_encryption">Encryption Settings</string>
+    <string name="dialog_delete_confimation_message">Are you sure you want to delete the stored backups? This will permanently delete them. You will not be able to restore them.</string>
+    <string name="dialog_delete_confimation_negative">Cancel</string>
+    <string name="dialog_delete_confimation_positive">Delete</string>
+    <string name="dialog_delete_confimation_title">Delete Confirmation</string>
 
 
 </resources>

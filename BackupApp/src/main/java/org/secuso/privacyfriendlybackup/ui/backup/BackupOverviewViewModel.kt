@@ -9,7 +9,7 @@ import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
-import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment.Mode
+import org.secuso.privacyfriendlybackup.ui.common.Mode
 import java.io.ByteArrayInputStream
 
 class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
@@ -81,6 +81,17 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
                     BackupDatabase.getInstance(getApplication())
                 ).storeFile(getApplication(), "org.secuso.example", dataId)
             }
+        }
+    }
+
+    fun deleteData(deleteList: Set<BackupData>) {
+        viewModelScope.launch {
+            val repo = BackupDataStorageRepository(
+                WebserviceProvider(),
+                BackupDatabase.getInstance(getApplication())
+            )
+
+            repo.deleteFiles(getApplication(), deleteList.map { it.id })
         }
     }
 }

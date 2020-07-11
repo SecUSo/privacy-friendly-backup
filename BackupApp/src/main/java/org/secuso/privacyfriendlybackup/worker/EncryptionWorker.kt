@@ -17,6 +17,7 @@ import org.openintents.openpgp.util.OpenPgpServiceConnection
 import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
+import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
 import org.secuso.privacyfriendlybackup.ui.encryption.UserInteractionRequiredActivity
 import org.secuso.privacyfriendlybackup.worker.datakeys.*
@@ -139,7 +140,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         }
     }
 
-    fun decryptAndVerify() {
+    private fun decryptAndVerify() {
         runBlocking {
             val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
             internalData = data
@@ -181,9 +182,6 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
                     Log.d(TAG, "RESULT_CODE_SUCCESS")
 
-                    // store data
-                    worker.get()?.storeData(outputStream, requestCode)
-
                     when(requestCode) {
                         REQUEST_CODE_DECRYPT_AND_VERIFY -> {
                             val signatureResult: OpenPgpSignatureResult = result.getParcelableExtra(OpenPgpApi.RESULT_SIGNATURE)!!
@@ -195,6 +193,10 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                             // do nothing
                         }
                     }
+
+                    // store data
+                    worker.get()?.storeData(outputStream, requestCode)
+
                     worker.get()?.workDone = true
                 }
                 OpenPgpApi.RESULT_CODE_ERROR -> {
@@ -220,14 +222,23 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
     private fun storeData(outputStream: ByteArrayOutputStream, requestCode: Int) {
         GlobalScope.launch(Dispatchers.IO) {
-            var encrypted = when(requestCode) {
+            val encrypted = when(requestCode) {
                 REQUEST_CODE_DECRYPT_AND_VERIFY -> false
                 REQUEST_CODE_SIGN_AND_ENCRYPT -> true
                 else -> true
             }
-            InternalBackupDataStoreHelper.storeBackupData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
+
+            // store to internal storage and delete unencrypted data
+            val id = InternalBackupDataStoreHelper.storeData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
             InternalBackupDataStoreHelper.clearData(context, dataId)
-            // TODO: call more worker here?
+
+            // store new internal data id into next job
+            val dao = BackupDatabase.getInstance(context).backupJobDao()
+            val job = dao.getJobForId(backupJobId)
+            val nextJob = dao.getJobForId(job.nextJob!!).apply {
+                dataId = id
+            }
+            BackupDatabase.getInstance(context).backupJobDao().update(nextJob)
         }
     }
 

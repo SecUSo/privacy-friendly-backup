@@ -107,5 +107,28 @@ class BackupDataStorageRepository(
         return livedata
     }
 
+    suspend fun deleteFiles(context: Context, metadataIds: List<Long>) {
+        val metaDataList = database.backupMetaDataDao().getFromIds(metadataIds)
+
+        for(metaData in metaDataList) {
+            try {
+                when (metaData.storageService) {
+                    StorageType.EXTERNAL -> {
+                        ExternalBackupDataStoreHelper.deleteData(context, metaData)
+                    }
+                    StorageType.CLOUD -> {
+                        TODO("Not yet implemented.")
+                    }
+                }
+            } catch (e : Exception) {
+                // TODO: Error Handling - mark, which entry could not be deleted
+                //  do not delete metaData of this entry
+            }
+        }
+
+        database.backupMetaDataDao().deleteForIds(metadataIds)
+
+    }
+
 
 }
