@@ -13,7 +13,6 @@ import org.secuso.privacyfriendlybackup.ui.common.Mode
 import java.io.ByteArrayInputStream
 
 class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
-
     private val internalBackupLiveData : MediatorLiveData<List<BackupData>> = MediatorLiveData()
 
     val backupLiveData : LiveData<List<BackupData>> = internalBackupLiveData
@@ -55,7 +54,11 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
         val internalData = internalBackupLiveData.value ?: emptyList()
 
         for(data in internalData) {
-            if(filter.isNullOrEmpty() || data.packageName.contains(filter, true)) {
+            val pfaInfo = PFApplicationHelper.getDataForPackageName(getApplication(), data.packageName)
+            if(filter.isNullOrEmpty()
+                || data.packageName.contains(filter, true)
+                || pfaInfo?.label?.contains(filter, true) == true
+            ) {
                 result.add(data)
             }
         }

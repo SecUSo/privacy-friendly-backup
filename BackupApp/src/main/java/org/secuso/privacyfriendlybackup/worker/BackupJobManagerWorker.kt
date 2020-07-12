@@ -55,9 +55,11 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
                     // if no next job was found - user needs to decide what is done with this job.
                     // Leave job in the database and wait for user ui interaction - TODO
                 } else {
-                    enqueueEncryptionWork(job)
-                    job.active = true
-                    jobDao.update(job)
+                    if(job.dataId != null) {
+                        enqueueEncryptionWork(job)
+                        job.active = true
+                        jobDao.update(job)
+                    }
                 }
             }
         }
@@ -137,12 +139,15 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     private fun createStoreWorkRequest(job : BackupJob) : OneTimeWorkRequest {
         val builder = OneTimeWorkRequestBuilder<StoreWorker>()
 
+//        val constraints = Constraints.Builder().setRequiresStorageNotLow(true).build()
+//        builder.setConstraints(constraints)
+
         val data : MutableList<Pair<String, Any?>> = ArrayList()
 
         data.add(DATA_JOB_ID to job._id)
         data.add(DATA_ID to job.dataId)
-        data.add(DATA_TIMESTAMP to job.timestamp)
-        data.add(DATA_BACKUP_LOCATION to job.location) // TODO: this is not in use yet
+        data.add(DATA_TIMESTAMP to job.timestamp.time)
+        data.add(DATA_BACKUP_LOCATION to job.location)
 
         return builder.setInputData(
             workDataOf(*data.toTypedArray())

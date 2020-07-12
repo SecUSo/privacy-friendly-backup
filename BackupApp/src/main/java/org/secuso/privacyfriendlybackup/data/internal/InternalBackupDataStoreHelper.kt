@@ -27,27 +27,19 @@ object InternalBackupDataStoreHelper {
         val dataId = storeData(context, packageName, inputStream, encrypted)
 
         val backupJobDao = BackupDatabase.getInstance(context).backupJobDao()
-        val date = Date()
 
-        val store = BackupJob(
-            timestamp = date,
-            packageName = packageName,
-            action = BackupJobAction.BACKUP_STORE,
-            dataId = null,
-            nextJob = null
-        )
-
-        val next = backupJobDao.insert(store)
-
-        val encrypt = BackupJob(
-            timestamp = date,
-            packageName = packageName,
-            action = BackupJobAction.BACKUP_ENCRYPT,
-            dataId = dataId,
-            nextJob = next
-        )
-
-        backupJobDao.insert(encrypt)
+        // delete corresponding backup job and update the dataID of the next
+        val pfaJobs = backupJobDao.getJobsForPackage(packageName)
+        val pfaJob = pfaJobs.find { it.action == BackupJobAction.PFA_JOB_BACKUP }
+        if(pfaJob != null) {
+            val nextJob = pfaJobs.find { it._id == pfaJob.nextJob }
+            if(nextJob != null) {
+                nextJob.dataId = dataId
+                backupJobDao.deleteForId(pfaJob._id)
+                backupJobDao.update(nextJob)
+                return dataId
+            }
+        }
 
         return dataId
     }

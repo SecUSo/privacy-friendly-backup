@@ -10,6 +10,5 @@ object BackupDataUtil {
         val dateString: CharSequence = DateFormat.format("yyyy_MM_dd_HHmmss", date.time)
         return "${packageName}_${dateString}.backup"
     }
-
 }
 

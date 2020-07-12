@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.content.Context
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,13 +9,16 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.bumptech.glide.Glide
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository.BackupData
 import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.lang.ref.WeakReference
+import java.text.SimpleDateFormat
 import java.util.*
 
 class FilterableBackupAdapter(val context : Context, adapterCallback : ManageListAdapterCallback) : RecyclerView.Adapter<FilterableBackupAdapter.ViewHolder>() {
@@ -115,6 +119,20 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
             }
         }
 
+        val icon = when(data.storageType) {
+            StorageType.EXTERNAL -> R.drawable.ic_device_24
+            StorageType.CLOUD -> R.drawable.ic_cloud_24
+        }
+
+        Glide.with(context)
+            .load(icon)
+            .centerCrop()
+            .into(holder.mStorageImage)
+        holder.mStorageImage.setColorFilter(ContextCompat.getColor(context, R.color.darkblue))
+
+        val dateString = SimpleDateFormat.getDateTimeInstance().format(data.timestamp)
+        holder.mDate.text = dateString
+
         if(pfaInfo != null) {
             Glide.with(context)
                 .load(pfaInfo.icon)
@@ -138,6 +156,8 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         val mCard : CardView = itemView.findViewById(R.id.card)
         val mCheckbox : CheckBox = itemView.findViewById(R.id.checkbox)
         val mImage : ImageView = itemView.findViewById(R.id.image)
+        val mDate : TextView = itemView.findViewById(R.id.date)
+        val mStorageImage : ImageView = itemView.findViewById(R.id.storageImage)
     }
 
     fun enableDeleteMode() {

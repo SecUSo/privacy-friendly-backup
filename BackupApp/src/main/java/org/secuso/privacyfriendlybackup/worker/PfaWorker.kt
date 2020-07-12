@@ -77,10 +77,11 @@ class PfaWorker(val context: Context, params: WorkerParameters) : CoroutineWorke
                 throw RuntimeException(error?.errorMessage)
             }
 
-            db.backupJobDao().deleteForId(backupJobId)
+            // do not delete yet
             return Result.success()
         } catch (e : Exception) {
-            db.backupJobDao().deleteForId(backupJobId)
+            // Error occurred
+            //db.backupJobDao().deleteForId(backupJobId)
             return Result.failure()
         }
     }
@@ -98,8 +99,8 @@ class PfaWorker(val context: Context, params: WorkerParameters) : CoroutineWorke
 
     override fun onSuccess() {
         Log.d(TAG,"Command sent successfully.")
-        connection.disconnect()
         workDone = true
+        connection.disconnect()
     }
 
     override fun onDisconnected() {

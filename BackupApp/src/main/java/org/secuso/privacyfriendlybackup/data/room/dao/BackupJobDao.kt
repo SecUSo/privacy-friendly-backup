@@ -27,6 +27,9 @@ interface BackupJobDao {
     @Update
     suspend fun update(data: BackupJob)
 
+    @Query("DELETE FROM BackupJob WHERE packageName = :packageName")
+    suspend fun deleteAllForPackage(packageName: String)
+
     @Query("DELETE FROM BackupJob WHERE _id = :id")
     suspend fun deleteForId(id: Long)
 

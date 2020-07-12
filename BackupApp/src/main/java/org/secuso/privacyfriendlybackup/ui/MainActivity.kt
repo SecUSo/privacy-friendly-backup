@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val SELECTED_MENU_ITEM = "SELECTED_MENU_ITEM"
+        const val FILTER = "FILTER"
 
         val items : List<MenuItem> = listOf(
             MenuItem.MENU_MAIN_APPS,
@@ -113,6 +114,9 @@ class MainActivity : AppCompatActivity() {
         } else {
             val intent = Intent(this, activity).apply {
                 putExtra(SELECTED_MENU_ITEM, menuItem.name)
+                if(intent.hasExtra(FILTER)) {
+                    putExtra(FILTER, intent.getStringExtra(FILTER))
+                }
             }
             startActivity(intent)
         }

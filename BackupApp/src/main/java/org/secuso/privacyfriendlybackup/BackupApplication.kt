@@ -4,8 +4,12 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import androidx.work.*
+import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
+import org.secuso.privacyfriendlybackup.worker.BackupJobManagerWorker
+import java.util.concurrent.TimeUnit
 
-class BackupApplication : Application() {
+class BackupApplication : Application(), Configuration.Provider {
 
     companion object {
         const val CHANNEL_ID = "org.secuso.privacyfriendlybackup.CHANNEL_ID"
@@ -15,6 +19,20 @@ class BackupApplication : Application() {
         super.onCreate()
 
         createNotificationChannel()
+        schedulePeriodicWork()
+    }
+
+    fun schedulePeriodicWork() {
+        val periodicJobManagerWork =
+            PeriodicWorkRequestBuilder<BackupJobManagerWorker>(15, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            BuildConfig.APPLICATION_ID,
+            ExistingPeriodicWorkPolicy.REPLACE,
+            periodicJobManagerWork
+        )
     }
 
     private fun createNotificationChannel() {
@@ -31,4 +49,9 @@ class BackupApplication : Application() {
             notificationManager.createNotificationChannel(channel)
         }
     }
+
+    override fun getWorkManagerConfiguration(): Configuration =
+        Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .build()
 }

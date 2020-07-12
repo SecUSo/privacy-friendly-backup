@@ -6,26 +6,43 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import org.secuso.privacyfriendlybackup.api.util.addSources
+import org.secuso.privacyfriendlybackup.data.BackupJobManager
 import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
+import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
+
+
+typealias BackupApplicationDataList = ArrayList<ApplicationOverviewViewModel.BackupApplicationData>
 
 class ApplicationOverviewViewModel(app : Application) : AndroidViewModel(app) {
 
-    class BackupApplicationDataList : ArrayList<BackupApplicationData>() {
-
-    }
-
     data class BackupApplicationData(
         val pfaInfo: PFApplicationHelper.PFAInfo,
-        val id: Long,
-        val jobs: List<BackupJob>
-    )
+        val jobs: List<BackupJob>,
+        val backups: List<StoredBackupMetaData>
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if(other == null) return false
+            if(other !is BackupApplicationData) return false
+            if(pfaInfo != other.pfaInfo) return false
+            if(jobs.size != other.jobs.size) return false
+            jobs.forEachIndexed {
+                i,j -> if(other.jobs[i] != j) return false
+            }
+            if(backups.size != other.backups.size) return false
+            backups.forEachIndexed {
+                i,b -> if(other.backups[i] != b) return false
+            }
+            return true
+        }
+    }
 
-    private val internalBackupApplicationLiveData = MediatorLiveData<List<BackupApplicationData>>()
+    private val internalBackupApplicationLiveData = MediatorLiveData<BackupApplicationDataList>()
     private lateinit var pfaList : List<PFApplicationHelper.PFAInfo>
 
-    val appLiveData: LiveData<List<BackupApplicationData>> = internalBackupApplicationLiveData
+    val appLiveData: LiveData<BackupApplicationDataList> = internalBackupApplicationLiveData
 
     init {
         viewModelScope.launch {
@@ -36,24 +53,41 @@ class ApplicationOverviewViewModel(app : Application) : AndroidViewModel(app) {
 
     private fun getApplicationDataWithJobs() {
         // get jobs for them
-        val dao = BackupDatabase.getInstance(getApplication()).backupJobDao()
-        val backupJobsLiveData = dao.getAllLive()
+        val db = BackupDatabase.getInstance(getApplication())
+        val backupJobsLiveData = db.backupJobDao().getAllLive()
+        val metadataLiveData = db.backupMetaDataDao().getAllLive()
 
-        internalBackupApplicationLiveData.addSource(backupJobsLiveData) { list ->
+        internalBackupApplicationLiveData.addSources(backupJobsLiveData, metadataLiveData) { jobs, metaData ->
             val applicationList = BackupApplicationDataList()
 
             for(pfa in pfaList) {
-                val jobList = list.filter { it.packageName == pfa.packageName }
-                val pfaId = pfa.packageName.hashCode().toLong()
-                // jobList.map { it to pfaId.shl(32).or(it._id) }
-                applicationList.add(
-                    BackupApplicationData(pfa, pfaId, jobList)
-                )
+                val jobList = jobs?.filter { it.packageName == pfa.packageName } ?: emptyList()
+                val metaList = metaData?.filter { it.packageName == pfa.packageName } ?: emptyList()
+                applicationList.add(BackupApplicationData(pfa, jobList, metaList))
             }
 
-            internalBackupApplicationLiveData.postValue(applicationList)
+            applicationList
         }
     }
 
+    fun createBackupForPackage(packageName: String) {
+        viewModelScope.launch {
+            val jobManager = BackupJobManager.getInstance(getApplication())
+            jobManager.createBackupJobChain(packageName)
+        }
+    }
 
+    fun cancelRunningJobs(packageName: String) {
+        viewModelScope.launch {
+            val jobManager = BackupJobManager.getInstance(getApplication())
+            jobManager.cancelAllJobs(packageName)
+        }
+    }
+
+    fun restoreRecentBackup(packageName: String) {
+        viewModelScope.launch {
+            val jobManager = BackupJobManager.getInstance(getApplication())
+            jobManager.createRestoreJobChain(packageName)
+        }
+    }
 }

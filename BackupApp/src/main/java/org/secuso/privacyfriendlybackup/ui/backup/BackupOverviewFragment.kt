@@ -24,6 +24,7 @@ import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.ui.MainActivity
+import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.FILTER
 import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
 import org.secuso.privacyfriendlybackup.ui.common.Mode
 
@@ -45,6 +46,8 @@ class BackupOverviewFragment : Fragment(),
     private var searchIcon: MenuItem? = null
     private var selectAllIcon: MenuItem? = null
     private var oldMode : Mode = Mode.NORMAL
+
+    var predefinedFilter : String? = null
 
     // ui
     private lateinit var toolbar : Toolbar
@@ -109,6 +112,11 @@ class BackupOverviewFragment : Fragment(),
                 builder.show()
 
             }
+        }
+
+        if(requireActivity().intent.hasExtra(FILTER)) {
+            predefinedFilter = requireActivity().intent.getStringExtra(FILTER)
+            viewModel.setFilterText(predefinedFilter)
         }
 
         viewModel.backupLiveData.observe(viewLifecycleOwner) { data ->
@@ -194,6 +202,18 @@ class BackupOverviewFragment : Fragment(),
         searchIcon = menu.findItem(R.id.action_search)
         selectAllIcon = menu.findItem(R.id.action_select_all)
 
+
+        if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
+            onEnableDeleteMode()
+        } else {
+            onDisableDeleteMode()
+        }
+
+        if(!predefinedFilter.isNullOrEmpty()) {
+            searchIcon?.isVisible = false
+            return
+        }
+
         val searchView = searchIcon?.actionView as SearchView?
         searchView?.setOnQueryTextListener(this)
 
@@ -212,17 +232,10 @@ class BackupOverviewFragment : Fragment(),
             }
         })
 
-
         if(Mode.SEARCH.isActiveIn(viewModel.getCurrentMode())) {
             searchIcon?.expandActionView()
         } else {
             searchIcon?.collapseActionView()
-        }
-
-        if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
-            onEnableDeleteMode()
-        } else {
-            onDisableDeleteMode()
         }
 
         viewModel.filterLiveData.observe(viewLifecycleOwner) { text ->

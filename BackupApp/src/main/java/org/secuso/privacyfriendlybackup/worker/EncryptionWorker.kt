@@ -18,6 +18,7 @@ import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
+import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
 import org.secuso.privacyfriendlybackup.ui.encryption.UserInteractionRequiredActivity
 import org.secuso.privacyfriendlybackup.worker.datakeys.*
@@ -57,6 +58,13 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     val signingKey = inputData.getLong(DATA_SIGNING_KEY_ID, -1L)
     val passphrase = inputData.getString(DATA_PASSPHRASE)
     var internalData : InternalBackupData? = null
+    var job : BackupJob? = null
+
+    init {
+        GlobalScope.launch(Dispatchers.IO) {
+            job = BackupDatabase.getInstance(context).backupJobDao().getJobForId(backupJobId)
+        }
+    }
 
     lateinit var mConnection: OpenPgpServiceConnection
 
@@ -162,7 +170,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     }
 
     override fun onError(e: Exception?) {
-        Log.d(TAG, "Error occurred.")
+        Log.e(TAG, "Error occurred.", e)
         e?.printStackTrace()
         errorOccurred = true
         workDone = true
@@ -234,8 +242,10 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
             // store new internal data id into next job
             val dao = BackupDatabase.getInstance(context).backupJobDao()
-            val job = dao.getJobForId(backupJobId)
-            val nextJob = dao.getJobForId(job.nextJob!!).apply {
+            if(job == null) {
+                onError(IllegalArgumentException("Job is null."))
+            }
+            val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
                 dataId = id
             }
             BackupDatabase.getInstance(context).backupJobDao().update(nextJob)

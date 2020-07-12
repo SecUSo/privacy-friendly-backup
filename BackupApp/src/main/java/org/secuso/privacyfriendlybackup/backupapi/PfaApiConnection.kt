@@ -115,6 +115,7 @@ class PfaApiConnection(
 
     fun disconnect() {
         mContext.unbindService(mConnection)
+        mService = null
     }
 
     fun isBound() : Boolean {

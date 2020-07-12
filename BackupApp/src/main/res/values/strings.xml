@@ -29,6 +29,16 @@
     <string name="dialog_delete_confimation_negative">Cancel</string>
     <string name="dialog_delete_confimation_positive">Delete</string>
     <string name="dialog_delete_confimation_title">Delete Confirmation</string>
+    <string name="menu_item_backup">Create Backup</string>
+    <string name="menu_item_cancel_jobs">Cancel current jobs</string>
+    <string name="menu_item_restore_most_recent_backup">Restore most recent Backup</string>
+    <string name="menu_item_manage_backups">Manage Backups</string>
+    <string name="job_action_encrypt">Encrypt</string>
+    <string name="job_action_dcrypt">Decrypt</string>
+    <string name="job_action_store">Store</string>
+    <string name="job_action_load">Load</string>
+    <string name="job_action_pfa_backup">Backup</string>
+    <string name="job_action_pfa_restore">Restore</string>
 
 
 </resources>

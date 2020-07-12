@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_backup"
+        android:title="@string/menu_item_backup" />
+
+    <item
+        android:id="@+id/menu_cancel_jobs"
+        android:title="@string/menu_item_cancel_jobs" />
+
+    <item
+        android:id="@+id/menu_restore_most_recent_backup"
+        android:title="@string/menu_item_restore_most_recent_backup" />
+
+    <item
+        android:id="@+id/menu_manage_backups"
+        android:title="@string/menu_item_manage_backups" />
+
+</menu>

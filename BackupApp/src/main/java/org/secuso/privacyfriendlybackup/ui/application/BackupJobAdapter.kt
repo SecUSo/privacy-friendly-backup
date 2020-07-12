@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -20,11 +21,23 @@ import java.lang.ref.WeakReference
 class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback) : ListAdapter<BackupJob, BackupJobAdapter.BackupJobViewHolder>(BackupJob.DIFFCALLBACK) {
 
     interface ManageListAdapterCallback {
-        fun onItemClick(packageName : String, job : BackupJob)
+        fun onItemClick(view: View, packageName : String, job : BackupJob, menuItemId : Int?)
     }
 
     init {
         setHasStableIds(true)
+    }
+
+    override fun submitList(list: List<BackupJob>?) {
+        if(list == null) {
+            return super.submitList(list)
+        }
+
+        val result = ArrayList<BackupJob>(list)
+
+        result.sortBy { it.action.ordinal }
+
+        super.submitList(result)
     }
 
     private val callback = WeakReference(callback)
@@ -38,10 +51,10 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
     override fun onBindViewHolder(holder: BackupJobViewHolder, position: Int) {
         val data = getItem(position)
 
-        holder.mName.text = data.action.name
+        holder.mName.text = context.getString(data.action.stringResId)
 
         holder.mContainer.setOnClickListener {
-            callback.get()?.onItemClick(data.packageName, data)
+            callback.get()?.onItemClick(it, data.packageName, data, null)
         }
 
         when(data.action) {
@@ -49,12 +62,26 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
             }
         }
 
+        holder.mDots.visibility = if(data.nextJob != null) View.VISIBLE else View.GONE
+        holder.mDivider.visibility =
+            if(data.nextJob == null
+                && data.action == BackupJobAction.BACKUP_STORE
+                && itemCount > position + 1
+            )
+                View.VISIBLE
+            else
+                View.GONE
+
         Glide.with(context).load(data.action.image).into(holder.mImage)
+        val colorId = if(data.active) R.color.colorAccent else R.color.middlegrey
+        holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
     }
 
     class BackupJobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val mName : TextView = itemView.findViewById(R.id.name)
         val mImage : ImageView = itemView.findViewById(R.id.image)
         val mContainer : ConstraintLayout = itemView.findViewById(R.id.container)
+        val mDots : TextView = itemView.findViewById(R.id.nextDots)
+        val mDivider : View = itemView.findViewById(R.id.divider)
     }
 }

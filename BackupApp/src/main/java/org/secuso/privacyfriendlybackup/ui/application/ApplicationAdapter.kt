@@ -1,16 +1,19 @@
 package org.secuso.privacyfriendlybackup.ui.application
 
 import android.content.Context
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.bumptech.glide.Glide
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.ui.application.ApplicationOverviewViewModel.*
 import java.lang.ref.WeakReference
@@ -20,7 +23,7 @@ class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdap
     BackupJobAdapter.ManageListAdapterCallback {
 
     interface ManageListAdapterCallback {
-        fun onItemClick(packageName : String, job : BackupJob?)
+        fun onItemClick(view: View, packageName : String, job : BackupJob?, menuItemId : Int?)
     }
 
     companion object {
@@ -81,12 +84,26 @@ class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdap
         holder.mName.text = data.pfaInfo.label
 
         holder.mCard.setOnClickListener {
-            callback.get()?.onItemClick(data.pfaInfo.packageName, null)
+            val popup = PopupMenu(context, it)
+            popup.menuInflater.inflate(R.menu.menu_popup_application, popup.menu)
+            popup.gravity = Gravity.END
+            popup.setOnMenuItemClickListener { item ->
+                callback.get()?.onItemClick(it, data.pfaInfo.packageName, null, item.itemId)
+                return@setOnMenuItemClickListener true
+            }
+            popup.menu.findItem(R.id.menu_cancel_jobs).apply {
+                this.isVisible = data.jobs.isNotEmpty()
+            }
+            popup.menu.findItem(R.id.menu_restore_most_recent_backup).apply {
+                this.isVisible = data.backups.isNotEmpty()
+            }
+            popup.show()
         }
 
         val adapter = BackupJobAdapter(context, this)
         adapter.submitList(data.jobs)
         holder.mList.adapter = adapter
+        holder.mList.visibility = if(data.jobs.isEmpty()) View.GONE else View.VISIBLE
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -101,7 +118,7 @@ class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdap
         val mList : RecyclerView = itemView.findViewById(R.id.list)
     }
 
-    override fun onItemClick(packageName: String, job: BackupJob) {
-        callback.get()?.onItemClick(packageName, job)
+    override fun onItemClick(view: View, packageName: String, job: BackupJob, menuItemId: Int?) {
+        callback.get()?.onItemClick(view, packageName, job, menuItemId)
     }
 }

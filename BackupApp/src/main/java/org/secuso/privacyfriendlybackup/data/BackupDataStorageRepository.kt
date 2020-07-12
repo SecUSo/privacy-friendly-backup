@@ -38,6 +38,11 @@ class BackupDataStorageRepository(
         }
     }
 
+    suspend fun isBackupAvailableForApp(context: Context, packageName: String) : Boolean {
+        val metadata = database.backupMetaDataDao().getFromPackage(packageName)
+        return metadata.isNotEmpty()
+    }
+
     suspend fun getFileLiveData(context: Context, metadataId : Long) : LiveData<BackupData> {
         val data = MutableLiveData<BackupData>()
 

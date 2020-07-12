@@ -2,13 +2,12 @@ package org.secuso.privacyfriendlybackup.ui.application
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -16,11 +15,15 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
+import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.ui.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.MainActivity
+import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.FILTER
+import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
 import org.secuso.privacyfriendlybackup.ui.common.Mode
+
 
 class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAdapterCallback {
 
@@ -129,8 +132,23 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
         return resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     }
 
-    override fun onItemClick(packageName: String, job : BackupJob?) {
-        Toast.makeText(context, packageName + (job?.action ?: ""), Toast.LENGTH_SHORT).show()
+    override fun onItemClick(view: View, packageName: String, job : BackupJob?, menuItemId: Int?) {
+        when(menuItemId) {
+            R.id.menu_backup -> viewModel.createBackupForPackage(packageName)
+            R.id.menu_cancel_jobs -> viewModel.cancelRunningJobs(packageName)
+            R.id.menu_restore_most_recent_backup -> viewModel.restoreRecentBackup(packageName)
+            R.id.menu_manage_backups -> gotoBackups(packageName)
+        }
+        if(job != null) {
+            (requireActivity().application as BackupApplication).schedulePeriodicWork()
+        }
     }
 
+    fun gotoBackups(packageName : String) {
+        val intent = Intent(requireActivity(), MainActivity::class.java).apply {
+            putExtra(SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.ordinal)
+            putExtra(FILTER, packageName)
+        }
+        startActivity(intent)
+    }
 }
