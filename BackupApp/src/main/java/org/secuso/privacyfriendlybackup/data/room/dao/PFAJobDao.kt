@@ -30,6 +30,9 @@ interface PFAJobDao {
     @Query("DELETE FROM PFAJob WHERE uid = :uid")
     suspend fun deleteForUid(uid: Int)
 
+    @Query("DELETE FROM PFAJob WHERE packageName = :packageName")
+    suspend fun deleteAllForPackage(packageName: String)
+
     @Query("DELETE FROM PFAJob WHERE packageName = :packageName AND `action` == :action")
     suspend fun deleteJobForPackage(packageName: String?, action: String)
 }

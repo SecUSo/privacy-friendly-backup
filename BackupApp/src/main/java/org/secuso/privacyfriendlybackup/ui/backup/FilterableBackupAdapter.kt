@@ -34,8 +34,10 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
 
     private val TIME_COMPARATOR: Comparator<BackupData> =
         Comparator { a: BackupData, b: BackupData -> a.timestamp.compareTo(b.timestamp) }
+    private val TIME_COMPARATOR_DESC: Comparator<BackupData> =
+        Comparator { a: BackupData, b: BackupData -> b.timestamp.compareTo(a.timestamp) }
 
-    private val mComparator: Comparator<BackupData> = TIME_COMPARATOR
+    private val mComparator: Comparator<BackupData> = TIME_COMPARATOR_DESC
 
     val completeData : MutableList<BackupData> = mutableListOf()
     val sortedList : SortedList<BackupData> = SortedList<BackupData>(

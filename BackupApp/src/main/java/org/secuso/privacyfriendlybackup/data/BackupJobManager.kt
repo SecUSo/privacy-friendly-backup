@@ -26,6 +26,9 @@ class BackupJobManager private constructor(
             }
             return INSTANCE!!
         }
+
+        fun getTagForJob(job: BackupJob) : String =
+            "${job._id} - ${job.packageName} - ${job.action.name} - ${job.dataId}"
     }
 
     /**
@@ -73,6 +76,7 @@ class BackupJobManager private constructor(
 
     suspend fun cancelAllJobs(packageName: String) {
         db.backupJobDao().deleteAllForPackage(packageName)
+        db.pfaJobDao().deleteAllForPackage(packageName)
     }
 
     /**
@@ -86,7 +90,7 @@ class BackupJobManager private constructor(
                 return
             }
             val mostRecentBackup = metadata.fold(metadata[0]) {
-                a, item -> if(item.timestamp < a.timestamp) item else a
+                a, item -> if(item.timestamp > a.timestamp) item else a
             }
             newId = mostRecentBackup._id
         }

@@ -16,6 +16,7 @@ import org.openintents.openpgp.util.OpenPgpApi
 import org.openintents.openpgp.util.OpenPgpServiceConnection
 import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
@@ -242,13 +243,16 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
             // store new internal data id into next job
             val dao = BackupDatabase.getInstance(context).backupJobDao()
+
             if(job == null) {
                 onError(IllegalArgumentException("Job is null."))
             }
+
+            dao.deleteForId(job!!._id)
             val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
                 dataId = id
             }
-            BackupDatabase.getInstance(context).backupJobDao().update(nextJob)
+            dao.update(nextJob)
         }
     }
 

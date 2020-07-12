@@ -35,7 +35,10 @@ object InternalBackupDataStoreHelper {
             val nextJob = pfaJobs.find { it._id == pfaJob.nextJob }
             if(nextJob != null) {
                 nextJob.dataId = dataId
+                Log.d("PFABackupDebug", "Deleting job with id ${pfaJob._id}")
                 backupJobDao.deleteForId(pfaJob._id)
+
+                Log.d("PFABackupDebug", "Updating job with id ${nextJob._id}")
                 backupJobDao.update(nextJob)
                 return dataId
             }

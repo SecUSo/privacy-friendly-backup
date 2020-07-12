@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
 import kotlinx.android.parcel.Parcelize
+import org.secuso.privacyfriendlybackup.data.BackupJobManager
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import java.util.*
 
@@ -15,13 +16,6 @@ import java.util.*
 @Entity(indices = [
     Index(value = ["packageName", "action"], unique = true),
     Index(value = ["dataId"])
-], foreignKeys = [
-    ForeignKey(
-        onDelete = CASCADE,
-        entity = InternalBackupData::class,
-        parentColumns = ["_id"],
-        childColumns = ["dataId"]
-    )
 ])
 data class BackupJob(
     @PrimaryKey(autoGenerate = true) var _id : Long = 0,
@@ -33,6 +27,8 @@ data class BackupJob(
     var active : Boolean = false,
     var location: String? = null
 ) : Parcelable {
+    fun getWorkerTag() : String = BackupJobManager.getTagForJob(this)
+
     object DIFFCALLBACK : DiffUtil.ItemCallback<BackupJob>() {
         override fun areItemsTheSame(o: BackupJob, n: BackupJob): Boolean = o._id == n._id
         override fun areContentsTheSame(o: BackupJob, n: BackupJob): Boolean = o == n

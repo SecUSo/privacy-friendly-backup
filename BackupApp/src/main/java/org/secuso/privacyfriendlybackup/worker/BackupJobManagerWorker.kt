@@ -1,8 +1,11 @@
 package org.secuso.privacyfriendlybackup.worker
 
 import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.observe
 import androidx.preference.PreferenceManager
 import androidx.work.*
+import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
@@ -30,12 +33,37 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
         val jobDao = db.backupJobDao()
         val jobs = jobDao.getAll()
 
+        val processedJobs = jobs.filter { it.active }
         val unprocessedJobs = jobs.filter { !it.active }
+
+        for(job in processedJobs) {
+            val workInfoFuture = WorkManager.getInstance(context).getWorkInfosByTag(job.getWorkerTag())
+            val workInfoList = workInfoFuture.get()
+            if(workInfoList.isNotEmpty()) {
+                val workInfo = workInfoList[0]
+                when (workInfo.state) {
+                    WorkInfo.State.RUNNING -> { /* DO NOTHING */ }
+                    WorkInfo.State.SUCCEEDED -> {
+                        // SUCCEEDED but job is not deleted?
+                        // this is okay if it is a PFA job because they will be handled by the service
+                        if(job.action != BackupJobAction.PFA_JOB_BACKUP && job.action != BackupJobAction.PFA_JOB_RESTORE) {
+                            jobDao.deleteForId(job._id)
+                        }
+                    }
+                    WorkInfo.State.BLOCKED -> { /* DO NOTHING */ }
+                    WorkInfo.State.CANCELLED -> { /* DO NOTHING */ }
+                    WorkInfo.State.ENQUEUED -> { /* DO NOTHING */ }
+                    WorkInfo.State.FAILED -> {
+                        // if it failed - try again
+                        job.active = false
+                        jobDao.update(job)
+                    }
+                }
+            }
+        }
 
         val encryptJobs = unprocessedJobs.filter { it.action == BackupJobAction.BACKUP_ENCRYPT }
         val storeJobs = unprocessedJobs.filter { it.action == BackupJobAction.BACKUP_STORE }
-
-        //val processedJobIds = HashSet<Long>()
 
         if(encryptJobs.isNotEmpty() && provider.isNullOrEmpty()) {
             // TODO: display notification to user to fix encryption settings?
@@ -110,7 +138,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     }
 
     private fun enqueueDecryptionWorker(job : BackupJob) {
-        val decryptionWork = createEncryptionWorkRequest(job, true)
+        val decryptionWork = createEncryptionWorkRequest(job, false)
 
         WorkManager.getInstance(context)
             .beginUniqueWork("${job.packageName}(${job.dataId})", ExistingWorkPolicy.KEEP, decryptionWork)
@@ -120,6 +148,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     private fun createEncryptionWorkRequest(job : BackupJob, encrypt : Boolean) : OneTimeWorkRequest {
 
         val builder = OneTimeWorkRequestBuilder<EncryptionWorker>()
+        builder.addTag(job.getWorkerTag())
 
         val data : MutableList<Pair<String, Any?>> = ArrayList()
 
@@ -138,6 +167,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
 
     private fun createStoreWorkRequest(job : BackupJob) : OneTimeWorkRequest {
         val builder = OneTimeWorkRequestBuilder<StoreWorker>()
+        builder.addTag(job.getWorkerTag())
 
 //        val constraints = Constraints.Builder().setRequiresStorageNotLow(true).build()
 //        builder.setConstraints(constraints)
@@ -172,6 +202,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
 
     private fun createPfaWorkRequest(job: BackupJob) : OneTimeWorkRequest {
         val builder = OneTimeWorkRequestBuilder<PfaWorker>()
+        builder.addTag(job.getWorkerTag())
 
         val data : MutableList<Pair<String, Any?>> = ArrayList()
 

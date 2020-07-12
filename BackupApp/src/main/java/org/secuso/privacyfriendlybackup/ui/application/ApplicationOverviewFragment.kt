@@ -54,7 +54,7 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
         super.onActivityCreated(savedInstanceState)
 
         viewModel = ViewModelProvider(this).get(ApplicationOverviewViewModel::class.java)
-        adapter = ApplicationAdapter(requireContext(), this)
+        adapter = ApplicationAdapter(requireContext(), this, viewLifecycleOwner)
 
         toolbar = requireActivity().findViewById(R.id.toolbar)
         appBar = requireActivity().findViewById(R.id.app_bar)
@@ -65,6 +65,8 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
 
         viewModel.appLiveData.observe(viewLifecycleOwner) { data ->
             adapter.setData(data)
+
+            (requireActivity().application as BackupApplication).schedulePeriodicWork()
         }
     }
 

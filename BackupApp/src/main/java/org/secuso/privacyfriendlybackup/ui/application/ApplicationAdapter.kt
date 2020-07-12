@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.bumptech.glide.Glide
@@ -19,7 +20,7 @@ import org.secuso.privacyfriendlybackup.ui.application.ApplicationOverviewViewMo
 import java.lang.ref.WeakReference
 import java.util.Comparator
 
-class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdapterCallback) : RecyclerView.Adapter<ApplicationAdapter.ViewHolder>(),
+class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdapterCallback, val lifecycleOwner: LifecycleOwner) : RecyclerView.Adapter<ApplicationAdapter.ViewHolder>(),
     BackupJobAdapter.ManageListAdapterCallback {
 
     interface ManageListAdapterCallback {
@@ -100,7 +101,7 @@ class ApplicationAdapter(val context : Context, adapterCallback : ManageListAdap
             popup.show()
         }
 
-        val adapter = BackupJobAdapter(context, this)
+        val adapter = BackupJobAdapter(context, this, lifecycleOwner)
         adapter.submitList(data.jobs)
         holder.mList.adapter = adapter
         holder.mList.visibility = if(data.jobs.isEmpty()) View.GONE else View.VISIBLE

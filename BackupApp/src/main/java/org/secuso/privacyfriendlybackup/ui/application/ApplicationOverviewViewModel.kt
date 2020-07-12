@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.ui.application
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -65,6 +66,8 @@ class ApplicationOverviewViewModel(app : Application) : AndroidViewModel(app) {
                 val metaList = metaData?.filter { it.packageName == pfa.packageName } ?: emptyList()
                 applicationList.add(BackupApplicationData(pfa, jobList, metaList))
             }
+
+            Log.d("PFABackupDebug", applicationList.toString())
 
             applicationList
         }

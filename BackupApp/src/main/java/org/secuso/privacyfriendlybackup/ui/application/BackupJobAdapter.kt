@@ -10,15 +10,19 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.observe
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.bumptech.glide.Glide
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import java.lang.ref.WeakReference
 
-class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback) : ListAdapter<BackupJob, BackupJobAdapter.BackupJobViewHolder>(BackupJob.DIFFCALLBACK) {
+class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback, val lifecycleOwner: LifecycleOwner) : ListAdapter<BackupJob, BackupJobAdapter.BackupJobViewHolder>(BackupJob.DIFFCALLBACK) {
 
     interface ManageListAdapterCallback {
         fun onItemClick(view: View, packageName : String, job : BackupJob, menuItemId : Int?)
@@ -57,11 +61,6 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
             callback.get()?.onItemClick(it, data.packageName, data, null)
         }
 
-        when(data.action) {
-            BackupJobAction.BACKUP_ENCRYPT -> {
-            }
-        }
-
         holder.mDots.visibility = if(data.nextJob != null) View.VISIBLE else View.GONE
         holder.mDivider.visibility =
             if(data.nextJob == null
@@ -73,8 +72,29 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
                 View.GONE
 
         Glide.with(context).load(data.action.image).into(holder.mImage)
-        val colorId = if(data.active) R.color.colorAccent else R.color.middlegrey
+
+        val colorId = if(data.active) {
+            R.color.colorAccent
+        } else {
+            R.color.middlegrey
+        }
         holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
+
+        WorkManager.getInstance(context).getWorkInfosByTagLiveData(data.getWorkerTag()).observe(lifecycleOwner) {
+            workInfoList ->
+            if(workInfoList.isNotEmpty()) {
+                val workInfo = workInfoList[0]
+                val colorId : Int = when (workInfo.state) {
+                    WorkInfo.State.RUNNING -> R.color.colorAccent
+                    WorkInfo.State.SUCCEEDED -> R.color.green
+                    WorkInfo.State.BLOCKED -> R.color.darkgrey
+                    WorkInfo.State.CANCELLED -> R.color.lightred
+                    WorkInfo.State.ENQUEUED -> R.color.middlegrey
+                    WorkInfo.State.FAILED -> R.color.red
+                }
+                holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
+            }
+        }
     }
 
     class BackupJobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
