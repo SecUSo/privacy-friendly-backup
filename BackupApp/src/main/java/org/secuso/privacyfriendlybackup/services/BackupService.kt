@@ -182,7 +182,7 @@ class BackupService : AbstractAuthService() {
     }
 
     fun executeCommandsForPackageName(messenger: Messenger, callerId: Int) {
-        val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
+        val packageName = AuthenticationHelper.getPackageName(this, callerId)
 
         GlobalScope.launch(Dispatchers.Default) {
             if(packageName.isNullOrEmpty()) {

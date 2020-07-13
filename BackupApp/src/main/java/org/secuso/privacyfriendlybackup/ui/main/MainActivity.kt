@@ -1,8 +1,9 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.main
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.core.widget.NestedScrollView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +20,10 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.ui.common.PlaceholderFragment
 import org.secuso.privacyfriendlybackup.ui.application.ApplicationOverviewFragment
-import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewActivity
 import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
+import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.encryption.EncryptionSettingsFragment
 
 /**
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         _fragment: Class<out Fragment>,
         _activity: Class<out Activity>
     ) {
-        MENU_MAIN_BACKUP_OVERVIEW(R.drawable.ic_backup_24, R.string.menu_main_backup, BackupOverviewFragment::class.java, BackupOverviewActivity::class.java),
+        MENU_MAIN_BACKUP_OVERVIEW(R.drawable.ic_backup_24, R.string.menu_main_backup, BackupOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_APPS(R.drawable.ic_apps_24, R.string.menu_main_apps, ApplicationOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_ENCRYPTION(R.drawable.ic_encryption_24, R.string.menu_main_encryption, EncryptionSettingsFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_SETTINGS(R.drawable.ic_settings_24, R.string.menu_main_settings, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),
@@ -54,8 +56,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        const val TAG = "PFA MainActivity"
+
         const val SELECTED_MENU_ITEM = "SELECTED_MENU_ITEM"
         const val FILTER = "FILTER"
+        const val TWOPANE = "TWOPANE"
+
+        val DEFAULT_NAVIGATION_ITEM =
+            MenuItem.MENU_MAIN_APPS
 
         val items : List<MenuItem> = listOf(
             MenuItem.MENU_MAIN_APPS,
@@ -73,9 +81,17 @@ class MainActivity : AppCompatActivity() {
      */
     private var twoPane: Boolean = false
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d(TAG, "onNewIntent()")
+
+        navigateFromIntent(intent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d(TAG, "onCreate()")
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -96,34 +112,66 @@ class MainActivity : AppCompatActivity() {
 
         setupRecyclerView(findViewById(R.id.item_list))
 
-        if(intent.extras != null && intent.extras!!.containsKey(SELECTED_MENU_ITEM)) {
-            handleNavigation(intent.extras!!.getInt(SELECTED_MENU_ITEM))
+        navigateFromIntent(intent)
+    }
+
+    private fun navigateFromIntent(intent : Intent?) {
+        Log.d(TAG, "navigateFromIntent($intent)")
+        if(intent != null && intent.extras != null && intent.extras!!.containsKey(SELECTED_MENU_ITEM)) {
+            val menuItem = MenuItem.valueOf(intent.extras!!.getString(
+                SELECTED_MENU_ITEM, DEFAULT_NAVIGATION_ITEM.name))
+            handleNavigation(menuItem, intent.extras)
+        } else if(twoPane){
+            handleNavigation(DEFAULT_NAVIGATION_ITEM)
         }
     }
 
-    fun handleNavigation(id : Int) {
-        val menuItem = MenuItem.values()[id]
+    fun handleNavigation(menuItem : MenuItem, extras : Bundle? = null) {
         val fragment = menuItem.fragment
         val activity = menuItem.activity
 
+
         if (twoPane) {
+            highlightActiveMenuItem(menuItem)
+
+            val f = fragment.newInstance()
+            if(extras != null) {
+                f.arguments = extras.apply {
+                    putBoolean(TWOPANE, twoPane)
+                }
+            }
+
             supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.item_detail_container, fragment.newInstance())
+                .replace(R.id.item_detail_container, f)
                 .commit()
         } else {
             val intent = Intent(this, activity).apply {
                 putExtra(SELECTED_MENU_ITEM, menuItem.name)
-                if(intent.hasExtra(FILTER)) {
-                    putExtra(FILTER, intent.getStringExtra(FILTER))
+                putExtra(TWOPANE, twoPane)
+
+                if(extras != null && extras.containsKey(FILTER)) {
+                    putExtra(
+                        FILTER, extras.getString(
+                            FILTER
+                        ))
                 }
             }
             startActivity(intent)
         }
     }
 
+    private fun highlightActiveMenuItem(menuItem: MenuItem) {
+        // TODO
+    }
+
     private fun setupRecyclerView(recyclerView: RecyclerView) {
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, items, twoPane)
+        recyclerView.adapter =
+            SimpleItemRecyclerViewAdapter(
+                this,
+                items,
+                twoPane
+            )
     }
 
     class SimpleItemRecyclerViewAdapter(
@@ -139,7 +187,7 @@ class MainActivity : AppCompatActivity() {
             onClickListener = View.OnClickListener { v ->
                 val item = v.tag as MenuItem
 
-                parentActivity.handleNavigation(item.ordinal)
+                parentActivity.handleNavigation(item)
             }
         }
 

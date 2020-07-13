@@ -1,7 +1,6 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.common
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,7 @@ import org.secuso.privacyfriendlybackup.R
  * in two-pane mode (on tablets) or a [DisplayMenuItemActivity]
  * on handsets.
  */
-class PlaceholderFragment : Fragment() {
+class PlaceholderFragment : BaseFragment() {
 
     /**
      * The dummy content this fragment is presenting.

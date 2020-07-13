@@ -3,36 +3,31 @@ package org.secuso.privacyfriendlybackup.ui.backup
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.content.DialogInterface
-import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
-import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.R
-import org.secuso.privacyfriendlybackup.ui.MainActivity
-import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.FILTER
-import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
+import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
 import org.secuso.privacyfriendlybackup.ui.common.Mode
 
-class BackupOverviewFragment : Fragment(),
+class BackupOverviewFragment : BaseFragment(),
     FilterableBackupAdapter.ManageListAdapterCallback,
     SearchView.OnQueryTextListener {
 
     companion object {
+        const val TAG = "PFA BackupFragment"
+
         fun newInstance() =
             BackupOverviewFragment()
     }
@@ -48,10 +43,6 @@ class BackupOverviewFragment : Fragment(),
     private var oldMode : Mode = Mode.NORMAL
 
     var predefinedFilter : String? = null
-
-    // ui
-    private lateinit var toolbar : Toolbar
-    private lateinit var appBar : AppBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,15 +64,14 @@ class BackupOverviewFragment : Fragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        setTitle(R.string.fragment_title_backup_overview)
+
         viewModel = ViewModelProvider(this).get(BackupOverviewViewModel::class.java)
         adapter =
             FilterableBackupAdapter(
                 requireContext(),
                 this
             )
-
-        toolbar = requireActivity().findViewById(R.id.toolbar)
-        appBar = requireActivity().findViewById(R.id.app_bar)
 
         fragment_backup_overview_list.adapter = adapter
         fragment_backup_overview_list.layoutManager = when {
@@ -114,8 +104,10 @@ class BackupOverviewFragment : Fragment(),
             }
         }
 
-        if(requireActivity().intent.hasExtra(FILTER)) {
-            predefinedFilter = requireActivity().intent.getStringExtra(FILTER)
+        Log.d(TAG, "arguments = $arguments")
+        predefinedFilter = arguments?.getString(FILTER, "")
+        Log.d(TAG, "predefinedFilter = $predefinedFilter")
+        if(!predefinedFilter.isNullOrEmpty()) {
             viewModel.setFilterText(predefinedFilter)
         }
 
@@ -178,21 +170,6 @@ class BackupOverviewFragment : Fragment(),
         outState.putString("oldMode", oldMode.name)
     }
 
-    private fun playColorAnimation(colorFrom: Int, colorTo: Int, applyAnimation : (a : ValueAnimator) -> Unit = this::defaultFadeAnimation) : Animator {
-        val colorAnimation: ValueAnimator = ValueAnimator.ofArgb(colorFrom, colorTo)
-        colorAnimation.duration = 250
-        colorAnimation.addUpdateListener {
-            applyAnimation(it)
-        }
-        return colorAnimation
-    }
-
-    private fun defaultFadeAnimation(a : ValueAnimator) {
-        appBar.setBackgroundColor(a.animatedValue as Int)
-        toolbar.setBackgroundColor(a.animatedValue as Int)
-        activity?.window?.statusBarColor = a.animatedValue as Int
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
 
@@ -245,7 +222,12 @@ class BackupOverviewFragment : Fragment(),
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
 
+        searchIcon?.collapseActionView()
+        onDisableDeleteMode()
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
@@ -268,7 +250,7 @@ class BackupOverviewFragment : Fragment(),
                 }
             }
             R.id.action_sort -> {
-                viewModel.insertTestData()
+                // viewModel.insertTestData()
                 // TODO: to implement sorting - just swap the comparator :)
             }
             else -> return false
@@ -308,26 +290,8 @@ class BackupOverviewFragment : Fragment(),
         toolbarDeleteIcon?.isVisible = true
         selectAllIcon?.isVisible = false
 
-        fab.hide()
+        fab?.hide()
         adapter.disableDeleteMode()
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        val activity = requireActivity()
-
-        if(isLargeTablet()) {
-            if(activity is BackupOverviewActivity && !isPortrait()) {
-                activity.finish()
-            } else if(activity is MainActivity && isPortrait()){
-                val intent = activity.intent.apply {
-                    putExtra(SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.ordinal)
-                }
-                activity.finish()
-                activity.startActivity(intent)
-            }
-        }
     }
 
     override fun onItemClick(id: Long) {
@@ -369,22 +333,6 @@ class BackupOverviewFragment : Fragment(),
         }
 
         return createCircularReveal
-    }
-
-    private fun isRtl(): Boolean {
-        return resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
-    }
-
-    private fun isLargeTablet(): Boolean {
-        return resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
-    }
-
-    private fun isXLargeTablet(): Boolean {
-        return resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_XLARGE
-    }
-
-    private fun isPortrait(): Boolean {
-        return resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     }
 
     override fun onQueryTextSubmit(query: String?): Boolean {

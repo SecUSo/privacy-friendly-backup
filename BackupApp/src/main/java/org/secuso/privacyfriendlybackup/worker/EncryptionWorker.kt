@@ -78,6 +78,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         }
 
         if(cryptoProviderPackage.isNullOrEmpty()) {
+            // TODO: display notification to fix encryption settings
             return Result.failure()
         }
 

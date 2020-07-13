@@ -25,8 +25,6 @@ import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.preference.Preference;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -37,7 +35,6 @@ import org.openintents.openpgp.OpenPgpError;
 import org.openintents.openpgp.R;
 import org.openintents.openpgp.util.OpenPgpApi;
 import org.openintents.openpgp.util.OpenPgpServiceConnection;
-import org.secuso.privacyfriendlybackup.ui.MainActivity;
 
 public class OpenPgpKeyPreference extends Preference {
     private long mKeyId;

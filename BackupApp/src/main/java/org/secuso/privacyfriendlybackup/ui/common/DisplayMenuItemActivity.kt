@@ -1,11 +1,13 @@
-package org.secuso.privacyfriendlybackup.ui
+package org.secuso.privacyfriendlybackup.ui.common
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.activity_display_menu_item.*
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity
 
 /**
  * An activity representing a single Item detail screen. This
@@ -18,7 +20,7 @@ class DisplayMenuItemActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_menu_item)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -35,7 +37,9 @@ class DisplayMenuItemActivity : AppCompatActivity() {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             val fragment = try {
-                    MainActivity.MenuItem.valueOf(intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!).fragment.newInstance()
+                    MainActivity.MenuItem.valueOf(intent.getStringExtra(
+                        MainActivity.SELECTED_MENU_ITEM
+                    )!!).fragment.newInstance()
                 } catch (e: IllegalArgumentException) {
                     null
                 } catch (e: NullPointerException) {
@@ -43,6 +47,8 @@ class DisplayMenuItemActivity : AppCompatActivity() {
                 }
 
             if(fragment != null) {
+                fragment.arguments = intent.extras
+
                 supportFragmentManager.beginTransaction()
                     .add(R.id.container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
                     .commit()
@@ -55,15 +61,7 @@ class DisplayMenuItemActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem) =
         when (item.itemId) {
             android.R.id.home -> {
-
-                // This ID represents the Home or Up button. In the case of this
-                // activity, the Up button is shown. For
-                // more details, see the Navigation pattern on Android Design:
-                //
-                // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-
                 navigateUpTo(Intent(this, MainActivity::class.java))
-
                 true
             }
             else -> super.onOptionsItemSelected(item)

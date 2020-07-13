@@ -39,6 +39,8 @@
     <string name="job_action_load">Load</string>
     <string name="job_action_pfa_backup">Backup</string>
     <string name="job_action_pfa_restore">Restore</string>
+    <string name="fragment_title_application_overview">Application Overview</string>
+    <string name="fragment_title_backup_overview">Backup Overview</string>
 
 
 </resources>

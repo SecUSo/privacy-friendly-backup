@@ -1,37 +1,29 @@
 package org.secuso.privacyfriendlybackup.ui.application
 
-import android.animation.Animator
-import android.animation.ValueAnimator
 import android.content.Intent
-import android.content.res.Configuration
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Bundle
 import android.view.*
-import android.widget.Toast
-import androidx.appcompat.widget.PopupMenu
-import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.appbar.AppBarLayout
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
-import org.secuso.privacyfriendlybackup.ui.DisplayMenuItemActivity
-import org.secuso.privacyfriendlybackup.ui.MainActivity
-import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.FILTER
-import org.secuso.privacyfriendlybackup.ui.MainActivity.Companion.SELECTED_MENU_ITEM
+import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.SELECTED_MENU_ITEM
 import org.secuso.privacyfriendlybackup.ui.common.Mode
 
 
-class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAdapterCallback {
+class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageListAdapterCallback {
 
     // ui
     private lateinit var viewModel: ApplicationOverviewViewModel
     private lateinit var adapter : ApplicationAdapter
-    private lateinit var toolbar : Toolbar
-    private lateinit var appBar : AppBarLayout
 
     private var oldMode : Mode = Mode.NORMAL
 
@@ -53,11 +45,10 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        setTitle(R.string.fragment_title_application_overview)
+
         viewModel = ViewModelProvider(this).get(ApplicationOverviewViewModel::class.java)
         adapter = ApplicationAdapter(requireContext(), this, viewLifecycleOwner)
-
-        toolbar = requireActivity().findViewById(R.id.toolbar)
-        appBar = requireActivity().findViewById(R.id.app_bar)
 
         fragment_backup_overview_list.adapter = adapter
         fragment_backup_overview_list.layoutManager =
@@ -75,21 +66,6 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
         outState.putString("oldMode", oldMode.name)
     }
 
-    private fun playColorAnimation(colorFrom: Int, colorTo: Int, applyAnimation : (a : ValueAnimator) -> Unit = this::defaultFadeAnimation) : Animator {
-        val colorAnimation: ValueAnimator = ValueAnimator.ofArgb(colorFrom, colorTo)
-        colorAnimation.duration = 250
-        colorAnimation.addUpdateListener {
-            applyAnimation(it)
-        }
-        return colorAnimation
-    }
-
-    private fun defaultFadeAnimation(a : ValueAnimator) {
-        appBar.setBackgroundColor(a.animatedValue as Int)
-        toolbar.setBackgroundColor(a.animatedValue as Int)
-        activity?.window?.statusBarColor = a.animatedValue as Int
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.action_sort -> {
@@ -98,40 +74,6 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
             else -> return false
         }
         return true
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        val activity = requireActivity()
-
-        if(isLargeTablet()) {
-            if(activity is DisplayMenuItemActivity && !isPortrait()) {
-                activity.finish()
-            } else if(activity is MainActivity && isPortrait()){
-                val intent = activity.intent.apply {
-                    putExtra(MainActivity.SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.ordinal)
-                }
-                activity.finish()
-                activity.startActivity(intent)
-            }
-        }
-    }
-
-    private fun isRtl(): Boolean {
-        return resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
-    }
-
-    private fun isLargeTablet(): Boolean {
-        return resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_LARGE
-    }
-
-    private fun isXLargeTablet(): Boolean {
-        return resources.configuration.screenLayout and Configuration.SCREENLAYOUT_SIZE_MASK >= Configuration.SCREENLAYOUT_SIZE_XLARGE
-    }
-
-    private fun isPortrait(): Boolean {
-        return resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     }
 
     override fun onItemClick(view: View, packageName: String, job : BackupJob?, menuItemId: Int?) {
@@ -146,11 +88,17 @@ class ApplicationOverviewFragment : Fragment(), ApplicationAdapter.ManageListAda
         }
     }
 
-    fun gotoBackups(packageName : String) {
+    private fun gotoBackups(packageName : String) {
         val intent = Intent(requireActivity(), MainActivity::class.java).apply {
-            putExtra(SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.ordinal)
+            flags = FLAG_ACTIVITY_CLEAR_TOP or FLAG_ACTIVITY_NEW_TASK
+            putExtra(SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.name)
             putExtra(FILTER, packageName)
         }
         startActivity(intent)
+
+        // if we are in singlepane mode - close current activity
+        if(arguments?.getBoolean(MainActivity.TWOPANE) == false) {
+            requireActivity().finish()
+        }
     }
 }
