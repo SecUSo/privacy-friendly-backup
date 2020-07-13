@@ -15,11 +15,12 @@ import org.secuso.privacyfriendlybackup.util.BackupDataUtil.getFileName
 import org.secuso.privacyfriendlybackup.worker.EncryptionWorker
 import org.secuso.privacyfriendlybackup.worker.StoreWorker
 import java.io.File
+import java.io.IOException
 import java.io.InputStream
 import java.util.*
 
 object InternalBackupDataStoreHelper {
-    const val TAG = "BackupDataStoreHelper"
+    const val TAG = "PFA Internal"
 
     const val BACKUP_DIR = "backupData"
 
@@ -35,10 +36,10 @@ object InternalBackupDataStoreHelper {
             val nextJob = pfaJobs.find { it._id == pfaJob.nextJob }
             if(nextJob != null) {
                 nextJob.dataId = dataId
-                Log.d("PFABackupDebug", "Deleting job with id ${pfaJob._id}")
+                Log.d(TAG, "Deleting job with id ${pfaJob._id}")
                 backupJobDao.deleteForId(pfaJob._id)
 
-                Log.d("PFABackupDebug", "Updating job with id ${nextJob._id}")
+                Log.d(TAG, "Updating job with id ${nextJob._id}")
                 backupJobDao.update(nextJob)
                 return dataId
             }
@@ -81,6 +82,7 @@ object InternalBackupDataStoreHelper {
     }
 
     suspend fun getInternalData(context: Context, filename: String): Pair<InputStream?, InternalBackupData> {
+        Log.d(TAG, "getInternalData(context, $filename)")
         val data = BackupDatabase.getInstance(context).internalBackupDataDao().getByFilename(filename)
 
 //        if(data.packageName != callingPackageName && data.uid == callingUid) {
@@ -93,7 +95,17 @@ object InternalBackupDataStoreHelper {
     }
 
     suspend fun clearData(context: Context, dataId: Long) {
-        BackupDatabase.getInstance(context).internalBackupDataDao().delete(dataId)
+        Log.d(TAG, "clearData(context, $dataId)")
+        val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
+        val file = File(data.file)
+
+        try {
+            file.delete()
+            BackupDatabase.getInstance(context).internalBackupDataDao().delete(dataId)
+            Log.d(TAG, "File(${file.absolutePath}) deleted.")
+        } catch (e : IOException) {
+            e.printStackTrace()
+        }
     }
 
 }

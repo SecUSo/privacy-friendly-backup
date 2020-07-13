@@ -44,7 +44,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
         val NOTIFICATION_ID = 9000
 
-        val TAG = "EncryptionWorker"
+        val TAG = "PFA Encryption"
     }
 
     var workDone = false
@@ -61,17 +61,23 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     var internalData : InternalBackupData? = null
     var job : BackupJob? = null
 
-    init {
-        GlobalScope.launch(Dispatchers.IO) {
-            job = BackupDatabase.getInstance(context).backupJobDao().getJobForId(backupJobId)
-        }
-    }
-
     lateinit var mConnection: OpenPgpServiceConnection
 
     override suspend fun doWork(): Result {
-        Log.d(TAG, "started running")
-        if(cryptoProviderPackage.isNullOrEmpty() || dataId == -1L) {
+        Log.d(TAG, "doWork()")
+
+        job = BackupDatabase.getInstance(context).backupJobDao().getJobForId(backupJobId)
+
+        if(job == null || dataId == -1L) return Result.failure()
+
+        // are we scheduled to decrypt data that is already unencrypted?
+        val data = InternalBackupDataStoreHelper.getInternalData(context, dataId)
+        if(!encrypt && !data.second.encrypted) {
+            processJobData(dataId)
+            return Result.success()
+        }
+
+        if(cryptoProviderPackage.isNullOrEmpty()) {
             return Result.failure()
         }
 
@@ -241,19 +247,19 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             val id = InternalBackupDataStoreHelper.storeData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
             InternalBackupDataStoreHelper.clearData(context, dataId)
 
-            // store new internal data id into next job
-            val dao = BackupDatabase.getInstance(context).backupJobDao()
-
-            if(job == null) {
-                onError(IllegalArgumentException("Job is null."))
-            }
-
-            dao.deleteForId(job!!._id)
-            val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
-                dataId = id
-            }
-            dao.update(nextJob)
+            processJobData(id)
         }
+    }
+
+    private suspend fun processJobData(id : Long) {
+        // store new internal data id into next job
+        val dao = BackupDatabase.getInstance(context).backupJobDao()
+
+        dao.deleteForId(job!!._id)
+        val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
+            dataId = id
+        }
+        dao.update(nextJob)
     }
 
     private fun postUserInteractionNotification(requestCode: Int, pi: PendingIntent) {

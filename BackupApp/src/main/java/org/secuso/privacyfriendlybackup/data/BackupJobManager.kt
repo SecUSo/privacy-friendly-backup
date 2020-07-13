@@ -83,17 +83,24 @@ class BackupJobManager private constructor(
      * If no id is given, the most recent backup will be used.
      */
     suspend fun createRestoreJobChain(packageName: String, metadataId : Long? = null) {
-        var newId : Long = -1L
-        if(metadataId == null) {
-            val metadata = db.backupMetaDataDao().getFromPackage(packageName)
-            if(metadata.isEmpty()) {
+        val metadata = if(metadataId == null) {
+            val metadataList = db.backupMetaDataDao().getFromPackage(packageName)
+
+            if(metadataList.isEmpty())
                 return
-            }
-            val mostRecentBackup = metadata.fold(metadata[0]) {
+
+            val mostRecentBackup = metadataList.fold(metadataList[0]) {
                 a, item -> if(item.timestamp > a.timestamp) item else a
             }
-            newId = mostRecentBackup._id
+
+            mostRecentBackup
+        } else {
+            db.backupMetaDataDao().getFromId(metadataId)
         }
+
+        // if no valid metadata -> return
+        // TODO: show toast?
+        metadata ?: return
 
         db.pfaJobDao().insert(PFAJob(0,0,packageName,Date(),PFAJobAction.PFA_RESTORE, null))
 
@@ -105,20 +112,23 @@ class BackupJobManager private constructor(
         )
         val restoreId = db.backupJobDao().insert(restoreJob)
 
-        val decryptJob = BackupJob(
-            packageName = packageName,
-            timestamp = Date(),
-            action = BackupJobAction.BACKUP_DECRYPT,
-            nextJob = restoreId
-        )
-        val decryptId = db.backupJobDao().insert(decryptJob)
+        var decryptId = -1L
+        if(metadata.encrypted) {
+            val decryptJob = BackupJob(
+                packageName = packageName,
+                timestamp = Date(),
+                action = BackupJobAction.BACKUP_DECRYPT,
+                nextJob = restoreId
+            )
+            decryptId = db.backupJobDao().insert(decryptJob)
+        }
 
         val loadJob = BackupJob(
             packageName = packageName,
             timestamp = Date(),
             action = BackupJobAction.BACKUP_LOAD,
-            nextJob = decryptId,
-            dataId = if(newId != -1L) newId else metadataId
+            nextJob = if(metadata.encrypted) decryptId else restoreId,
+            dataId = if(metadata._id != -1L) metadata._id else metadataId
         )
         db.backupJobDao().insert(loadJob)
     }

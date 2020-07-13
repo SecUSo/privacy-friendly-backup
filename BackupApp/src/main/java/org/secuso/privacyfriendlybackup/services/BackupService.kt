@@ -23,27 +23,30 @@ import org.secuso.privacyfriendlybackup.api.util.AuthenticationHelper
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
+import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @author Christopher Beckmann
  */
 class BackupService : AbstractAuthService() {
-    val TAG = "PFABackup"
+    val TAG = "PFA BackupService"
 
-    var mMessengers = HashMap<Int, Messenger?>()
-    var mActiveJobs = HashMap<Int, PFAJob?>()
+    var mMessengers = ConcurrentHashMap<Int, Messenger?>()
+    var mActiveJobs = ConcurrentHashMap<Int, PFAJob?>()
 
     override val SUPPORTED_API_VERSIONS = listOf(1)
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
         override fun performBackup(input: ParcelFileDescriptor?) {
+            val callerId = Binder.getCallingUid()
             // is client allowed to call this?
-            if (!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
+            if (!AuthenticationHelper.authenticate(applicationContext, callerId)) {
                 return
             }
-            val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, Binder.getCallingUid())
+            val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, callerId)
 
             runBlocking {
                 ParcelFileDescriptor.AutoCloseInputStream(input).use {
@@ -55,39 +58,68 @@ class BackupService : AbstractAuthService() {
                 jobDao.deleteJobForPackage(callingPackageName, PFAJobAction.PFA_BACKUP.name)
 
                 // is the PFA waiting for commands?
-                val messenger = mMessengers[Binder.getCallingUid()]
+                val messenger = mMessengers[callerId]
                 if (messenger != null) {
-                    executeCommandsForPackageName(messenger)
+                    executeCommandsForPackageName(messenger, callerId)
                 }
             }
         }
 
         override fun performRestore(): ParcelFileDescriptor? {
+            val callerId = Binder.getCallingUid()
+
             // is client allowed to call this?
-            if(!AuthenticationHelper.authenticate(applicationContext, Binder.getCallingUid())) {
+            Log.d(TAG, "Authenticating ${callerId}...")
+            if(!AuthenticationHelper.authenticate(this@BackupService, callerId)) {
+                Log.d(TAG, "Authentication failed for ${callerId}")
                 return null
             }
             val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, Binder.getCallingUid())
+                ?: return null
+            Log.d(TAG, "Retrieved package name ${callingPackageName}")
 
+            Log.d(TAG, "Create pipes for ${callingPackageName}")
             // write data to parcelfiledescriptor and return it
             val pipes = ParcelFileDescriptor.createPipe()
+            Log.d(TAG, "Pipes created: ${pipes}")
 
             // is the data to restore available?
             val currentJob = mActiveJobs[Binder.getCallingUid()] ?: return null
+            Log.d(TAG, "Get active job $currentJob")
 
             runBlocking {
                 val restoreData = InternalBackupDataStoreHelper.getInternalData(this@BackupService, currentJob.dataId!!).first
+                Log.d(TAG, "Restore data read $restoreData")
+
                 ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
                     restoreData?.copyTo(it)
                 }
+                Log.d(TAG, "Copied data into pipe")
 
-                val jobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
-                jobDao.deleteJobForPackage(callingPackageName, PFAJobAction.PFA_RESTORE.name)
+                InternalBackupDataStoreHelper.clearData(this@BackupService, currentJob.dataId!!)
+                Log.d(TAG, "Clear internal data.")
+
+                val backupJobDao = BackupDatabase.getInstance(this@BackupService).backupJobDao()
+
+                // delete corresponding backup job
+                val pfaJobs = backupJobDao.getJobsForPackage(callingPackageName)
+                Log.d(TAG, "List of jobs: $pfaJobs")
+                val pfaJob = pfaJobs.find { it.action == BackupJobAction.PFA_JOB_RESTORE }
+                Log.d(TAG, "Get backup job: $pfaJob")
+
+                if(pfaJob != null) {
+                    Log.d(TAG, "Deleting job $pfaJob")
+                    backupJobDao.deleteForId(pfaJob._id)
+                }
+
+                // delete pfa job
+                val pfaJobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
+                pfaJobDao.deleteJobForPackage(callingPackageName, PFAJobAction.PFA_RESTORE.name)
 
                 // is the PFA waiting for commands?
-                val messenger = mMessengers[Binder.getCallingUid()]
+                val messenger = mMessengers[callerId]
                 if (messenger != null) {
-                    executeCommandsForPackageName(messenger)
+                    executeCommandsForPackageName(messenger, callerId)
                 }
             }
 
@@ -95,25 +127,26 @@ class BackupService : AbstractAuthService() {
         }
 
         override fun send(data: Intent?): Intent {
+            val callerId = Binder.getCallingUid()
             Log.d(TAG, "Intent received: ${ApiFormatter.formatIntent(data)}")
-            val result = canAccess(data)
+            val result = canAccess(data, callerId)
             if(result != null) {
                 return result
             }
 
             // data can not be null here else canAccess(Intent) would have returned an error
-            val resultIntent = handle(data!!)
+            val resultIntent = handle(data!!, callerId)
             Log.d(TAG, "Sent Reply: ${ApiFormatter.formatIntent(resultIntent)}")
             return resultIntent
         }
 
-        private fun handle(data: Intent): Intent {
+        private fun handle(data: Intent, callerId : Int): Intent {
             data.setExtrasClassLoader(classLoader)
 
             return when(data.action) {
                 ACTION_SEND_MESSENGER -> {
                     val messenger : Messenger? = data.getParcelableExtra(BackupApi.EXTRA_MESSENGER)
-                    mMessengers[Binder.getCallingUid()] = messenger
+                    mMessengers[callerId] = messenger
                     if(messenger == null) {
                         Intent().apply {
                             putExtra(RESULT_CODE, RESULT_CODE_ERROR)
@@ -127,7 +160,7 @@ class BackupService : AbstractAuthService() {
                         }
                     } else {
                         // execute commands for this pfa - messenger is not null because of the check above
-                        executeCommandsForPackageName(messenger)
+                        executeCommandsForPackageName(messenger, callerId)
 
                         // send success result
                         Intent().apply {
@@ -148,7 +181,7 @@ class BackupService : AbstractAuthService() {
         }
     }
 
-    fun executeCommandsForPackageName(messenger: Messenger) {
+    fun executeCommandsForPackageName(messenger: Messenger, callerId: Int) {
         val packageName = AuthenticationHelper.getPackageName(this, Binder.getCallingUid())
 
         GlobalScope.launch(Dispatchers.Default) {
@@ -173,9 +206,11 @@ class BackupService : AbstractAuthService() {
                         currentJob = job
                     }
                 }
-                Log.d(TAG, "sending ${currentJob!!.action.message}")
+                Log.d(TAG, "sending ${currentJob!!.action.name}")
+                Log.d(TAG, "mActiveJobs[${callerId}] = ${currentJob}")
+                Log.d(TAG, "callerId: $callerId - Binder.getCallingUid(): ${Binder.getCallingUid()}")
+                mActiveJobs[callerId] = currentJob
                 messenger.send(Message.obtain(null, currentJob.action.message, 0, 0))
-                mActiveJobs[Binder.getCallingUid()] = currentJob
             }
         }
     }
