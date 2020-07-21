@@ -1,0 +1,272 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "894731d8e5fa9130559986a763f2dcef",
+    "entities": [
+      {
+        "tableName": "StoredBackupMetaData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `storageService` TEXT NOT NULL, `filename` TEXT NOT NULL, `hash` TEXT, `encrypted` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storageService",
+            "columnName": "storageService",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filename",
+            "columnName": "filename",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hash",
+            "columnName": "hash",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "encrypted",
+            "columnName": "encrypted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "_id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_StoredBackupMetaData_packageName",
+            "unique": false,
+            "columnNames": [
+              "packageName"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StoredBackupMetaData_packageName` ON `${TABLE_NAME}` (`packageName`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PFAJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `uid` INTEGER NOT NULL, `packageName` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `action` TEXT NOT NULL, `dataId` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataId",
+            "columnName": "dataId",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "_id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PFAJob_packageName_action",
+            "unique": true,
+            "columnNames": [
+              "packageName",
+              "action"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PFAJob_packageName_action` ON `${TABLE_NAME}` (`packageName`, `action`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "InternalBackupData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `file` TEXT NOT NULL, `encrypted` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "file",
+            "columnName": "file",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "encrypted",
+            "columnName": "encrypted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "_id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_InternalBackupData_packageName",
+            "unique": false,
+            "columnNames": [
+              "packageName"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_InternalBackupData_packageName` ON `${TABLE_NAME}` (`packageName`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "BackupJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `action` TEXT NOT NULL, `dataId` INTEGER, `nextJob` INTEGER, `active` INTEGER NOT NULL, `location` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "_id",
+            "columnName": "_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dataId",
+            "columnName": "dataId",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "nextJob",
+            "columnName": "nextJob",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "active",
+            "columnName": "active",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "location",
+            "columnName": "location",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "_id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_BackupJob_packageName_action",
+            "unique": true,
+            "columnNames": [
+              "packageName",
+              "action"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_BackupJob_packageName_action` ON `${TABLE_NAME}` (`packageName`, `action`)"
+          },
+          {
+            "name": "index_BackupJob_dataId",
+            "unique": false,
+            "columnNames": [
+              "dataId"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_BackupJob_dataId` ON `${TABLE_NAME}` (`dataId`)"
+          }
+        ],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '894731d8e5fa9130559986a763f2dcef')"
+    ]
+  }
+}

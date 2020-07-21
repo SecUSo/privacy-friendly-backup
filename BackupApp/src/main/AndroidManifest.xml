@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.secuso.privacyfriendlybackup">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name=".BackupApplication"
         android:allowBackup="false"

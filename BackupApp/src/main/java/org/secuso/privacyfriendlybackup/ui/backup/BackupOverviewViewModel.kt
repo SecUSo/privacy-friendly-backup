@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository.BackupData
+import org.secuso.privacyfriendlybackup.data.BackupJobManager
 import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
@@ -95,6 +96,13 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
             )
 
             repo.deleteFiles(getApplication(), deleteList.map { it.id })
+        }
+    }
+
+    fun restoreBackup(backupData: BackupData) {
+        viewModelScope.launch {
+            val jobManager = BackupJobManager.getInstance(getApplication())
+            jobManager.createRestoreJobChain(backupData.packageName, backupData.id)
         }
     }
 }

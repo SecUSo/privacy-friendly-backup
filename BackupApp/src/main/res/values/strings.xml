@@ -41,6 +41,10 @@
     <string name="job_action_pfa_restore">Restore</string>
     <string name="fragment_title_application_overview">Application Overview</string>
     <string name="fragment_title_backup_overview">Backup Overview</string>
+    <string name="cancel">Cancel</string>
+    <string name="restore">Restore</string>
+    <string name="dialog_restore_confirmation_message">Are you sure you want to restore this backup? It is advised to create a backup before you restore data.</string>
+    <string name="dialog_restore_confirmation_title">Restore data</string>
 
 
 </resources>

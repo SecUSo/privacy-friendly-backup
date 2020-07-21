@@ -26,6 +26,7 @@ import org.secuso.privacyfriendlybackup.ui.main.MainActivity
 class EncryptionSettingsFragment : PreferenceFragmentCompat() {
 
     companion object {
+        // TODO: Add Dialog or warning box that tells the user to tur encryption on
         const val DIALOG_FRAGMENT_TAG = "EncryptionSettingsFragment.DIALOG_FRAGMENT_TAG"
 
         fun newInstance() : EncryptionSettingsFragment {

@@ -4,11 +4,13 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +18,9 @@ import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
+import kotlinx.coroutines.NonCancellable.cancel
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
 import org.secuso.privacyfriendlybackup.ui.common.Mode
@@ -280,6 +284,17 @@ class BackupOverviewFragment : BaseFragment(),
         fab.show()
     }
 
+    override fun onItemClick(id: Long, backupData: BackupDataStorageRepository.BackupData, view: View) {
+        val builder  = AlertDialog.Builder(requireContext())
+        builder.setPositiveButton(R.string.restore) { d: DialogInterface, i: Int ->
+            viewModel.restoreBackup(backupData)
+        }
+        builder.setNegativeButton(R.string.cancel, null)
+        builder.setMessage(R.string.dialog_restore_confirmation_message)
+        builder.setTitle(R.string.dialog_restore_confirmation_title)
+        builder.create().show()
+    }
+
     fun onDisableDeleteMode() {
         viewModel.disableMode(Mode.DELETE)
 
@@ -292,10 +307,6 @@ class BackupOverviewFragment : BaseFragment(),
 
         fab?.hide()
         adapter.disableDeleteMode()
-    }
-
-    override fun onItemClick(id: Long) {
-        TODO("Not yet implemented")
     }
 
     @SuppressLint("PrivateResource")

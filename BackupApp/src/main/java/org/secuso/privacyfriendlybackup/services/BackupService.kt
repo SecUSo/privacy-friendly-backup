@@ -7,6 +7,7 @@ import android.os.Messenger
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
 import org.secuso.privacyfriendlybackup.api.common.BackupApi
@@ -43,12 +44,18 @@ class BackupService : AbstractAuthService() {
         override fun performBackup(input: ParcelFileDescriptor?) {
             val callerId = Binder.getCallingUid()
             // is client allowed to call this?
+
+            Log.d(TAG, "Authenticating ${callerId}...")
             if (!AuthenticationHelper.authenticate(applicationContext, callerId)) {
+                Log.d(TAG, "Authentication failed for ${callerId}")
                 return
             }
             val callingPackageName = AuthenticationHelper.getPackageName(this@BackupService, callerId)
+            Log.d(TAG, "Retrieved package name ${callingPackageName}")
 
             runBlocking {
+
+                Log.d(TAG, "Storing backup data for ${callingPackageName}")
                 ParcelFileDescriptor.AutoCloseInputStream(input).use {
                     InternalBackupDataStoreHelper.storeBackupData(this@BackupService, callingPackageName!!, it)
                 }
@@ -91,9 +98,17 @@ class BackupService : AbstractAuthService() {
                 val restoreData = InternalBackupDataStoreHelper.getInternalData(this@BackupService, currentJob.dataId!!).first
                 Log.d(TAG, "Restore data read $restoreData")
 
-                ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use {
-                    restoreData?.copyTo(it)
+                // start writing async, because PFA has to read at the same time -
+                // that means the outer method has to finish while writing can block if the buffer
+                // is full
+                GlobalScope.launch(IO) {
+                    ParcelFileDescriptor.AutoCloseOutputStream(pipes[1]).use { outS ->
+                        restoreData?.use { inS ->
+                            inS.copyTo(outS)
+                        }
+                    }
                 }
+
                 Log.d(TAG, "Copied data into pipe")
 
                 InternalBackupDataStoreHelper.clearData(this@BackupService, currentJob.dataId!!)

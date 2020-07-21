@@ -26,7 +26,7 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
     interface ManageListAdapterCallback {
         fun onDeleteCountChanged(count: Int)
         fun onEnableDeleteMode()
-        fun onItemClick(id : Long)
+        fun onItemClick(id : Long, backupData: BackupData, view: View)
     }
 
     private val LEXICOGRAPHICAL_COMPARATOR: Comparator<BackupData> =
@@ -117,7 +117,7 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
                 }
                 notifyDeleteCount()
             } else {
-                callback.get()?.onItemClick(data.id)
+                callback.get()?.onItemClick(data.id, data, it)
             }
         }
 

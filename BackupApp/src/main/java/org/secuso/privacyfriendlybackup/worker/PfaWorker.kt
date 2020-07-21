@@ -100,7 +100,7 @@ class PfaWorker(val context: Context, params: WorkerParameters) : CoroutineWorke
     override fun onSuccess() {
         Log.d(TAG,"Command sent successfully.")
         workDone = true
-        connection.disconnect()
+        //connection.disconnect()
     }
 
     override fun onDisconnected() {
