@@ -45,6 +45,11 @@
     <string name="restore">Restore</string>
     <string name="dialog_restore_confirmation_message">Are you sure you want to restore this backup? It is advised to create a backup before you restore data.</string>
     <string name="dialog_restore_confirmation_title">Restore data</string>
+    <string name="pref_category_storage">Storage Settings</string>
+    <string name="pref_storage_type">Storage Type</string>
+    <string name="pref_category_automatic_backup">Automatic Backups</string>
+    <string name="storage_type_external">External Storage</string>
+    <string name="storage_type_drive">Google Drive</string>
 
 
 </resources>

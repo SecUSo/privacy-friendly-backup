@@ -81,6 +81,13 @@ object InternalBackupDataStoreHelper {
         return File(path, data.file).inputStream() to data
     }
 
+    suspend fun getInternalDataAsFile(context: Context, dataId: Long): Pair<File?, InternalBackupData> {
+        val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
+
+        val path = File(context.filesDir, BACKUP_DIR)
+        return File(path, data.file) to data
+    }
+
     suspend fun getInternalData(context: Context, filename: String): Pair<InputStream?, InternalBackupData> {
         Log.d(TAG, "getInternalData(context, $filename)")
         val data = BackupDatabase.getInstance(context).internalBackupDataDao().getByFilename(filename)

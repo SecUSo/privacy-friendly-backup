@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.preference.PreferenceManager
 import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.api.util.addSources
 import org.secuso.privacyfriendlybackup.data.BackupJobManager
@@ -13,6 +14,8 @@ import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
 
 
 typealias BackupApplicationDataList = ArrayList<ApplicationOverviewViewModel.BackupApplicationData>
@@ -76,7 +79,9 @@ class ApplicationOverviewViewModel(app : Application) : AndroidViewModel(app) {
     fun createBackupForPackage(packageName: String) {
         viewModelScope.launch {
             val jobManager = BackupJobManager.getInstance(getApplication())
-            jobManager.createBackupJobChain(packageName)
+            val storageName = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString(PreferenceKeys.PREF_STORAGE_TYPE, StorageType.EXTERNAL.name)
+            val storageType = StorageType.valueOf(storageName!!)
+            jobManager.createBackupJobChain(packageName, storageType)
         }
     }
 

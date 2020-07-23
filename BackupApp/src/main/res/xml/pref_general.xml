@@ -1,0 +1,57 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        app:title="@string/pref_category_storage">
+
+        <ListPreference
+            app:defaultValue="External"
+            app:key="pref_storage_type"
+            app:title="@string/pref_storage_type"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/pref_category_automatic_backup">
+
+        <!-- <ListPreference
+            app:defaultValue="External"
+            app:key="pref_storage_type"
+            app:title="@string/pref_storage_type"
+            app:useSimpleSummaryProvider="true" /> -->
+
+        <!-- <SwitchPreferenceCompat
+            app:key="pref_enable_encryption"
+            app:title="@string/pref_encryption_enable"
+            app:summaryOn="@string/pref_encryption_enable_on"
+            app:summaryOff="@string/pref_encryption_enable_off" /> -->
+
+        <!-- <org.secuso.privacyfriendlybackup.ui.encryption.OpenPgpKeyPreference
+            app:dependency="pref_enable_encryption"
+            app:key="pref_encryption_key"
+            app:title="@string/pref_encryption_select_key" /> -->
+
+        <!-- <EditTextPreference
+            app:dependency="pref_enable_encryption"
+            app:key="pref_encryption_passphrase"
+            app:title="@string/pref_encryption_passphrase" /> -->
+
+        <!--  </PreferenceCategory>
+
+        <PreferenceCategory app:title="@string/sync_header">
+
+            <SwitchPreferenceCompat
+                app:key="sync"
+                app:title="" />
+
+            <SwitchPreferenceCompat
+                app:dependency="sync"
+                app:key="attachment"
+                app:summaryOff="@string/attachment_summary_off"
+                app:summaryOn="@string/attachment_summary_on"
+                app:title="@string/attachment_title" /> -->
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

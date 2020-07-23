@@ -99,7 +99,7 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        setPreferencesFromResource(R.xml.root_preferences, rootKey)
+        setPreferencesFromResource(R.xml.pref_encryption, rootKey)
 
         enablePref = findPreference(PREF_ENCRYPTION_ENABLE)
         providerPref = findPreference(PREF_ENCRYPTION_CRYPTO_PROVIDER)

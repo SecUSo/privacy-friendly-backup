@@ -34,7 +34,7 @@ class BackupDataStorageRepository(
     suspend fun storeFile(context: Context, packageName: String, dataId : Long, storageType: StorageType = StorageType.EXTERNAL) {
         when(storageType) {
             StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.storeData(context, packageName, dataId)
-            StorageType.CLOUD -> { TODO() }
+            StorageType.CLOUD -> webserviceProvider.storeData(context, packageName, dataId)
         }
     }
 
@@ -69,9 +69,7 @@ class BackupDataStorageRepository(
 
         return when (metadata.storageService) {
             StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.getData(context, metadata)
-            StorageType.CLOUD -> {
-                TODO()
-            }
+            StorageType.CLOUD -> webserviceProvider.getData(context, metadata)
         }
     }
 
@@ -122,7 +120,7 @@ class BackupDataStorageRepository(
                         ExternalBackupDataStoreHelper.deleteData(context, metaData)
                     }
                     StorageType.CLOUD -> {
-                        TODO("Not yet implemented.")
+                        webserviceProvider.deleteData(context, metaData)
                     }
                 }
             } catch (e : Exception) {

@@ -49,7 +49,7 @@ object ExternalBackupDataStoreHelper {
             var hash : String? = null
 
             val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
-            if (inputStream != null) {
+            inputStream?.use {
                 file.copyInputStreamToFile(inputStream)
                 hash = inputStream.readBytes().toHex()
             }
