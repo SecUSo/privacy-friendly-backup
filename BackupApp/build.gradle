@@ -97,9 +97,17 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
 
     // Drive
-    implementation "com.google.android.gms:play-services-auth:18.1.0"
-    implementation 'com.google.android.gms:play-services-drive:17.0.0'
+    //implementation "com.google.android.gms:play-services-auth:18.1.0"
+    //implementation 'com.google.android.gms:play-services-drive:17.0.0'
+
+    implementation 'com.google.api-client:google-api-client:1.23.0'
+    implementation 'com.google.api-client:google-api-client-android:1.23.0'
+    implementation 'com.google.apis:google-api-services-drive:v3-rev110-1.23.0'
+
+    // Retrofit for Google Drive Test
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 
     // fix from google according to: https://stackoverflow.com/questions/56639529/duplicate-class-com-google-common-util-concurrent-listenablefuture-found-in-modu
-    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+    //implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 }
