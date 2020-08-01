@@ -11,6 +11,6 @@ enum class StorageType(
 
     companion object {
         @JvmStatic
-        fun getStorageOptions() = listOf(EXTERNAL, CLOUD)
+        fun getStorageOptions() = listOf(EXTERNAL)
     }
 }

@@ -3,8 +3,6 @@ package org.secuso.privacyfriendlybackup.data.cloud.drive
 import android.content.Context
 import android.util.Log
 import com.google.api.client.auth.oauth2.Credential
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
@@ -52,8 +50,15 @@ object GoogleDriveHelper {
             .setDataStoreFactory(FileDataStoreFactory(File(context.filesDir, TOKENS_DIRECTORY_PATH)))
             .setAccessType("offline")
             .build()
-        val receiver: LocalServerReceiver = LocalServerReceiver.Builder().setPort(8888).build()
-        return AuthorizationCodeInstalledApp(flow, receiver).authorize("user")
+
+        val cred = flow.loadCredential(flow.clientId)
+        if(cred != null) {
+            return cred
+        }
+
+        //val receiver: LocalServerReceiver = LocalServerReceiver.Builder().setPort(8888).build()
+        //return AuthorizationCodeInstalledApp(flow, receiver).authorize("user")
+        return Credential.Builder(null).build() // TODO: This is wrong - correct flow is still work to be done
     }
 
     private fun getService(context: Context) : Drive {

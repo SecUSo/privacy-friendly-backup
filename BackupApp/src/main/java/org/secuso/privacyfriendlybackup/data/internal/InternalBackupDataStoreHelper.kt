@@ -22,7 +22,7 @@ import java.util.*
 object InternalBackupDataStoreHelper {
     const val TAG = "PFA Internal"
 
-    const val BACKUP_DIR = "backupData"
+    const val BACKUP_DIR = "tempData"
 
     suspend fun storeBackupData(context: Context, packageName: String, inputStream: InputStream, encrypted: Boolean = false) : Long {
         val dataId = storeData(context, packageName, inputStream, encrypted)

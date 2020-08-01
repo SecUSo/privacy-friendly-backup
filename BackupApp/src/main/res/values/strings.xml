@@ -50,6 +50,8 @@
     <string name="pref_category_automatic_backup">Automatic Backups</string>
     <string name="storage_type_external">External Storage</string>
     <string name="storage_type_drive">Google Drive</string>
+    <string name="menu_item_inspect">Inspect</string>
+    <string name="menu_item_restore">Restore</string>
 
 
 </resources>

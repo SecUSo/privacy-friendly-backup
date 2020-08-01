@@ -15,6 +15,11 @@
     <PreferenceCategory
         app:title="@string/pref_category_automatic_backup">
 
+        <SwitchPreference
+            app:key="pref_test"
+            android:defaultValue="false"
+            app:title="Test" />
+
         <!-- <ListPreference
             app:defaultValue="External"
             app:key="pref_storage_type"

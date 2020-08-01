@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.annotation.SuppressLint
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -285,14 +286,33 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     override fun onItemClick(id: Long, backupData: BackupDataStorageRepository.BackupData, view: View) {
-        val builder  = AlertDialog.Builder(requireContext())
-        builder.setPositiveButton(R.string.restore) { d: DialogInterface, i: Int ->
-            viewModel.restoreBackup(backupData)
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.menu_popup_backup, popup.menu)
+        popup.gravity = Gravity.END
+        popup.setOnMenuItemClickListener { item ->
+            handlePopupMenuClick(id, backupData, item.itemId)
+            return@setOnMenuItemClickListener true
         }
-        builder.setNegativeButton(R.string.cancel, null)
-        builder.setMessage(R.string.dialog_restore_confirmation_message)
-        builder.setTitle(R.string.dialog_restore_confirmation_title)
-        builder.create().show()
+        popup.show()
+    }
+
+    private fun handlePopupMenuClick(id: Long, backupData: BackupDataStorageRepository.BackupData, itemId: Int) {
+        when(itemId) {
+            R.id.menu_restore -> {
+                val builder  = AlertDialog.Builder(requireContext())
+                builder.setPositiveButton(R.string.restore) { d: DialogInterface, i: Int ->
+                    viewModel.restoreBackup(backupData)
+                }
+                builder.setNegativeButton(R.string.cancel, null)
+                builder.setMessage(R.string.dialog_restore_confirmation_message)
+                builder.setTitle(R.string.dialog_restore_confirmation_title)
+                builder.create().show()
+            }
+            R.id.menu_inspect -> {
+                // TODO: inspect this particular backup and let users export it
+            }
+            else -> {}
+        }
     }
 
     fun onDisableDeleteMode() {

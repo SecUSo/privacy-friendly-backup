@@ -1,6 +1,7 @@
 package org.secuso.privacyfriendlybackup.data.external
 
 import android.content.Context
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.util.toHex
@@ -18,6 +19,7 @@ import java.util.*
 object ExternalBackupDataStoreHelper {
 
     const val BACKUP_DIR = "backupData"
+    const val TAG = "PFA External"
 
     suspend fun storeData(context: Context, data: BackupDataStorageRepository.BackupData) {
         withContext(Dispatchers.IO) {
@@ -46,6 +48,9 @@ object ExternalBackupDataStoreHelper {
             val date = Date()
             val filename = getFileName(date, packageName)
             val file = File(path, filename)
+
+            Log.d(TAG, file.toString())
+
             var hash : String? = null
 
             val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)

@@ -1,10 +1,12 @@
 package org.secuso.privacyfriendlybackup.ui.settings
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
@@ -12,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.*
 import com.google.android.material.appbar.AppBarLayout
+import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
@@ -25,6 +28,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     companion object {
         const val DIALOG_FRAGMENT_TAG = "SettingsFragment.DIALOG_FRAGMENT_TAG"
+        const val TAG = "PFA Settings"
 
         fun newInstance() : SettingsFragment {
             return SettingsFragment()
@@ -92,6 +96,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
         storageTypePref?.apply {
             entryValues = StorageType.getStorageOptions().map { it.name }.toTypedArray()
             entries = StorageType.getStorageOptions().map { requireContext().getString(it.nameResId) }.toTypedArray()
+        }
+
+        val test : SwitchPreference? = findPreference("pref_test")
+        test?.setOnPreferenceClickListener {
+            val gam = GoogleAccountManager(it.context)
+            Log.d(TAG, gam.accounts.size.toString())
+            return@setOnPreferenceClickListener true
         }
     }
 

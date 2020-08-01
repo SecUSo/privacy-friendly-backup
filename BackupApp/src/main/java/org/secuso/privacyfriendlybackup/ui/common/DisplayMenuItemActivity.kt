@@ -16,7 +16,6 @@ import org.secuso.privacyfriendlybackup.ui.main.MainActivity
  * in a [MainActivity].
  */
 class DisplayMenuItemActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_menu_item)
@@ -58,14 +57,16 @@ class DisplayMenuItemActivity : AppCompatActivity() {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) =
-        when (item.itemId) {
-            android.R.id.home -> {
-                navigateUpTo(Intent(this, MainActivity::class.java))
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when (item.itemId) {
+//            android.R.id.home -> {
+//                navigateUpTo(Intent(this, MainActivity::class.java))
+//                true
+//            }
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//        return true
+//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

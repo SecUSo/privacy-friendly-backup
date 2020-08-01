@@ -53,7 +53,7 @@ class WorkerTest {
         val fileName = "${packageName}_${dateString}.backup"
 
         runBlocking {
-            dataId = InternalBackupDataStoreHelper.storeBackupData(appContext, 0, packageName, data)
+            dataId = InternalBackupDataStoreHelper.storeBackupData(appContext, packageName, data, false)
         }
 
         val worker : EncryptionWorker = TestListenableWorkerBuilder<EncryptionWorker>(appContext).apply {
