@@ -48,12 +48,12 @@ object ExternalBackupDataStoreHelper {
             val path = File(context.getExternalFilesDir(null), BACKUP_DIR)
             path.mkdirs()
             val date = Date()
-            val filename = getFileName(date, packageName)
+            val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
+            val filename = getFileName(date, packageName, data?.encrypted == true)
             val file = File(path, filename)
 
             Log.d(TAG, file.toString())
 
-            val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
             val dataBytes = inputStream?.use {
                 return@use inputStream.readBytes()
             }

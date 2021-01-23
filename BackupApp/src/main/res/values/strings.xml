@@ -58,7 +58,7 @@
     <string name="data_inspection_load_status_loading">Loading…</string>
     <string name="data_inspection_load_status_decrypting">Decrypting…</string>
     <string name="data_inspection_load_status_error">Unknown error.</string>
-    <string name="data_inspection_load_status_decryption_error">An unknown decryption error occurred. Please check the encryption settings.</string>
+    <string name="data_inspection_load_status_decryption_error">An unknown decryption error occurred. Please check if the correct cryptography provider was selected in the encryption settings and the decryption key is still available in the cryptography provider. </string>
     <string name="data_inspection_load_status_done">Done</string>
     <string name="menu_title_add">Import backup</string>
     <string name="app_import_backup">Import Backup</string>
@@ -69,6 +69,20 @@
     <string name="data_import_error_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_title">Data Import Failed</string>
     <string name="data_import_error_dialog_message">The file could not be imported. Please make sure it is a valid backup file.</string>
-
-
+    <string name="data_import_confirmation_dialog_confirm">Import</string>
+    <string name="data_import_confirmation_dialog_message">Do you want to import this backup into the list of backups?</string>
+    <string name="data_import_confirmation_dialog_title">Backup Import</string>
+    <string name="data_import_confirmation_dialog_cacncel">Cancel</string>
+    <string name="data_export_confirmation_dialog_cancel">Cancel</string>
+    <string name="data_export_confirmation_dialog_confirm">Export</string>
+    <string name="data_export_confirmation_dialog_title">Backup Export</string>
+    <string name="data_export_confirmation_dialog_message">Do you want to export this backup?</string>
+    <string name="data_export_confirmation_dialog_checkbox">Encrypt Backup</string>
+    <string name="dialog_data_export_encrypted_warning">Saving the backup into an external data storage unencrypted leaves your data unprotected.</string>
+    <string name="data_inspection_load_status_error_invalid_json">The backup seems to be corrupted. Try creating a new backup or retry importing the backup.</string>
+    <string name="dialog_data_export_start_confirm">Yes</string>
+    <string name="dialog_data_export_start_cancel">No</string>
+    <string name="dialog_data_export_start_title">Backup Import</string>
+    <string name="dialog_data_export_start_message">Do you want to import a backup file?</string>
+    <string name="dialog_dont_show_again">Do not show this again.</string>
 </resources>

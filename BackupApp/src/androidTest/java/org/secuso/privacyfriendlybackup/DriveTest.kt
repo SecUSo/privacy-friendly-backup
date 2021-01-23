@@ -2,7 +2,6 @@ package org.secuso.privacyfriendlybackup
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,8 +25,8 @@ class DriveTest {
 
     @Test
     fun driveTest() {
-        val gam = GoogleAccountManager(appContext)
-        println(gam)
+        //val gam = GoogleAccountManager(appContext)
+        //println(gam)
     }
 
     fun getUidForPackageName(packageName : String) : Int {

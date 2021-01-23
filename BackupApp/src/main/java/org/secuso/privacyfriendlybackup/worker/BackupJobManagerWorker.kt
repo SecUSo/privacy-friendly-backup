@@ -175,7 +175,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
             data.add(DATA_ID to job.dataId)
             data.add(DATA_OPENPGP_PROVIDER to provider)
             data.add(DATA_ENCRYPT to encrypt)
-            data.add(DATA_KEY_ID to longArrayOf()) // TODO - this is for encryption for other ppl
+            data.add(DATA_KEY_ID to longArrayOf(key)) // TODO - this is for encryption for other ppl
             data.add(DATA_SIGNING_KEY_ID to key)
             data.add(DATA_PASSPHRASE to passphrase)
 

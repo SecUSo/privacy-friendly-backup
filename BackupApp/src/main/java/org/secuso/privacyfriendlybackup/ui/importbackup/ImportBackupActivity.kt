@@ -34,13 +34,31 @@ class ImportBackupActivity : AppCompatActivity() {
             }
             Intent.ACTION_VIEW -> {
                 intent.data?.also { uri ->
-                    import(uri)
+                    showImportConfirmationDialog(uri)
                 }
             }
             else -> {
                 finish()
             }
         }
+    }
+
+    private fun showImportConfirmationDialog(uri : Uri) {
+        AlertDialog.Builder(this).apply {
+            setTitle(R.string.data_import_confirmation_dialog_title)
+            setIcon(ContextCompat.getDrawable(this@ImportBackupActivity, R.drawable.ic_outline_info_24)?.apply {
+                this.setTint(ContextCompat.getColor(this@ImportBackupActivity, R.color.colorAccent))
+            })
+            setMessage(R.string.data_import_confirmation_dialog_message)
+            setPositiveButton(R.string.data_import_confirmation_dialog_confirm) { d, _ ->
+                d.dismiss()
+                import(uri)
+            }
+            setNegativeButton(R.string.data_import_confirmation_dialog_cacncel) { d, _ ->
+                d.dismiss()
+                finish()
+            }
+        }.create().show()
     }
 
     private fun sendOpenIntent() {
@@ -104,8 +122,7 @@ class ImportBackupActivity : AppCompatActivity() {
             setMessage(
                 getString(
                     R.string.data_import_success_dialog_message,
-                    data.packageName,
-                    SimpleDateFormat.getDateTimeInstance().format(data.timestamp)
+                    arrayOf<String>(data.packageName, SimpleDateFormat.getDateTimeInstance().format(data.timestamp))
                 )
             )
             setPositiveButton(R.string.data_import_success_dialog_confirm) { _, _ ->

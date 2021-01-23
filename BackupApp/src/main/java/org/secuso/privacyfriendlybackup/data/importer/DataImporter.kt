@@ -5,18 +5,18 @@ import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.text.TextUtils
 import android.util.JsonReader
-import android.util.JsonWriter
 import android.util.MalformedJsonException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.io.IOException
-import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 import java.util.*
+
 
 class DataImporter {
 
@@ -34,21 +34,32 @@ class DataImporter {
                         backupData = readData(reader)
                         reader.endObject()
                     }
-                } catch (e : MalformedJsonException) {
+                } catch (e: MalformedJsonException) {
                     return@withContext false to null
-                } catch (e : IOException) {
+                } catch (e: IOException) {
                     return@withContext false to null
                 }
 
                 val result : Pair<Boolean, Long>
 
                 if(backupData != null) {
-                    result = BackupDataStorageRepository.getInstance(context).storeFile(context, backupData!!)
+
+                    if(!backupData!!.encrypted) {
+                        // short validation check if the json is valid
+                        if(!isValidJSON(String(backupData!!.data!!))) {
+                            return@withContext false to null
+                        }
+                    }
+
+                    result = BackupDataStorageRepository.getInstance(context).storeFile(
+                        context,
+                        backupData!!
+                    )
                 } else {
                     return@withContext false to null
                 }
 
-                val (_,id) = result
+                val (_, id) = result
                 val resultBackUpData = BackupDataStorageRepository.BackupData(
                     id, // return the real database id it was imported to
                     backupData!!.filename,
@@ -101,6 +112,19 @@ class DataImporter {
                 storageType = StorageType.EXTERNAL,
                 available = true
             )
+        }
+
+        fun isValidJSON(test: String?): Boolean {
+            try {
+                JSONObject(test)
+            } catch (ex: JSONException) {
+                try {
+                    JSONArray(test)
+                } catch (ex1: JSONException) {
+                    return false
+                }
+            }
+            return true
         }
     }
 }

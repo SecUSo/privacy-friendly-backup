@@ -11,12 +11,13 @@ import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
 import org.openintents.openpgp.IOpenPgpService2
 import org.openintents.openpgp.OpenPgpDecryptionResult
+import org.openintents.openpgp.OpenPgpError
+import org.openintents.openpgp.OpenPgpError.*
 import org.openintents.openpgp.OpenPgpSignatureResult
 import org.openintents.openpgp.util.OpenPgpApi
 import org.openintents.openpgp.util.OpenPgpServiceConnection
 import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
-import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
@@ -36,7 +37,10 @@ import java.lang.ref.WeakReference
  *
  * @author Christopher Beckmann
  */
-class EncryptionWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(context, params), OpenPgpServiceConnection.OnBound {
+class EncryptionWorker(val context: Context, params: WorkerParameters) : CoroutineWorker(
+    context,
+    params
+), OpenPgpServiceConnection.OnBound {
 
     companion object {
         val REQUEST_CODE_SIGN_AND_ENCRYPT = 9912
@@ -152,7 +156,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     )
                 )
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             onError(e)
         }
     }
@@ -168,7 +172,8 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                 action = OpenPgpApi.ACTION_DECRYPT_VERIFY
             }
 
-            openPgpApi.executeApiAsync(intent, inputStream, outputStream,
+            openPgpApi.executeApiAsync(
+                intent, inputStream, outputStream,
                 OpenPGPCallback(
                     this@EncryptionWorker,
                     outputStream,
@@ -199,10 +204,15 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
 
                     Log.d(TAG, "RESULT_CODE_SUCCESS")
 
-                    when(requestCode) {
+                    when (requestCode) {
                         REQUEST_CODE_DECRYPT_AND_VERIFY -> {
-                            val signatureResult: OpenPgpSignatureResult = result.getParcelableExtra(OpenPgpApi.RESULT_SIGNATURE)!!
-                            val decryptionResult: OpenPgpDecryptionResult = result.getParcelableExtra(OpenPgpApi.RESULT_DECRYPTION)!!
+                            val signatureResult: OpenPgpSignatureResult = result.getParcelableExtra(
+                                OpenPgpApi.RESULT_SIGNATURE
+                            )!!
+                            val decryptionResult: OpenPgpDecryptionResult =
+                                result.getParcelableExtra(
+                                    OpenPgpApi.RESULT_DECRYPTION
+                                )!!
                             // val metadata: OpenPgpDecryptMetadata = result.getParcelableExtra(OpenPgpApi.RESULT_METADATA)!!
                             // TODO: check signature
                         }
@@ -217,6 +227,27 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     worker.get()?.workDone = true
                 }
                 OpenPgpApi.RESULT_CODE_ERROR -> {
+                    when (result.getParcelableExtra<OpenPgpError>(OpenPgpApi.RESULT_ERROR)!!.errorId) {
+                        CLIENT_SIDE_ERROR -> {
+                            Log.d(TAG, "CLIENT_SIDE_ERROR")
+                        }
+                        GENERIC_ERROR -> {
+                            Log.d(TAG, "GENERIC_ERROR")
+                        }
+                        INCOMPATIBLE_API_VERSIONS -> {
+                            Log.d(TAG, "INCOMPATIBLE_API_VERSIONS")
+                        }
+                        NO_OR_WRONG_PASSPHRASE -> {
+                            Log.d(TAG, "NO_OR_WRONG_PASSPHRASE")
+                        }
+                        NO_USER_IDS -> {
+                            Log.d(TAG, "NO_USER_IDS")
+                        }
+                        OPPORTUNISTIC_MISSING_KEYS -> {
+                            Log.d(TAG, "OPPORTUNISTIC_MISSING_KEYS")
+                        }
+                        else -> { /* do nothing */ }
+                    }
                     worker.get()?.onError(null)
 
                     Log.d(TAG, "RESULT_CODE_ERROR")
@@ -246,13 +277,17 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             }
 
             // store to internal storage and delete unencrypted data
-            val id = InternalBackupDataStoreHelper.storeData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), internalData!!.timestamp, encrypted)
+            val id = InternalBackupDataStoreHelper.storeData(
+                context, internalData!!.packageName, ByteArrayInputStream(
+                    outputStream.toByteArray()
+                ), internalData!!.timestamp, encrypted
+            )
             InternalBackupDataStoreHelper.clearData(context, dataId)
             processJobData(id)
         }
     }
 
-    private suspend fun processJobData(id : Long) {
+    private suspend fun processJobData(id: Long) {
         // store new internal data id into next job
         val dao = BackupDatabase.getInstance(context).backupJobDao()
 
@@ -286,7 +321,12 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     putExtra(DATA_PASSPHRASE, passphrase)
                     putExtra(DATA_SIGNING_KEY_ID, signingKey)
                 }
-                val pendingIntent = PendingIntent.getActivity(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+                val pendingIntent = PendingIntent.getActivity(
+                    context,
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
                 setContentIntent(pendingIntent)
             }.build()
 

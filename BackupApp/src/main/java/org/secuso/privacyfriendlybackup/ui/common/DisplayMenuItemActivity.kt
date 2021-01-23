@@ -105,9 +105,9 @@ class DisplayMenuItemActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(MainActivity.MenuItem.MENU_MAIN_ENCRYPTION.name)
-//        if(fragment != null && fragment.isVisible) {
-//            fragment.onActivityResult(requestCode, resultCode, data)
-//        }
+        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(MainActivity.MenuItem.MENU_MAIN_ENCRYPTION.name)
+        if(fragment != null && fragment.isVisible) {
+            fragment.onActivityResult(requestCode, resultCode, data)
+        }
     }
 }

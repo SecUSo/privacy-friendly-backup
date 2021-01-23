@@ -122,8 +122,8 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         }
 
         val icon = when(data.storageType) {
-            StorageType.EXTERNAL -> R.drawable.ic_device_24
-            StorageType.CLOUD -> R.drawable.ic_cloud_24
+            StorageType.EXTERNAL -> if(data.encrypted) R.drawable.ic_baseline_phonelink_lock_24 else R.drawable.ic_baseline_smartphone_24
+            StorageType.CLOUD -> if(data.encrypted) R.drawable.ic_cloud_24 else R.drawable.ic_cloud_24
         }
 
         Glide.with(context)

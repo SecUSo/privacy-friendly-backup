@@ -23,6 +23,7 @@ import org.secuso.privacyfriendlybackup.api.util.readString
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.exporter.DataExporter
+import org.secuso.privacyfriendlybackup.data.importer.DataImporter
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
@@ -51,19 +52,18 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     private var encryptedFileName : String = ""
     private var timestamp : Date? = null
     private var backupMetaData : BackupDataStorageRepository.BackupData? = null
+    var isEncrypted : Boolean = false
+        private set
 
     private var backupData : String = ""
 
     fun getFileName(encrypted: Boolean) : String {
         return if(backupMetaData?.encrypted == true && encrypted) {
-            fileName
+            getEncryptedFilename(fileName)
         } else {
             getUnencryptedFilename(fileName)
         }
     }
-
-    fun getPathLiveData() : LiveData<List<String>> = pathLiveData
-    fun getShownData() : LiveData<List<String>> = backupDataShownLiveData
 
     fun getLoadStatus() : LiveData<LoadStatus> {
         return loadStatusLiveData
@@ -85,6 +85,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
             fileName = data.filename
 
             if(data.encrypted) {
+                isEncrypted = true
                 val internalDataId = InternalBackupDataStoreHelper.storeData(getApplication(), data.packageName, data.data.inputStream(), data.timestamp, data.encrypted)
                 encryptedFileName = InternalBackupDataStoreHelper.getInternalDataFileName(getApplication(), internalDataId)
                 val fileName = getUnencryptedFilename(encryptedFileName)
@@ -158,13 +159,29 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     private fun getUnencryptedFilename(filename: String) =
         filename.replace("_encrypted.backup", ".backup")
 
+    private fun getEncryptedFilename(filename: String) : String {
+        return if(filename.contains("_encrypted.backup", true)) {
+            filename
+        } else {
+            filename.replace(".backup", "_encrypted.backup", true)
+        }
+    }
+
+
 
     private fun setBackupData(backupDataString: String) {
         backupData = backupDataString
 
         if(!TextUtils.isEmpty(backupData)) {
-            backupDataLiveData.postValue(backupData)
-            loadStatusLiveData.postValue(LoadStatus.DONE)
+
+            // short validity check if it is valid json
+            if(DataImporter.isValidJSON(backupDataString)) {
+                backupDataLiveData.postValue(backupData)
+                loadStatusLiveData.postValue(LoadStatus.DONE)
+            } else {
+                loadStatusLiveData.postValue(LoadStatus.ERROR_INVALID_JSON)
+                // JSON STRING INVALID
+            }
         }
     }
 

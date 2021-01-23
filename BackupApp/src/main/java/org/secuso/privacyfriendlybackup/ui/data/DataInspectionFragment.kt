@@ -1,33 +1,35 @@
 package org.secuso.privacyfriendlybackup.ui.data
 
 import android.content.Intent
-import android.graphics.Bitmap
+import android.graphics.PorterDuff
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.text.TextUtils
 import android.util.Log
 import android.view.*
-import android.widget.ImageView
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.data_inspection_fragment.*
 import kotlinx.android.synthetic.main.item_application_job.*
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 
 
-class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspectionOnItemClickListener */{
+class DataInspectionFragment : Fragment() {
 
     private var exportMenuItem : MenuItem? = null
     private var onlyExportData : Boolean = false
     private var exportEncrypted : Boolean = false
+    private var encryptionEnabled : Boolean = false
 
     companion object {
         fun newInstance() = DataInspectionFragment()
@@ -55,6 +57,17 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         exportMenuItem = menu.findItem(R.id.action_export)
+        val icon = exportMenuItem?.icon
+        if(icon != null) {
+            icon.mutate()
+            icon.setColorFilter(ContextCompat.getColor(requireActivity(), R.color.white), PorterDuff.Mode.SRC_ATOP)
+            icon.alpha = 255
+        }
+
+        if(viewModel.getLoadStatus().value as LoadStatus == LoadStatus.DONE) {
+            exportMenuItem?.isEnabled = true
+            exportMenuItem?.isVisible = true
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -64,7 +77,6 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
                 true
             }
             R.id.action_export -> {
-                // TODO: export encrypted? Introduce Dialog and let the user choose
                 handleExportClicked()
                 true
             }
@@ -73,17 +85,7 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
     }
 
     private fun handleExportClicked() {
-        val filename = viewModel.getFileName(exportEncrypted)
-        if(TextUtils.isEmpty(filename)) {
-            return
-        }
-
-        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            type = "*/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-            putExtra(Intent.EXTRA_TITLE, filename)
-            startActivityForResult(Intent.createChooser(this, ""), REQUEST_CODE_CREATE_DOCUMENT)
-        }
+        showExportConfirmationDialog()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -111,14 +113,73 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
         }
     }
 
+    private fun showExportConfirmationDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_data_export_confirmation, null)
+
+        AlertDialog.Builder(requireActivity()).apply {
+            setTitle(R.string.data_export_confirmation_dialog_title)
+            setIcon(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_save_alt_24)?.apply {
+                this.setTint(ContextCompat.getColor(requireActivity(), R.color.colorAccent))
+            })
+            if(encryptionEnabled) {
+                setView(view)
+            }
+            setMessage(R.string.data_export_confirmation_dialog_message)
+
+            val checkBox = view.findViewById<CheckBox>(R.id.dialog_data_export_encrypted_checkbox)
+            val warning = view.findViewById<TextView>(R.id.dialog_data_export_encrypted_warning)
+
+            setPositiveButton(R.string.data_export_confirmation_dialog_confirm) { d, _ ->
+                exportEncrypted = checkBox.isChecked and encryptionEnabled
+
+                val filename = viewModel.getFileName(exportEncrypted)
+                if(TextUtils.isEmpty(filename)) {
+                    d.dismiss()
+                    return@setPositiveButton
+                }
+
+                Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    type = "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    putExtra(Intent.EXTRA_TITLE, filename)
+                    startActivityForResult(Intent.createChooser(this, ""), REQUEST_CODE_CREATE_DOCUMENT)
+                }
+                d.dismiss()
+            }
+            setNegativeButton(R.string.data_export_confirmation_dialog_cancel) { d, _ ->
+                d.dismiss()
+            }
+
+            checkBox.setOnCheckedChangeListener { _, isChecked ->
+                warning.visibility = if(isChecked) View.GONE else View.VISIBLE
+            }
+
+        }.create().apply {
+            setOnShowListener {
+                val checkBox = view.findViewById<CheckBox>(R.id.dialog_data_export_encrypted_checkbox)
+                val warning = view.findViewById<TextView>(R.id.dialog_data_export_encrypted_warning)
+
+                if(encryptionEnabled) {
+                    warning.visibility = if (checkBox.isChecked) View.GONE else View.VISIBLE
+                } else {
+                    checkBox.visibility = View.GONE
+                    checkBox.isChecked = false
+                    warning.visibility = View.GONE
+                }
+            }
+        }.show()
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        val activity = requireActivity()
+        viewModel = ViewModelProvider(activity).get(DataInspectionViewModel::class.java)
+
+        encryptionEnabled = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(PreferenceKeys.PREF_ENCRYPTION_ENABLE, false)
+
         val dataId = arguments?.getLong(DataInspectionActivity.EXTRA_DATA_ID)
         onlyExportData = arguments?.getBoolean(DataInspectionActivity.EXTRA_EXPORT_DATA, false) ?: false
-        val activity = requireActivity()
-
-        viewModel = ViewModelProvider(activity).get(DataInspectionViewModel::class.java)
 
         if(dataId == null) {
             // end activity if no data is present
@@ -137,9 +198,9 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
 
         viewModel.getLoadStatus().observe(viewLifecycleOwner) {
             Log.d("TEST", "## Load Status Updated To ${it.name}")
-            Glide.with(requireActivity()).load(it.imageRes).into(image)
-            name.setText(it.descriptionRes)
-            image.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
+            Glide.with(requireActivity()).load(it.imageRes).into(data_inspection_load_status_image)
+            data_inspection_load_status_name.setText(it.descriptionRes)
+            data_inspection_load_status_image.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
             when(it) {
                 LoadStatus.UNKNOWN -> {
                     data_inspection_load_status.visibility = View.GONE
@@ -159,11 +220,14 @@ class DataInspectionFragment : Fragment() /*, DataInspectionAdapter.DataInspecti
                 LoadStatus.DONE -> {
                     data_inspection_load_status.visibility = View.GONE
 
+                    encryptionEnabled = encryptionEnabled and viewModel.isEncrypted
+
                     if(onlyExportData) {
                         handleExportClicked()
                     }
 
                     exportMenuItem?.isEnabled = true
+                    exportMenuItem?.isVisible = true
                 }
             }
         }

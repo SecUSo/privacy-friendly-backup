@@ -7,12 +7,14 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -24,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.DIALOG_SKIP_IMPORT_START
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.common.Mode
@@ -357,10 +360,7 @@ class BackupOverviewFragment : BaseFragment(),
                 }
             }
             R.id.action_add -> {
-                Intent(requireActivity(), ImportBackupActivity::class.java).apply {
-                    action = ImportBackupActivity.ACTION_OPEN_FILE
-                    startActivity(this)
-                }
+                showImportStartDialog()
             }
             R.id.action_sort -> {
                 // viewModel.insertTestData()
@@ -369,6 +369,38 @@ class BackupOverviewFragment : BaseFragment(),
             else -> return false
         }
         return true
+    }
+
+    private fun showImportStartDialog() {
+        if(PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(DIALOG_SKIP_IMPORT_START, false)) {
+            startImport()
+        } else {
+            AlertDialog.Builder(requireActivity()).apply {
+                setTitle(R.string.dialog_data_export_start_title)
+                setMessage(R.string.dialog_data_export_start_message)
+                val view = requireActivity().layoutInflater.inflate(R.layout.dialog_checkbox, null)
+                setView(view)
+                setPositiveButton(R.string.dialog_data_export_start_confirm) { d, _ ->
+                    val checkBox = view.findViewById<CheckBox>(R.id.dialog_checkbox)
+
+                    if (checkBox.isChecked) {
+                        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit()
+                            .putBoolean(DIALOG_SKIP_IMPORT_START, true).apply()
+                    }
+
+                    startImport()
+                    d.dismiss()
+                }
+                setNegativeButton(R.string.dialog_data_export_start_cancel, null)
+            }.create().show()
+        }
+    }
+
+    private fun startImport() {
+        Intent(requireActivity(), ImportBackupActivity::class.java).apply {
+            action = ImportBackupActivity.ACTION_OPEN_FILE
+            startActivity(this)
+        }
     }
 
     override fun onDeleteCountChanged(count: Int) {
