@@ -14,7 +14,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.*
 import com.google.android.material.appbar.AppBarLayout
-import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
@@ -100,8 +99,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         val test : SwitchPreference? = findPreference("pref_test")
         test?.setOnPreferenceClickListener {
-            val gam = GoogleAccountManager(it.context)
-            Log.d(TAG, gam.accounts.size.toString())
+            //val gam = GoogleAccountManager(it.context)
+            //Log.d(TAG, gam.accounts.size.toString())
             return@setOnPreferenceClickListener true
         }
     }

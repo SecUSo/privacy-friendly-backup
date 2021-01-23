@@ -13,6 +13,13 @@ import org.secuso.privacyfriendlybackup.R
  * on handsets.
  */
 class PlaceholderFragment : BaseFragment() {
+    override fun onBackPressed() {
+        val activity = activity
+
+        if(activity != null && activity is DisplayMenuItemActivity) {
+            activity.pressBack()
+        }
+    }
 
     /**
      * The dummy content this fragment is presenting.

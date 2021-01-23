@@ -1,15 +1,12 @@
 package org.secuso.privacyfriendlybackup.ui.backup
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
+import android.animation.*
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
@@ -18,13 +15,25 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import kotlinx.android.synthetic.main.fragment_backup_overview.*
-import kotlinx.coroutines.NonCancellable.cancel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
-import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
+import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.common.Mode
+import org.secuso.privacyfriendlybackup.ui.data.DataInspectionActivity
+import org.secuso.privacyfriendlybackup.ui.importbackup.ImportBackupActivity
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.BACKUP_ID
+import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
+import kotlin.math.abs
+import kotlin.math.ceil
+
 
 class BackupOverviewFragment : BaseFragment(),
     FilterableBackupAdapter.ManageListAdapterCallback,
@@ -48,11 +57,17 @@ class BackupOverviewFragment : BaseFragment(),
     private var oldMode : Mode = Mode.NORMAL
 
     var predefinedFilter : String? = null
+    var highlightSpecificBackup : Long = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
+
+        Log.d(
+            TAG,
+            "## Backup Overview Fragment created and savedInstanceState is ${if (savedInstanceState == null) "null" else "not null"}"
+        )
 
         savedInstanceState ?: return
 
@@ -62,7 +77,11 @@ class BackupOverviewFragment : BaseFragment(),
         currentDeleteCount = savedInstanceState.getInt("currentDeleteCount")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_backup_overview, container, false)
     }
 
@@ -81,10 +100,20 @@ class BackupOverviewFragment : BaseFragment(),
         fragment_backup_overview_list.adapter = adapter
         fragment_backup_overview_list.layoutManager = when {
             isXLargeTablet() -> {
-                GridLayoutManager(context,if (isPortrait()) 2 else 3,GridLayoutManager.VERTICAL,false)
+                GridLayoutManager(
+                    context,
+                    if (isPortrait()) 2 else 3,
+                    GridLayoutManager.VERTICAL,
+                    false
+                )
             }
             isLargeTablet() -> {
-                GridLayoutManager(context,if (isPortrait()) 1 else 2,GridLayoutManager.VERTICAL,false)
+                GridLayoutManager(
+                    context,
+                    if (isPortrait()) 1 else 2,
+                    GridLayoutManager.VERTICAL,
+                    false
+                )
             }
             else -> {
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
@@ -105,13 +134,14 @@ class BackupOverviewFragment : BaseFragment(),
                     }
                 }
                 builder.show()
-
             }
         }
 
         Log.d(TAG, "arguments = $arguments")
         predefinedFilter = arguments?.getString(FILTER, "")
+        highlightSpecificBackup = arguments?.getLong(BACKUP_ID) ?: -1L
         Log.d(TAG, "predefinedFilter = $predefinedFilter")
+
         if(!predefinedFilter.isNullOrEmpty()) {
             viewModel.setFilterText(predefinedFilter)
         }
@@ -122,6 +152,8 @@ class BackupOverviewFragment : BaseFragment(),
 
         viewModel.filteredBackupLiveData.observe(viewLifecycleOwner) { data ->
             adapter.setFilteredData(data)
+
+            playAnimationIfApplicable(data)
         }
 
         viewModel.currentMode.observe(viewLifecycleOwner) { mode ->
@@ -166,6 +198,75 @@ class BackupOverviewFragment : BaseFragment(),
             }
 
             oldMode = mode
+        }
+    }
+
+    private fun playAnimationIfApplicable(data: List<BackupDataStorageRepository.BackupData>) {
+        if(data.isNotEmpty() && highlightSpecificBackup != -1L) {
+            for (i in data.indices) {
+                if(data[i].id == highlightSpecificBackup) {
+                    Log.d(TAG, "## found backup in recyclerView at position $i")
+                    val highlight = highlightSpecificBackup
+                    highlightSpecificBackup = -1L
+
+                    GlobalScope.launch(Dispatchers.Main) {
+
+                        delay(250L)
+                        smoothScrollToPosition(i)
+
+                        delay(250L)
+                        Log.d(TAG, "## finding viewholder for item id $highlight")
+                        val vh = fragment_backup_overview_list.findViewHolderForItemId(highlight)
+                        if(vh != null) {
+                            (vh as FilterableBackupAdapter.ViewHolder).apply {
+                                ObjectAnimator.ofObject(
+                                    mCard,
+                                    "backgroundColor",
+                                    ArgbEvaluator(),
+                                    Color.WHITE,
+                                    0x0274B2,
+                                    Color.WHITE
+                                ).apply {
+                                    duration = 2000L
+                                    startDelay = 250L
+                                    start()
+                                }
+                            }
+                        }
+                    }
+                    break
+                }
+            }
+        }
+    }
+
+    private fun smoothScrollToPosition(position: Int) {
+        val smoothScroller: SmoothScroller =
+            object : LinearSmoothScroller(context) {
+                override fun getVerticalSnapPreference(): Int {
+                    return SNAP_TO_START
+                }
+            }
+        smoothScroller.targetPosition = position
+        fragment_backup_overview_list.layoutManager?.startSmoothScroll(smoothScroller)
+    }
+
+    override fun onBackPressed() {
+        val currentMode = viewModel.getCurrentMode()
+        val activity = activity
+
+        if(activity != null && activity is DisplayMenuItemActivity) {
+            when {
+                Mode.SEARCH.isActiveIn(currentMode) -> {
+                    activity.pressBack()
+                }
+                Mode.DELETE.isActiveIn(currentMode) -> {
+                    onDisableDeleteMode()
+                }
+                else -> {
+                    activity.finish()
+                }
+            }
         }
     }
 
@@ -245,13 +346,20 @@ class BackupOverviewFragment : BaseFragment(),
             }
             R.id.action_delete -> onEnableDeleteMode()
             R.id.action_search -> {
-                Toast.makeText(requireContext(), "action_search", Toast.LENGTH_SHORT).show()
+                /* nothing to do here */
+                //Toast.makeText(requireContext(), "action_search", Toast.LENGTH_SHORT).show()
             }
             R.id.action_select_all -> {
                 if (currentDeleteCount > 0) {
                     adapter.deselectAll()
                 } else if (currentDeleteCount == 0) {
                     adapter.selectAll()
+                }
+            }
+            R.id.action_add -> {
+                Intent(requireActivity(), ImportBackupActivity::class.java).apply {
+                    action = ImportBackupActivity.ACTION_OPEN_FILE
+                    startActivity(this)
                 }
             }
             R.id.action_sort -> {
@@ -285,7 +393,11 @@ class BackupOverviewFragment : BaseFragment(),
         fab.show()
     }
 
-    override fun onItemClick(id: Long, backupData: BackupDataStorageRepository.BackupData, view: View) {
+    override fun onItemClick(
+        id: Long,
+        backupData: BackupDataStorageRepository.BackupData,
+        view: View
+    ) {
         val popup = PopupMenu(requireContext(), view)
         popup.menuInflater.inflate(R.menu.menu_popup_backup, popup.menu)
         popup.gravity = Gravity.END
@@ -296,11 +408,15 @@ class BackupOverviewFragment : BaseFragment(),
         popup.show()
     }
 
-    private fun handlePopupMenuClick(id: Long, backupData: BackupDataStorageRepository.BackupData, itemId: Int) {
+    private fun handlePopupMenuClick(
+        id: Long,
+        backupData: BackupDataStorageRepository.BackupData,
+        itemId: Int
+    ) {
         when(itemId) {
             R.id.menu_restore -> {
-                val builder  = AlertDialog.Builder(requireContext())
-                builder.setPositiveButton(R.string.restore) { d: DialogInterface, i: Int ->
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setPositiveButton(R.string.restore) { _, _ ->
                     viewModel.restoreBackup(backupData)
                 }
                 builder.setNegativeButton(R.string.cancel, null)
@@ -309,7 +425,17 @@ class BackupOverviewFragment : BaseFragment(),
                 builder.create().show()
             }
             R.id.menu_inspect -> {
-                // TODO: inspect this particular backup and let users export it
+                Intent(requireActivity(), DataInspectionActivity::class.java).let {
+                    it.putExtra(DataInspectionActivity.EXTRA_DATA_ID, id)
+                    startActivity(it)
+                }
+            }
+            R.id.menu_export -> {
+                Intent(requireActivity(), DataInspectionActivity::class.java).let {
+                    it.putExtra(DataInspectionActivity.EXTRA_DATA_ID, id)
+                    it.putExtra(DataInspectionActivity.EXTRA_EXPORT_DATA, true)
+                    startActivity(it)
+                }
             }
             else -> {}
         }
@@ -330,11 +456,20 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     @SuppressLint("PrivateResource")
-    private fun animateSearchToolbar(numberOfMenuIcon: Int, containsOverflow: Boolean, show: Boolean) : Animator {
+    private fun animateSearchToolbar(
+        numberOfMenuIcon: Int,
+        containsOverflow: Boolean,
+        show: Boolean
+    ) : Animator {
         //appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.getCurrentMode().color))
 
         if (show) {
-            toolbar.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.getCurrentMode().color))
+            toolbar.setBackgroundColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    viewModel.getCurrentMode().color
+                )
+            )
         }
 
         val width: Int = toolbar.width -
@@ -345,8 +480,8 @@ class BackupOverviewFragment : BaseFragment(),
             toolbar,
             if (isRtl()) toolbar.width - width else width,
             toolbar.height / 2,
-            if(show) 0.0f else width.toFloat(),
-            if(show) width.toFloat() else 0.0f
+            if (show) 0.0f else width.toFloat(),
+            if (show) width.toFloat() else 0.0f
         )
 
         createCircularReveal.duration = 250
@@ -356,7 +491,12 @@ class BackupOverviewFragment : BaseFragment(),
                 override fun onAnimationEnd(animation: Animator) {
                     super.onAnimationEnd(animation)
                     activity?.runOnUiThread {
-                        toolbar.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.getCurrentMode().color))
+                        toolbar.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                viewModel.getCurrentMode().color
+                            )
+                        )
                         searchIcon?.isVisible = true
                     }
                 }

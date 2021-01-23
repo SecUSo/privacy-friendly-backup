@@ -13,6 +13,7 @@ import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
+import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.SELECTED_MENU_ITEM
@@ -58,6 +59,14 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
             adapter.setData(data)
 
             (requireActivity().application as BackupApplication).schedulePeriodicWork()
+        }
+    }
+
+    override fun onBackPressed() {
+        val activity = activity
+
+        if(activity != null && activity is DisplayMenuItemActivity) {
+            activity.pressBack()
         }
     }
 

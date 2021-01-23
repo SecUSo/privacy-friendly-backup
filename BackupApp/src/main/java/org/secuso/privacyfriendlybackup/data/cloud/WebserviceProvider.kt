@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.util.copyInputStreamToFile
+import org.secuso.privacyfriendlybackup.api.util.hash
 import org.secuso.privacyfriendlybackup.api.util.toHex
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.cloud.drive.GoogleDriveHelper
@@ -29,9 +30,12 @@ class WebserviceProvider {
             var hash = ""
 
             val (internalFile, data) = InternalBackupDataStoreHelper.getInternalDataAsFile(context, dataId)
+
+            if (data == null) return@withContext -1L
+
             if (internalFile != null) {
-                filename = GoogleDriveHelper.createFile(context, internalFile, data.encrypted)
-                hash = internalFile.inputStream().readBytes().toHex()
+                // TODO: filename = GoogleDriveHelper.createFile(context, internalFile, data.encrypted)
+                hash = internalFile.inputStream().readBytes().hash("SHA-1").toHex()
             }
 
             BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
@@ -47,7 +51,7 @@ class WebserviceProvider {
 
     suspend fun deleteData(context: Context, metadata : StoredBackupMetaData) {
         withContext(Dispatchers.IO) {
-            GoogleDriveHelper.deleteFile(context, metadata.filename)
+            // TODO: GoogleDriveHelper.deleteFile(context, metadata.filename)
         }
     }
 
@@ -58,7 +62,7 @@ class WebserviceProvider {
                 metadata.filename,
                 metadata.packageName,
                 metadata.timestamp,
-                GoogleDriveHelper.readFile(context, metadata.filename).use { it.readBytes() },
+                ByteArray(0),// TODO: GoogleDriveHelper.readFile(context, metadata.filename).use { it.readBytes() },
                 metadata.encrypted,
                 StorageType.CLOUD,
                 true

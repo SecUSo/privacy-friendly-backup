@@ -56,6 +56,6 @@ class BackupApplication : Application(), Configuration.Provider {
 
     override fun getWorkManagerConfiguration(): Configuration =
         Configuration.Builder()
-            .setMinimumLoggingLevel(android.util.Log.DEBUG)
+            .setMinimumLoggingLevel(Log.ERROR)
             .build()
 }

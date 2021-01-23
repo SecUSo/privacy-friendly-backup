@@ -26,6 +26,7 @@ import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -57,7 +58,7 @@ class BackupService : AbstractAuthService() {
 
                 Log.d(TAG, "Storing backup data for ${callingPackageName}")
                 ParcelFileDescriptor.AutoCloseInputStream(input).use {
-                    InternalBackupDataStoreHelper.storeBackupData(this@BackupService, callingPackageName!!, it)
+                    InternalBackupDataStoreHelper.storeBackupData(this@BackupService, callingPackageName!!, it, Date())
                 }
 
                 val db = BackupDatabase.getInstance(this@BackupService)

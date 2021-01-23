@@ -12,10 +12,10 @@ interface InternalBackupDataDao {
     suspend fun getAll() : List<InternalBackupData>
 
     @Query("SELECT * FROM InternalBackupData WHERE _id = :id")
-    suspend fun getById(id : Long) : InternalBackupData
+    suspend fun getById(id : Long) : InternalBackupData?
 
     @Query("SELECT * FROM InternalBackupData WHERE file = :file")
-    suspend fun getByFilename(file : String) : InternalBackupData
+    suspend fun getByFilename(file : String) : InternalBackupData?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: InternalBackupData) : Long

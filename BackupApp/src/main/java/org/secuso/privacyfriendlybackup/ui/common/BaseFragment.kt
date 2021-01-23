@@ -36,6 +36,8 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
+    abstract fun onBackPressed()
+
     private fun returnToNormalToolbarColor() {
         var colorFrom = ContextCompat.getColor(requireContext(), R.color.middlegrey)
         val background = appBar.background

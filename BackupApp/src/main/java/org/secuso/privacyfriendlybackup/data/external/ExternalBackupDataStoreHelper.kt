@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.util.toHex
 import org.secuso.privacyfriendlybackup.api.util.copyInputStreamToFile
+import org.secuso.privacyfriendlybackup.api.util.hash
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
@@ -21,16 +22,16 @@ object ExternalBackupDataStoreHelper {
     const val BACKUP_DIR = "backupData"
     const val TAG = "PFA External"
 
-    suspend fun storeData(context: Context, data: BackupDataStorageRepository.BackupData) {
-        withContext(Dispatchers.IO) {
+    suspend fun storeData(context: Context, data: BackupDataStorageRepository.BackupData) : Pair<Boolean, Long> {
+        return withContext(Dispatchers.IO) {
             val path = File(context.getExternalFilesDir(null), BACKUP_DIR)
             path.mkdirs()
             val file = File(path, data.filename)
 
             file.copyInputStreamToFile(ByteArrayInputStream(data.data))
-            val hash = data.data!!.toHex()
+            val hash = data.data!!.hash("SHA-1").toHex()
 
-            BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
+            val id = BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
                 packageName = data.packageName,
                 timestamp = data.timestamp,
                 storageService = StorageType.EXTERNAL,
@@ -38,6 +39,7 @@ object ExternalBackupDataStoreHelper {
                 encrypted = data.encrypted,
                 hash = hash
             ))
+            return@withContext true to id
         }
     }
 
@@ -51,22 +53,28 @@ object ExternalBackupDataStoreHelper {
 
             Log.d(TAG, file.toString())
 
-            var hash : String? = null
-
             val (inputStream, data) = InternalBackupDataStoreHelper.getInternalData(context, dataId)
-            inputStream?.use {
-                file.copyInputStreamToFile(inputStream)
-                hash = inputStream.readBytes().toHex()
+            val dataBytes = inputStream?.use {
+                return@use inputStream.readBytes()
             }
 
-            BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
-                packageName = data.packageName,
-                timestamp = date,
-                storageService = StorageType.EXTERNAL,
-                filename = filename,
-                encrypted = data.encrypted,
-                hash = hash!!
-            ))
+            file.copyInputStreamToFile(ByteArrayInputStream(dataBytes))
+            val hash = dataBytes!!.hash("SHA-1").toHex()
+
+            if(data != null) {
+                BackupDatabase.getInstance(context).backupMetaDataDao().insert(
+                    StoredBackupMetaData(
+                        packageName = data.packageName,
+                        timestamp = date,
+                        storageService = StorageType.EXTERNAL,
+                        filename = filename,
+                        encrypted = data.encrypted,
+                        hash = hash
+                    )
+                )
+            } else {
+                -1L
+            }
         }
     }
 

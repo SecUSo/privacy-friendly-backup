@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         MENU_MAIN_BACKUP_OVERVIEW(R.drawable.ic_backup_24, R.string.menu_main_backup, BackupOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_APPS(R.drawable.ic_apps_24, R.string.menu_main_apps, ApplicationOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_ENCRYPTION(R.drawable.ic_encryption_24, R.string.menu_main_encryption, EncryptionSettingsFragment::class.java, DisplayMenuItemActivity::class.java),
-        MENU_MAIN_SETTINGS(R.drawable.ic_settings_24, R.string.menu_main_settings, SettingsFragment::class.java, DisplayMenuItemActivity::class.java),
+        //MENU_MAIN_SETTINGS(R.drawable.ic_settings_24, R.string.menu_main_settings, SettingsFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_HELP(R.drawable.ic_help_outline_24, R.string.menu_main_help, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_ABOUT(R.drawable.ic_about_24, R.string.menu_main_about, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java);
 
@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val TAG = "PFA MainActivity"
 
+
+        const val BACKUP_ID = "BACKUP_ID"
         const val SELECTED_MENU_ITEM = "SELECTED_MENU_ITEM"
         const val FILTER = "FILTER"
         const val TWOPANE = "TWOPANE"
@@ -70,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             MenuItem.MENU_MAIN_APPS,
             MenuItem.MENU_MAIN_BACKUP_OVERVIEW,
             MenuItem.MENU_MAIN_ENCRYPTION,
-            MenuItem.MENU_MAIN_SETTINGS,
+            //MenuItem.MENU_MAIN_SETTINGS,
             MenuItem.MENU_MAIN_HELP,
             MenuItem.MENU_MAIN_ABOUT
         )
@@ -148,15 +150,11 @@ class MainActivity : AppCompatActivity() {
                 .commit()
         } else {
             val intent = Intent(this, activity).apply {
+                if(extras != null) {
+                    putExtras(extras)
+                }
                 putExtra(SELECTED_MENU_ITEM, menuItem.name)
                 putExtra(TWOPANE, twoPane)
-
-                if(extras != null && extras.containsKey(FILTER)) {
-                    putExtra(
-                        FILTER, extras.getString(
-                            FILTER
-                        ))
-                }
             }
             startActivity(intent)
         }

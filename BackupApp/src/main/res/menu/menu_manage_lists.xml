@@ -6,6 +6,13 @@
         android:id="@+id/action_sort"
         android:title="@string/menu_title_sort"
         android:icon="@drawable/ic_sort_24"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_add"
+        android:title="@string/menu_title_add"
+        android:icon="@drawable/ic_baseline_add_circle_outline_24"
         android:visible="true"
         app:showAsAction="always" />
 

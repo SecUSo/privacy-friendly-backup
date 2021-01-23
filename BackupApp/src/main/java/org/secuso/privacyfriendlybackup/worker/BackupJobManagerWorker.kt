@@ -1,11 +1,9 @@
 package org.secuso.privacyfriendlybackup.worker
 
 import android.content.Context
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.observe
+import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.work.*
-import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
@@ -130,7 +128,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     }
 
     private fun enqueueEncryptionWork(job : BackupJob) {
-        val encryptionWork = createEncryptionWorkRequest(job, true)
+        val encryptionWork = createEncryptionWorkRequest(job, true, pref)
 
         WorkManager.getInstance(context)
             .beginUniqueWork("${job.packageName}(${job.dataId})", ExistingWorkPolicy.KEEP, encryptionWork)
@@ -138,50 +136,11 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     }
 
     private fun enqueueDecryptionWorker(job : BackupJob) {
-        val decryptionWork = createEncryptionWorkRequest(job, false)
+        val decryptionWork = createEncryptionWorkRequest(job, false, pref)
 
         WorkManager.getInstance(context)
             .beginUniqueWork("${job.packageName}(${job.dataId})", ExistingWorkPolicy.KEEP, decryptionWork)
             .enqueue()
-    }
-
-    private fun createEncryptionWorkRequest(job : BackupJob, encrypt : Boolean) : OneTimeWorkRequest {
-
-        val builder = OneTimeWorkRequestBuilder<EncryptionWorker>()
-        builder.addTag(job.getWorkerTag())
-
-        val data : MutableList<Pair<String, Any?>> = ArrayList()
-
-        data.add(DATA_JOB_ID to job._id)
-        data.add(DATA_ID to job.dataId)
-        data.add(DATA_OPENPGP_PROVIDER to provider)
-        data.add(DATA_ENCRYPT to encrypt)
-        data.add(DATA_KEY_ID to longArrayOf()) // TODO - this is for encryption for other ppl
-        data.add(DATA_SIGNING_KEY_ID to key)
-        data.add(DATA_PASSPHRASE to passphrase)
-
-        return builder.setInputData(
-            workDataOf(*data.toTypedArray())
-        ).build()
-    }
-
-    private fun createStoreWorkRequest(job : BackupJob) : OneTimeWorkRequest {
-        val builder = OneTimeWorkRequestBuilder<StoreWorker>()
-        builder.addTag(job.getWorkerTag())
-
-//        val constraints = Constraints.Builder().setRequiresStorageNotLow(true).build()
-//        builder.setConstraints(constraints)
-
-        val data : MutableList<Pair<String, Any?>> = ArrayList()
-
-        data.add(DATA_JOB_ID to job._id)
-        data.add(DATA_ID to job.dataId)
-        data.add(DATA_TIMESTAMP to job.timestamp.time)
-        data.add(DATA_BACKUP_LOCATION to job.location)
-
-        return builder.setInputData(
-            workDataOf(*data.toTypedArray())
-        ).build()
     }
 
     private fun enqueueStoreWorker(job : BackupJob) {
@@ -200,19 +159,63 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
             .enqueue()
     }
 
-    private fun createPfaWorkRequest(job: BackupJob) : OneTimeWorkRequest {
-        val builder = OneTimeWorkRequestBuilder<PfaWorker>()
-        builder.addTag(job.getWorkerTag())
+    companion object {
+        fun createEncryptionWorkRequest(job: BackupJob, encrypt: Boolean, sharedPreferences: SharedPreferences): OneTimeWorkRequest {
 
-        val data : MutableList<Pair<String, Any?>> = ArrayList()
+            val builder = OneTimeWorkRequestBuilder<EncryptionWorker>()
+            builder.addTag(job.getWorkerTag())
 
-        data.add(DATA_JOB_ID to job._id)
-        data.add(DATA_ID to job.dataId)
+            val data: MutableList<Pair<String, Any?>> = ArrayList()
 
-        return builder.setInputData(
-            workDataOf(*data.toTypedArray())
-        ).build()
+            val provider : String? = sharedPreferences.getString(PREF_ENCRYPTION_CRYPTO_PROVIDER, "")
+            val passphrase : String? = sharedPreferences.getString(PREF_ENCRYPTION_PASSPHRASE, "")
+            val key : Long = sharedPreferences.getLong(PREF_ENCRYPTION_KEY, -1)
+
+            data.add(DATA_JOB_ID to job._id)
+            data.add(DATA_ID to job.dataId)
+            data.add(DATA_OPENPGP_PROVIDER to provider)
+            data.add(DATA_ENCRYPT to encrypt)
+            data.add(DATA_KEY_ID to longArrayOf()) // TODO - this is for encryption for other ppl
+            data.add(DATA_SIGNING_KEY_ID to key)
+            data.add(DATA_PASSPHRASE to passphrase)
+
+            return builder.setInputData(
+                workDataOf(*data.toTypedArray())
+            ).build()
+        }
+
+        fun createStoreWorkRequest(job: BackupJob): OneTimeWorkRequest {
+            val builder = OneTimeWorkRequestBuilder<StoreWorker>()
+            builder.addTag(job.getWorkerTag())
+
+//        val constraints = Constraints.Builder().setRequiresStorageNotLow(true).build()
+//        builder.setConstraints(constraints)
+
+            val data: MutableList<Pair<String, Any?>> = ArrayList()
+
+            data.add(DATA_JOB_ID to job._id)
+            data.add(DATA_ID to job.dataId)
+            data.add(DATA_TIMESTAMP to job.timestamp.time)
+            data.add(DATA_BACKUP_LOCATION to job.location)
+
+            return builder.setInputData(
+                workDataOf(*data.toTypedArray())
+            ).build()
+        }
+
+        private fun createPfaWorkRequest(job: BackupJob): OneTimeWorkRequest {
+            val builder = OneTimeWorkRequestBuilder<PfaWorker>()
+            builder.addTag(job.getWorkerTag())
+
+            val data: MutableList<Pair<String, Any?>> = ArrayList()
+
+            data.add(DATA_JOB_ID to job._id)
+            data.add(DATA_ID to job.dataId)
+
+            return builder.setInputData(
+                workDataOf(*data.toTypedArray())
+            ).build()
+        }
     }
-
 
 }

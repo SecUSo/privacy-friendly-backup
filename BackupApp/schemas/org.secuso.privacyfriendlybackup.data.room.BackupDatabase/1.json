@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "894731d8e5fa9130559986a763f2dcef",
+    "identityHash": "d738bcd3777d5c3d97e20e2c1b47f6f5",
     "entities": [
       {
         "tableName": "StoredBackupMetaData",
@@ -59,12 +59,13 @@
         },
         "indices": [
           {
-            "name": "index_StoredBackupMetaData_packageName",
-            "unique": false,
+            "name": "index_StoredBackupMetaData_packageName_timestamp",
+            "unique": true,
             "columnNames": [
-              "packageName"
+              "packageName",
+              "timestamp"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StoredBackupMetaData_packageName` ON `${TABLE_NAME}` (`packageName`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StoredBackupMetaData_packageName_timestamp` ON `${TABLE_NAME}` (`packageName`, `timestamp`)"
           }
         ],
         "foreignKeys": []
@@ -266,7 +267,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '894731d8e5fa9130559986a763f2dcef')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd738bcd3777d5c3d97e20e2c1b47f6f5')"
     ]
   }
 }

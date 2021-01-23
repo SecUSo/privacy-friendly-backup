@@ -66,13 +66,11 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     override suspend fun doWork(): Result {
         Log.d(TAG, "doWork()")
 
-        job = BackupDatabase.getInstance(context).backupJobDao().getJobForId(backupJobId)
-
-        if(job == null || dataId == -1L) return Result.failure()
+        if(dataId == -1L) return Result.failure()
 
         // are we scheduled to decrypt data that is already unencrypted?
         val data = InternalBackupDataStoreHelper.getInternalData(context, dataId)
-        if(!encrypt && !data.second.encrypted) {
+        if(!encrypt && data.second != null && !data.second!!.encrypted) {
             processJobData(dataId)
             return Result.success()
         }
@@ -118,6 +116,9 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     context,
                     dataId
                 )
+                if(data == null) {
+                    throw IllegalStateException("Can not perform encryption on null data.")
+                }
                 internalData = data
                 val outputStream = ByteArrayOutputStream()
                 val openPgpApi = OpenPgpApi(context, mConnection.service)
@@ -178,7 +179,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     }
 
     override fun onError(e: Exception?) {
-        Log.e(TAG, "Error occurred.", e)
+        Log.e(TAG, "Error occurred during decryption.", e)
         e?.printStackTrace()
         errorOccurred = true
         workDone = true
@@ -245,9 +246,8 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             }
 
             // store to internal storage and delete unencrypted data
-            val id = InternalBackupDataStoreHelper.storeData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), encrypted)
+            val id = InternalBackupDataStoreHelper.storeData(context, internalData!!.packageName, ByteArrayInputStream(outputStream.toByteArray()), internalData!!.timestamp, encrypted)
             InternalBackupDataStoreHelper.clearData(context, dataId)
-
             processJobData(id)
         }
     }
@@ -256,11 +256,15 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
         // store new internal data id into next job
         val dao = BackupDatabase.getInstance(context).backupJobDao()
 
-        dao.deleteForId(job!!._id)
-        val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
-            dataId = id
+        job = dao.getJobForId(backupJobId)
+
+        if(job?.nextJob != null) {
+            dao.deleteForId(job!!._id)
+            val nextJob = dao.getJobForId(job!!.nextJob!!).apply {
+                dataId = id
+            }
+            dao.update(nextJob)
         }
-        dao.update(nextJob)
     }
 
     private fun postUserInteractionNotification(requestCode: Int, pi: PendingIntent) {

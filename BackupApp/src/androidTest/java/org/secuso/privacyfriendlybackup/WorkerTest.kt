@@ -53,7 +53,7 @@ class WorkerTest {
         val fileName = "${packageName}_${dateString}.backup"
 
         runBlocking {
-            dataId = InternalBackupDataStoreHelper.storeBackupData(appContext, packageName, data, false)
+            dataId = InternalBackupDataStoreHelper.storeBackupData(appContext, packageName, data, date, false)
         }
 
         val worker : EncryptionWorker = TestListenableWorkerBuilder<EncryptionWorker>(appContext).apply {
@@ -74,7 +74,7 @@ class WorkerTest {
             delay(1000 * 30)
             val (istream, resultData) = InternalBackupDataStoreHelper.getInternalData(appContext, fileName)
             Log.d("PFABackup", "Data:"+istream?.readString())
-            assertTrue(resultData.encrypted)
+            assertTrue(resultData?.encrypted == true)
         }
 
     }

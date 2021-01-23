@@ -24,7 +24,7 @@ class StoreWorker(val context: Context, params: WorkerParameters) : CoroutineWor
 
     val backupJobId = inputData.getLong(DATA_JOB_ID, -1)
 
-    val repository = BackupDataStorageRepository(WebserviceProvider(), BackupDatabase.getInstance(context))
+    val repository = BackupDataStorageRepository.getInstance(context)
 
     override suspend fun doWork(): Result {
         try {
@@ -86,7 +86,7 @@ class StoreWorker(val context: Context, params: WorkerParameters) : CoroutineWor
         }
 
         // store to internal storage
-        val id = InternalBackupDataStoreHelper.storeData(context, job.packageName, ByteArrayInputStream(data.data), data.encrypted)
+        val id = InternalBackupDataStoreHelper.storeData(context, job.packageName, ByteArrayInputStream(data.data), data.timestamp, data.encrypted)
 
         val nextJob = BackupDatabase.getInstance(context).backupJobDao().getJobForId(job.nextJob!!)
         nextJob.dataId = id

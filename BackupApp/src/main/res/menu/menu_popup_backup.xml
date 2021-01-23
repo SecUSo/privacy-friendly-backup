@@ -8,6 +8,11 @@
     <item
         android:id="@+id/menu_inspect"
         android:title="@string/menu_item_inspect"
-        android:visible="false"/>
+        android:visible="true"/>
+
+    <item
+        android:id="@+id/menu_export"
+        android:title="@string/menu_item_export"
+        android:visible="true"/>
 
 </menu>

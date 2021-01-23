@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.room.ColumnInfo
+import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -12,13 +14,33 @@ import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.external.ExternalBackupDataStoreHelper
+import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
+import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
-class BackupDataStorageRepository(
+class BackupDataStorageRepository private constructor(
     private val webserviceProvider : WebserviceProvider = WebserviceProvider(),
     private val database : BackupDatabase
 ) {
+
+    companion object {
+        private var INSTANCE : BackupDataStorageRepository? = null
+
+        fun getInstance(context: Context): BackupDataStorageRepository {
+            val tempInstance = INSTANCE
+            if (tempInstance != null) {
+                return tempInstance
+            }
+            synchronized(this) {
+                INSTANCE = BackupDataStorageRepository(
+                    WebserviceProvider(),
+                    BackupDatabase.getInstance(context)
+                )
+                return INSTANCE!!
+            }
+        }
+    }
 
     data class BackupData(
         val id : Long = 0,
@@ -30,6 +52,14 @@ class BackupDataStorageRepository(
         val storageType : StorageType,
         val available : Boolean = false
     )
+
+    suspend fun storeFile(context: Context, backupData: BackupData) : Pair<Boolean, Long> {
+        return when(backupData.storageType) {
+            StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.storeData(context, backupData)
+            else -> { false to 0 }
+            //StorageType.CLOUD -> webserviceProvider.storeData(context, packageName, dataId)
+        }
+    }
 
     suspend fun storeFile(context: Context, packageName: String, dataId : Long, storageType: StorageType = StorageType.EXTERNAL) {
         when(storageType) {
@@ -132,6 +162,4 @@ class BackupDataStorageRepository(
         database.backupMetaDataDao().deleteForIds(metadataIds)
 
     }
-
-
 }

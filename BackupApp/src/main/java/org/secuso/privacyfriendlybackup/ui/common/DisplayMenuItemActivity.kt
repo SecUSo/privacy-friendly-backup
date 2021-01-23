@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.ui.common
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -33,27 +34,60 @@ class DisplayMenuItemActivity : AppCompatActivity() {
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            val fragment = try {
-                    MainActivity.MenuItem.valueOf(intent.getStringExtra(
-                        MainActivity.SELECTED_MENU_ITEM
-                    )!!).fragment.newInstance()
-                } catch (e: IllegalArgumentException) {
-                    null
-                } catch (e: NullPointerException) {
-                    null
-                }
+            loadFragment(intent)
+        }
+    }
 
+    private fun loadFragment(intent: Intent) {
+        // Create the detail fragment and add it to the activity
+        // using a fragment transaction.
+        val fragment = try {
+            MainActivity.MenuItem.valueOf(intent.getStringExtra(
+                MainActivity.SELECTED_MENU_ITEM
+            )!!).fragment.newInstance()
+        } catch (e: IllegalArgumentException) {
+            null
+        } catch (e: NullPointerException) {
+            null
+        }
+
+        if(fragment != null) {
+            fragment.arguments = intent.extras
+
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
+                .commit()
+        } else {
+            finish()
+        }
+    }
+
+    fun pressBack() {
+        super.onBackPressed()
+    }
+
+    override fun onBackPressed() {
+        try {
+            val menuItem = MainActivity.MenuItem.valueOf(intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
+            val fragment: Fragment? = supportFragmentManager.findFragmentByTag(menuItem.name)
             if(fragment != null) {
-                fragment.arguments = intent.extras
-
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.container, fragment, intent.getStringExtra(MainActivity.SELECTED_MENU_ITEM)!!)
-                    .commit()
+                (fragment as BaseFragment).onBackPressed()
             } else {
-                finish()
+                super.onBackPressed()
             }
+        } catch (e : Exception) {
+            Log.d("DisplayActivity", "You pressed back too fast", e)
+            super.onBackPressed()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        if(intent != null) {
+            loadFragment(intent)
+        } else {
+            finish()
         }
     }
 
@@ -71,9 +105,9 @@ class DisplayMenuItemActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(MainActivity.MenuItem.MENU_MAIN_ENCRYPTION.name)
-        if(fragment != null && fragment.isVisible) {
-            fragment.onActivityResult(requestCode, resultCode, data)
-        }
+//        val fragment: Fragment? = supportFragmentManager.findFragmentByTag(MainActivity.MenuItem.MENU_MAIN_ENCRYPTION.name)
+//        if(fragment != null && fragment.isVisible) {
+//            fragment.onActivityResult(requestCode, resultCode, data)
+//        }
     }
 }

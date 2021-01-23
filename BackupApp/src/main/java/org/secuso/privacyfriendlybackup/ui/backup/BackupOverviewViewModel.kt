@@ -12,6 +12,8 @@ import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHel
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.ui.common.Mode
 import java.io.ByteArrayInputStream
+import java.util.*
+import kotlin.collections.ArrayList
 
 class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
     private val internalBackupLiveData : MediatorLiveData<List<BackupData>> = MediatorLiveData()
@@ -24,7 +26,7 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             internalBackupLiveData.addSource(
-                BackupDataStorageRepository(WebserviceProvider(), BackupDatabase.getInstance(app)).listAvailableBackups(app)
+                BackupDataStorageRepository.getInstance(app).listAvailableBackups(app)
             ) {
                 internalBackupLiveData.value = it
                 setFilterText(filterLiveData.value)
@@ -78,23 +80,17 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
                     getApplication(),
                     "org.secuso.example",
                     ByteArrayInputStream("TestData_$i".toByteArray()),
+                    Date(),
                     false
                 )
-                BackupDataStorageRepository(
-                    WebserviceProvider(),
-                    BackupDatabase.getInstance(getApplication())
-                ).storeFile(getApplication(), "org.secuso.example", dataId)
+                BackupDataStorageRepository.getInstance(getApplication()).storeFile(getApplication(), "org.secuso.example", dataId)
             }
         }
     }
 
     fun deleteData(deleteList: Set<BackupData>) {
         viewModelScope.launch {
-            val repo = BackupDataStorageRepository(
-                WebserviceProvider(),
-                BackupDatabase.getInstance(getApplication())
-            )
-
+            val repo = BackupDataStorageRepository.getInstance(getApplication())
             repo.deleteFiles(getApplication(), deleteList.map { it.id })
         }
     }

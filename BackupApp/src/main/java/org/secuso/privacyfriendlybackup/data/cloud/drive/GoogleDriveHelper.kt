@@ -1,25 +1,26 @@
 package org.secuso.privacyfriendlybackup.data.cloud.drive
 
 import android.content.Context
-import android.util.Log
-import com.google.api.client.auth.oauth2.Credential
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.http.FileContent
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.util.store.FileDataStoreFactory
-import com.google.api.services.drive.Drive
-import com.google.api.services.drive.DriveScopes
-import com.google.api.services.drive.model.FileList
-import org.secuso.privacyfriendlybackup.util.BackupDataUtil
+//import android.util.Log
+//import com.google.api.client.auth.oauth2.Credential
+//import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
+//import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
+//import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+//import com.google.api.client.http.FileContent
+//import com.google.api.client.http.javanet.NetHttpTransport
+//import com.google.api.client.json.JsonFactory
+//import com.google.api.client.json.jackson2.JacksonFactory
+//import com.google.api.client.util.store.FileDataStoreFactory
+//import com.google.api.services.drive.Drive
+//import com.google.api.services.drive.DriveScopes
+//import com.google.api.services.drive.model.FileList
+//import org.secuso.privacyfriendlybackup.util.BackupDataUtil
 import java.io.*
 import java.util.*
 
 
 object GoogleDriveHelper {
+    /*
     private const val TAG = "PFA Drive"
     private const val APPLICATION_NAME = "Privacy Friendly Backup"
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
@@ -119,4 +120,5 @@ object GoogleDriveHelper {
     fun deleteFile(context: Context, fileId: String) {
         getService(context).Files().delete(fileId).execute()
     }
+     */
 }

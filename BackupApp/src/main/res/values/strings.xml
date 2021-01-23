@@ -52,6 +52,23 @@
     <string name="storage_type_drive">Google Drive</string>
     <string name="menu_item_inspect">Inspect</string>
     <string name="menu_item_restore">Restore</string>
+    <string name="activity_data_inspection_error_id_not_valid">Error: Id is not valid</string>
+    <string name="menu_title_export">Export</string>
+    <string name="data_inspection_load_status_unknown">Unknown</string>
+    <string name="data_inspection_load_status_loading">Loading…</string>
+    <string name="data_inspection_load_status_decrypting">Decrypting…</string>
+    <string name="data_inspection_load_status_error">Unknown error.</string>
+    <string name="data_inspection_load_status_decryption_error">An unknown decryption error occurred. Please check the encryption settings.</string>
+    <string name="data_inspection_load_status_done">Done</string>
+    <string name="menu_title_add">Import backup</string>
+    <string name="app_import_backup">Import Backup</string>
+    <string name="menu_item_export">Export</string>
+    <string name="data_import_success_dialog_title">Data Import Complete</string>
+    <string name="data_import_success_dialog_message">The backup was imported successfully.\nApp: %s\nDate:\%s</string>
+    <string name="data_import_success_dialog_confirm">Okay</string>
+    <string name="data_import_error_dialog_confirm">Okay</string>
+    <string name="data_import_error_dialog_title">Data Import Failed</string>
+    <string name="data_import_error_dialog_message">The file could not be imported. Please make sure it is a valid backup file.</string>
 
 
 </resources>

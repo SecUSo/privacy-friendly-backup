@@ -9,7 +9,7 @@ import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
 @Parcelize
-@Entity(indices = [Index(value = ["packageName"])])
+@Entity(indices = [Index(value = ["packageName", "timestamp"], unique = true)])
 data class StoredBackupMetaData(
     @PrimaryKey(autoGenerate = true)
     val _id : Long = 0,
