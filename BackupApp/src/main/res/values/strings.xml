@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Backup</string>
+    <string name="app_name_long">Privacy Friendly Backup</string>
     <string name="channel_name">Default</string>
     <string name="channel_description">Default notification channel</string>
     <string name="notification_user_interaction_required_title">Attention required</string>
@@ -85,4 +86,27 @@
     <string name="dialog_data_export_start_title">Backup Import</string>
     <string name="dialog_data_export_start_message">Do you want to import a backup file?</string>
     <string name="dialog_dont_show_again">Do not show this again.</string>
+    <string name="menu_title_encryption_info">Encryption Info</string>
+    <string name="backup_overview_no_entries_text">There is currently no backup. Either create or import new backups to see them in this list.</string>
+    <string name="application_overview_no_entries_text">There is currently no application supporting this backup protocol installed.</string>
+    <string name="version_number">Version: %s</string>
+    <string name="about_author">Authors:</string>
+    <string name="about_author_names" translatable="false">Christopher Beckmann</string>
+    <string name="about_author_contributors">and contributors</string>
+    <string name="about_affiliation">In affiliation with</string>
+    <string name="privacy_friendly">This application belongs to the group of Privacy Friendly Apps developed by Karlsruher Institute for Technology (KIT). Sourcecode licensed under GPLv3. Images copyright KIT and Google Inc.</string>
+    <string name="more_info">More information can be found on:</string>
+    <string name="github" translatable="false"><a href="https://github.com/SecUSo/privacy-friendly-backup">Github-Repo</a></string>
+    <string name="url" translatable="false"><a href="https://www.secuso.org/pfa">SECUSO-Website</a></string>
+    <string name="data_inspection_signature_user_id">Signed by %s</string>
+    <string name="data_inspection_signature_key_id">Key ID: %s</string>
+    <string name="signature_result_no_signature">No Signature</string>
+    <string name="signature_result_invalid">Invalid Signature</string>
+    <string name="signature_result_valid">Signature Valid</string>
+    <string name="signature_result_key_insecure">Insecure Key</string>
+    <string name="signature_result_key_expired">Key Expired</string>
+    <string name="signature_result_key_revoked">Key Revoked</string>
+    <string name="signature_result_key_unconfirmed">Key Unconfirmed</string>
+    <string name="signature_result_key_missing">Key Missing</string>
+
 </resources>

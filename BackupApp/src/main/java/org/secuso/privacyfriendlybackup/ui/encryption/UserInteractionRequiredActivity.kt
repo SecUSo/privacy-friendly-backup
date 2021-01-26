@@ -6,8 +6,11 @@ import android.content.IntentSender
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import androidx.work.*
 import org.openintents.openpgp.util.OpenPgpApi
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_KEY
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_PASSPHRASE
 import org.secuso.privacyfriendlybackup.worker.EncryptionWorker
 import org.secuso.privacyfriendlybackup.worker.datakeys.*
 
@@ -62,21 +65,33 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if(resultCode == RESULT_OK) {
+            val pref = PreferenceManager.getDefaultSharedPreferences(this)
+            val edit = pref.edit()
+
             val newPassphrase = data?.getStringExtra(OpenPgpApi.EXTRA_PASSPHRASE)
             if(!newPassphrase.isNullOrEmpty() && passphrase != newPassphrase) {
                 passphrase = newPassphrase
-            }
-
-            val newSelectedKeyIds = data?.getLongArrayExtra(OpenPgpApi.EXTRA_KEY_IDS)
-            if(newSelectedKeyIds != null && newSelectedKeyIds!!.isEmpty()) {
-                selectedKeyIds = newSelectedKeyIds
+                edit.putString(PREF_ENCRYPTION_PASSPHRASE, newPassphrase)
             }
 
             val newSignKey = data?.getLongExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, -1L)
             if(newSignKey != null && newSignKey != -1L) {
                 signingKey = newSignKey
+                edit.putLong(PREF_ENCRYPTION_KEY, newSignKey)
             }
 
+            val newSelectedKeyIds = data?.getLongArrayExtra(OpenPgpApi.EXTRA_KEY_IDS)
+            if(newSelectedKeyIds != null && newSelectedKeyIds!!.isEmpty()) {
+                selectedKeyIds = newSelectedKeyIds
+                // TODO: this might have to be changed if backup sharing is implemented
+            }
+
+            edit.apply()
+
+            // after the answer was received, there is no need to display this translucent activity
+            finish()
+
+/*
             var encryptionWorker : OneTimeWorkRequest?
 
             when(requestCode) {
@@ -100,10 +115,8 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
                 }
             }
 
-            // TODO save in preferences for future
-            //PreferenceManager.getDefaultSharedPreferences(this)
-
             WorkManager.getInstance(this).beginUniqueWork("$callingPackageName($dataId)", ExistingWorkPolicy.REPLACE, encryptionWorker!!).enqueue()
+*/
         }
     }
 

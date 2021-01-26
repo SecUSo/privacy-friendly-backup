@@ -1,8 +1,7 @@
-package org.secuso.privacyfriendlybackup.ui.data
+package org.secuso.privacyfriendlybackup.ui.inspection
 
 import android.app.Application
 import android.net.Uri
-import android.os.ParcelFileDescriptor
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
@@ -11,46 +10,34 @@ import androidx.preference.PreferenceManager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import com.google.gson.GsonBuilder
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import org.secuso.privacyfriendlybackup.api.util.readString
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
-import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
+import org.secuso.privacyfriendlybackup.data.cache.DecryptionCache
+import org.secuso.privacyfriendlybackup.data.cache.DecryptionMetaData
 import org.secuso.privacyfriendlybackup.data.exporter.DataExporter
 import org.secuso.privacyfriendlybackup.data.importer.DataImporter
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
-import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.worker.BackupJobManagerWorker
-import org.w3c.dom.Text
-import java.io.BufferedWriter
-import java.io.IOException
-import java.io.OutputStream
-import java.io.OutputStreamWriter
-import java.nio.charset.Charset
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
 class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     val TAG : String = "DataInspectionViewModel"
 
     private val backupDataLiveData = MutableLiveData<String>()
-    private val backupDataShownLiveData = MutableLiveData<List<String>>()
-    private val pathLiveData = MutableLiveData<List<String>>( emptyList() )
     private val loadStatusLiveData = MediatorLiveData<LoadStatus>().apply { postValue(LoadStatus.UNKNOWN) }
+    private val decryptionMetaLiveData = MutableLiveData<DecryptionMetaData>()
     private var dataId = -1L
     private var localLoadedDataId = -1L
     private var fileName : String = ""
     private var encryptedFileName : String = ""
-    private var timestamp : Date? = null
     private var backupMetaData : BackupDataStorageRepository.BackupData? = null
     var isEncrypted : Boolean = false
         private set
@@ -68,6 +55,8 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     fun getLoadStatus() : LiveData<LoadStatus> {
         return loadStatusLiveData
     }
+
+    fun getDecryptionMetaData() : LiveData<DecryptionMetaData> = decryptionMetaLiveData
 
     fun loadData(dataId: Long) {
         this.dataId = dataId
@@ -132,6 +121,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
                                         }
 
                                         setBackupData(decryptedData.readString())
+                                        setDecryptionMetaData(DecryptionCache.getDecryptionMetaData(metaData))
                                     }
                                 }
                                 WorkInfo.State.BLOCKED -> {
@@ -154,6 +144,12 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
                 setBackupData(String(data.data))
             }
         }
+    }
+
+    private fun setDecryptionMetaData(decryptionMetaData: DecryptionMetaData?) {
+        decryptionMetaData ?: return
+
+        decryptionMetaLiveData.postValue(decryptionMetaData)
     }
 
     private fun getUnencryptedFilename(filename: String) =

@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -47,8 +48,8 @@ class MainActivity : AppCompatActivity() {
         MENU_MAIN_APPS(R.drawable.ic_apps_24, R.string.menu_main_apps, ApplicationOverviewFragment::class.java, DisplayMenuItemActivity::class.java),
         MENU_MAIN_ENCRYPTION(R.drawable.ic_encryption_24, R.string.menu_main_encryption, EncryptionSettingsFragment::class.java, DisplayMenuItemActivity::class.java),
         //MENU_MAIN_SETTINGS(R.drawable.ic_settings_24, R.string.menu_main_settings, SettingsFragment::class.java, DisplayMenuItemActivity::class.java),
-        MENU_MAIN_HELP(R.drawable.ic_help_outline_24, R.string.menu_main_help, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java),
-        MENU_MAIN_ABOUT(R.drawable.ic_about_24, R.string.menu_main_about, PlaceholderFragment::class.java, DisplayMenuItemActivity::class.java);
+        MENU_MAIN_HELP(R.drawable.ic_help_outline_24, R.string.menu_main_help, HelpFragment::class.java, DisplayMenuItemActivity::class.java),
+        MENU_MAIN_ABOUT(R.drawable.ic_about_24, R.string.menu_main_about, AboutFragment::class.java, DisplayMenuItemActivity::class.java);
 
         val imageRes = _imageRes
         val titleRes = _titleRes
@@ -83,6 +84,9 @@ class MainActivity : AppCompatActivity() {
      * device.
      */
     private var twoPane: Boolean = false
+
+    private var adapter: SimpleItemRecyclerViewAdapter? = null
+    private var currentActiveMenuItem: MenuItem? = null
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -161,16 +165,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun highlightActiveMenuItem(menuItem: MenuItem) {
-        // TODO
+        currentActiveMenuItem = menuItem
+        adapter?.highlightMenuItem(currentActiveMenuItem)
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
-        recyclerView.adapter =
-            SimpleItemRecyclerViewAdapter(
-                this,
-                items,
-                twoPane
-            )
+        adapter = SimpleItemRecyclerViewAdapter(
+            this,
+            items,
+            twoPane
+        )
+        recyclerView.adapter = adapter
     }
 
     class SimpleItemRecyclerViewAdapter(
@@ -180,6 +185,7 @@ class MainActivity : AppCompatActivity() {
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
+        private var activeMenuItem : MenuItem = MenuItem.MENU_MAIN_APPS
         private val onClickListener: View.OnClickListener
 
         init {
@@ -206,11 +212,25 @@ class MainActivity : AppCompatActivity() {
                 tag = item
                 setOnClickListener(onClickListener)
             }
+
+            val color = if(twoPane && item == activeMenuItem) {
+                ContextCompat.getColor(parentActivity, R.color.lightgrey)
+            } else {
+                ContextCompat.getColor(parentActivity, R.color.transparent)
+            }
+            holder.background.setBackgroundColor(color)
         }
 
         override fun getItemCount() = values.size
 
+        fun highlightMenuItem(currentActiveMenuItem: MenuItem?) {
+            currentActiveMenuItem ?: return
+            activeMenuItem = currentActiveMenuItem
+            notifyDataSetChanged()
+        }
+
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val background: LinearLayout = view.findViewById(R.id.background)
             val imageView: ImageView = view.findViewById(R.id.image)
             val contentView: TextView = view.findViewById(R.id.content)
         }

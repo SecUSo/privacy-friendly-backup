@@ -55,8 +55,12 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
         fragment_backup_overview_list.layoutManager =
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
+        backup_overview_no_entries_name.setText(R.string.application_overview_no_entries_text)
+
         viewModel.appLiveData.observe(viewLifecycleOwner) { data ->
             adapter.setData(data)
+
+            displayNoElementsImage(data.isEmpty())
 
             (requireActivity().application as BackupApplication).schedulePeriodicWork()
         }
@@ -109,5 +113,10 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
         if(arguments?.getBoolean(MainActivity.TWOPANE) == false) {
             requireActivity().finish()
         }
+
+    }
+
+    private fun displayNoElementsImage(show: Boolean) {
+        backup_overview_no_entries.visibility = if(show) View.VISIBLE else View.GONE
     }
 }

@@ -1,11 +1,8 @@
-package org.secuso.privacyfriendlybackup.ui.data
+package org.secuso.privacyfriendlybackup.ui.inspection
 
-import android.R.attr.bitmap
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.widget.Toast
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import org.secuso.privacyfriendlybackup.R

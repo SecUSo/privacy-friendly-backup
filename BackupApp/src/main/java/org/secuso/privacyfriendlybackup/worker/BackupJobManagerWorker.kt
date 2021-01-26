@@ -23,8 +23,6 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
     // current encryption settings
     private val isEncryptionEnabled : Boolean = pref.getBoolean(PREF_ENCRYPTION_ENABLE, false)
     private val provider : String? = pref.getString(PREF_ENCRYPTION_CRYPTO_PROVIDER, "")
-    private val passphrase : String? = pref.getString(PREF_ENCRYPTION_PASSPHRASE, "")
-    private val key : Long = pref.getLong(PREF_ENCRYPTION_KEY, -1)
 
     override suspend fun doWork(): Result {
         val db = BackupDatabase.getInstance(context)
@@ -175,7 +173,7 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
             data.add(DATA_ID to job.dataId)
             data.add(DATA_OPENPGP_PROVIDER to provider)
             data.add(DATA_ENCRYPT to encrypt)
-            data.add(DATA_KEY_ID to longArrayOf(key)) // TODO - this is for encryption for other ppl
+            data.add(DATA_KEY_ID to longArrayOf(key)) // this is for encryption for other ppl
             data.add(DATA_SIGNING_KEY_ID to key)
             data.add(DATA_PASSPHRASE to passphrase)
 

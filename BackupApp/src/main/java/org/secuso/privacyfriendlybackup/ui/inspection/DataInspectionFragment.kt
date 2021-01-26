@@ -1,7 +1,9 @@
-package org.secuso.privacyfriendlybackup.ui.data
+package org.secuso.privacyfriendlybackup.ui.inspection
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -11,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +22,7 @@ import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.data_inspection_fragment.*
 import kotlinx.android.synthetic.main.item_application_job.*
+import org.openintents.openpgp.OpenPgpSignatureResult
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
 import java.io.FileNotFoundException
@@ -27,9 +31,11 @@ import java.io.FileNotFoundException
 class DataInspectionFragment : Fragment() {
 
     private var exportMenuItem : MenuItem? = null
+    private var encryptionInfoMenuItem : MenuItem? = null
     private var onlyExportData : Boolean = false
     private var exportEncrypted : Boolean = false
     private var encryptionEnabled : Boolean = false
+    private var showSigInfo: Boolean = false
 
     companion object {
         fun newInstance() = DataInspectionFragment()
@@ -57,6 +63,7 @@ class DataInspectionFragment : Fragment() {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         exportMenuItem = menu.findItem(R.id.action_export)
+        encryptionInfoMenuItem = menu.findItem(R.id.action_encryption_info)
         val icon = exportMenuItem?.icon
         if(icon != null) {
             icon.mutate()
@@ -80,8 +87,21 @@ class DataInspectionFragment : Fragment() {
                 handleExportClicked()
                 true
             }
+            R.id.action_encryption_info -> {
+                toggleShowSignatureInfo()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun toggleShowSignatureInfo() {
+        showSigInfo = !showSigInfo
+
+        val set = ConstraintSet()
+        set.clone(data_inspection)
+        set.setVisibility(R.id.data_inspection_encryption_details, if(showSigInfo) View.VISIBLE else View.GONE)
+        set.applyTo(data_inspection)
     }
 
     private fun handleExportClicked() {
@@ -259,5 +279,63 @@ class DataInspectionFragment : Fragment() {
         )
         data_inspection_json_list.setBracesColor(ContextCompat.getColor(activity, R.color.black))
         //data_inspection_json_list.setTextSize()
+
+        viewModel.getDecryptionMetaData().observe(requireActivity()) {
+            encryptionInfoMenuItem?.isEnabled = true
+            encryptionInfoMenuItem?.isVisible = true
+
+            var statusText = ""
+            var statusIcon = (ContextCompat.getDrawable(requireActivity(), R.drawable.ic_close_24))
+            var color = ContextCompat.getColor(requireActivity(), R.color.red)
+            when(it.signature?.result) {
+                OpenPgpSignatureResult.RESULT_NO_SIGNATURE -> {
+                    // not signed
+                    statusText = requireActivity().getString(R.string.signature_result_no_signature)
+                    data_inspection_signature_user_id.visibility = View.GONE
+                    data_inspection_signature_key_id.visibility = View.GONE
+                }
+                OpenPgpSignatureResult.RESULT_INVALID_SIGNATURE -> {
+                    // invalid signature
+                    statusText = requireActivity().getString(R.string.signature_result_no_signature)
+                }
+                OpenPgpSignatureResult.RESULT_VALID_KEY_CONFIRMED -> {
+                    // everything is fine
+                    statusText = requireActivity().getString(R.string.signature_result_valid)
+                    statusIcon = (ContextCompat.getDrawable(requireActivity(), R.drawable.ic_check_24))
+                    color = ContextCompat.getColor(requireActivity(), R.color.green)
+                }
+                OpenPgpSignatureResult.RESULT_KEY_MISSING -> {
+                    // no key was found for this signature verification
+                    statusText = requireActivity().getString(R.string.signature_result_key_missing)
+                }
+                OpenPgpSignatureResult.RESULT_VALID_KEY_UNCONFIRMED -> {
+                    // successfully verified signature, but with unconfirmed key
+                    statusText = requireActivity().getString(R.string.signature_result_key_unconfirmed)
+                }
+                OpenPgpSignatureResult.RESULT_INVALID_KEY_REVOKED -> {
+                    // key has been revoked -> invalid signature!
+                    statusText = requireActivity().getString(R.string.signature_result_key_revoked)
+                }
+                OpenPgpSignatureResult.RESULT_INVALID_KEY_EXPIRED -> {
+                    // key is expired -> invalid signature!
+                    statusText = requireActivity().getString(R.string.signature_result_key_expired)
+                }
+                OpenPgpSignatureResult.RESULT_INVALID_KEY_INSECURE -> {
+                    // insecure cryptographic algorithms/protocol -> invalid signature!
+                    statusText = requireActivity().getString(R.string.signature_result_key_insecure)
+                }
+                else -> {}
+            }
+
+            statusIcon?.apply {
+                mutate()
+                setTint(color)
+            }
+            data_inspection_signature_status.setImageDrawable(statusIcon)
+            data_inspection_signature_status_text.text = statusText
+            data_inspection_signature_user_id.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it.signature?.primaryUserId)
+            data_inspection_signature_key_id.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it.signature?.keyId.toString())
+
+        }
     }
 }

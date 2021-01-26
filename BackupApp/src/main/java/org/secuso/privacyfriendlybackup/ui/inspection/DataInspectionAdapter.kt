@@ -1,17 +1,14 @@
-package org.secuso.privacyfriendlybackup.ui.data
+package org.secuso.privacyfriendlybackup.ui.inspection
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import org.secuso.privacyfriendlybackup.R
-import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
-import org.secuso.privacyfriendlybackup.ui.backup.FilterableBackupAdapter
 
 class DataInspectionAdapter(val context : Context) : RecyclerView.Adapter<DataInspectionAdapter.DataViewHolder>() {
 

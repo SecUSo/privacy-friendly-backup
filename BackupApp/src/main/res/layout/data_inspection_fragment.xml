@@ -1,10 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/data_inspection"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/data_inspection_encryption_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_margin="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/data_inspection_json_list_scroll_view">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp">
+
+            <ImageView
+                android:id="@+id/data_inspection_signature_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_check_24"
+                app:tint="@color/green"
+                app:layout_constraintDimensionRatio="w,1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/data_inspection_signature_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Valid"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/data_inspection_signature_status"/>
+
+            <TextView
+                android:id="@+id/data_inspection_signature_user_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Signed by ID mail@example.com"
+                app:layout_constraintBottom_toTopOf="@+id/data_inspection_signature_key_id"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@id/data_inspection_signature_status_text"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/data_inspection_signature_key_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Key ID: 0xb581c2a973746a20"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@id/data_inspection_signature_status_text"
+                app:layout_constraintTop_toBottomOf="@id/data_inspection_signature_user_id" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/data_inspection_load_status"
@@ -15,7 +79,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toBottomOf="@+id/data_inspection_encryption_details" >
 
         <ImageView
             android:id="@+id/data_inspection_load_status_image"
@@ -78,14 +142,15 @@
         app:layout_constraintTop_toBottomOf="@+id/data_inspection_path_scroll_view" /> -->
 
     <ScrollView
+        android:id="@+id/data_inspection_json_list_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:fillViewport="true"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/data_inspection_encryption_details">
 
         <com.yuyh.jsonviewer.library.JsonRecyclerView
             android:id="@+id/data_inspection_json_list"

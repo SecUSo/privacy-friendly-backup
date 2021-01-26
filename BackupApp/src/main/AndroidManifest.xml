@@ -12,6 +12,7 @@
         android:name=".BackupApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:installLocation="preferExternal"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -109,7 +110,7 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.backup.*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.data.DataInspectionActivity" />
+        <activity android:name=".ui.inspection.DataInspectionActivity" />
         <activity
             android:name=".ui.main.MainActivity"
             android:configChanges="orientation|screenSize"

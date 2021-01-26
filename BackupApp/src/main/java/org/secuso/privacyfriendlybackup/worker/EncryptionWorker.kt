@@ -6,18 +6,18 @@ import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.*
-import org.openintents.openpgp.IOpenPgpService2
-import org.openintents.openpgp.OpenPgpDecryptionResult
-import org.openintents.openpgp.OpenPgpError
+import org.openintents.openpgp.*
 import org.openintents.openpgp.OpenPgpError.*
-import org.openintents.openpgp.OpenPgpSignatureResult
 import org.openintents.openpgp.util.OpenPgpApi
 import org.openintents.openpgp.util.OpenPgpServiceConnection
 import org.secuso.privacyfriendlybackup.BackupApplication.Companion.CHANNEL_ID
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.data.cache.DecryptionCache
+import org.secuso.privacyfriendlybackup.data.cache.DecryptionMetaData
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
@@ -64,6 +64,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
     val passphrase = inputData.getString(DATA_PASSPHRASE)
     var internalData : InternalBackupData? = null
     var job : BackupJob? = null
+    var decryptedDataId : Long = 0L
 
     lateinit var mConnection: OpenPgpServiceConnection
 
@@ -130,11 +131,13 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                 val intent = Intent().apply {
                     action = OpenPgpApi.ACTION_SIGN_AND_ENCRYPT
 
-                    if (selectedKeyIds != null && selectedKeyIds.isNotEmpty()) {
+                    if (selectedKeyIds != null && selectedKeyIds.isNotEmpty() && !selectedKeyIds.contains(
+                            0
+                        )) {
                         putExtra(OpenPgpApi.EXTRA_KEY_IDS, selectedKeyIds)
                     }
 
-                    if (signingKey != -1L) {
+                    if (signingKey != -1L && signingKey != 0L) {
                         putExtra(OpenPgpApi.EXTRA_SIGN_KEY_ID, signingKey)
                     }
 
@@ -209,12 +212,59 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                             val signatureResult: OpenPgpSignatureResult = result.getParcelableExtra(
                                 OpenPgpApi.RESULT_SIGNATURE
                             )!!
-                            val decryptionResult: OpenPgpDecryptionResult =
-                                result.getParcelableExtra(
-                                    OpenPgpApi.RESULT_DECRYPTION
-                                )!!
-                            // val metadata: OpenPgpDecryptMetadata = result.getParcelableExtra(OpenPgpApi.RESULT_METADATA)!!
+                            val decryptionResult: OpenPgpDecryptionResult = result.getParcelableExtra(
+                                OpenPgpApi.RESULT_DECRYPTION
+                            )!!
+                            val metadata: OpenPgpMetadata = result.getParcelableExtra(
+                                OpenPgpApi.RESULT_METADATA
+                            )!!
+
                             // TODO: check signature
+                            // ### INFORMATION for user? -> Display to user -> Save somewhere temporarily?
+                            // Signed by
+                            signatureResult.confirmedUserIds
+                            // primary
+                            signatureResult.primaryUserId
+                            // signed date
+                            signatureResult.signatureTimestamp
+                            // hex key id of the signer key
+                            signatureResult.keyId
+
+                            when (signatureResult.result) {
+                                OpenPgpSignatureResult.RESULT_NO_SIGNATURE -> {
+                                    // not signed
+                                }
+                                OpenPgpSignatureResult.RESULT_INVALID_SIGNATURE -> {
+                                    // invalid signature
+                                }
+                                OpenPgpSignatureResult.RESULT_VALID_KEY_CONFIRMED -> {
+                                    // everything is fine
+                                }
+                                OpenPgpSignatureResult.RESULT_KEY_MISSING -> {
+                                    // no key was found for this signature verification
+                                }
+                                OpenPgpSignatureResult.RESULT_VALID_KEY_UNCONFIRMED -> {
+                                    // successfully verified signature, but with unconfirmed key
+                                }
+                                OpenPgpSignatureResult.RESULT_INVALID_KEY_REVOKED -> {
+                                    // key has been revoked -> invalid signature!
+                                }
+                                OpenPgpSignatureResult.RESULT_INVALID_KEY_EXPIRED -> {
+                                    // key is expired -> invalid signature!
+                                }
+                                OpenPgpSignatureResult.RESULT_INVALID_KEY_INSECURE -> {
+                                    // insecure cryptographic algorithms/protocol -> invalid signature!
+                                }
+                            }
+
+                            // write to temp storage
+                            val currentWorker = worker.get()
+                            if(currentWorker?.internalData != null) {
+                                DecryptionCache.writeDecryptionMetaData(
+                                    currentWorker.internalData!!,
+                                    DecryptionMetaData(signatureResult, decryptionResult, metadata)
+                                )
+                            }
                         }
                         else -> {
                             // do nothing
@@ -236,17 +286,21 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                         }
                         INCOMPATIBLE_API_VERSIONS -> {
                             Log.d(TAG, "INCOMPATIBLE_API_VERSIONS")
+                            // TODO:
                         }
                         NO_OR_WRONG_PASSPHRASE -> {
                             Log.d(TAG, "NO_OR_WRONG_PASSPHRASE")
+                            // TODO: inform user about wrong passphrase
                         }
                         NO_USER_IDS -> {
                             Log.d(TAG, "NO_USER_IDS")
+                            // TODO:
                         }
                         OPPORTUNISTIC_MISSING_KEYS -> {
                             Log.d(TAG, "OPPORTUNISTIC_MISSING_KEYS")
                         }
-                        else -> { /* do nothing */ }
+                        else -> { /* do nothing */
+                        }
                     }
                     worker.get()?.onError(null)
 
@@ -282,6 +336,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     outputStream.toByteArray()
                 ), internalData!!.timestamp, encrypted
             )
+            decryptedDataId = id
             InternalBackupDataStoreHelper.clearData(context, dataId)
             processJobData(id)
         }
@@ -308,13 +363,14 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             val notification = NotificationCompat.Builder(context, CHANNEL_ID).apply {
                 setContentTitle(context.getString(R.string.notification_user_interaction_required_title))
                 setContentText(context.getString(R.string.notification_user_interaction_required_content))
-                setSmallIcon(R.mipmap.ic_launcher)
+                color = ContextCompat.getColor(context, R.color.ic_launcher_background)
+                setSmallIcon(R.drawable.ic_stat_backup)
                 setAutoCancel(true)
 
                 val intent = Intent(context, UserInteractionRequiredActivity::class.java).apply {
                     putExtra(OpenPgpApi.RESULT_INTENT, pi)
                     putExtra(UserInteractionRequiredActivity.EXTRA_REQUEST_CODE, requestCode)
-                    putExtra(DATA_ID, dataId)
+                    putExtra(DATA_ID, dataId) // inputData.getLong(DATA_ID, -1)
                     putExtra(DATA_ENCRYPT, encrypt)
                     putExtra(DATA_OPENPGP_PROVIDER, cryptoProviderPackage)
                     putExtra(DATA_KEY_ID, selectedKeyIds)

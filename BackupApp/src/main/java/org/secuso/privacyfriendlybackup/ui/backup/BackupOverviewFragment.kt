@@ -30,12 +30,10 @@ import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.DIALOG_SKIP_IM
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.common.Mode
-import org.secuso.privacyfriendlybackup.ui.data.DataInspectionActivity
+import org.secuso.privacyfriendlybackup.ui.inspection.DataInspectionActivity
 import org.secuso.privacyfriendlybackup.ui.importbackup.ImportBackupActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.BACKUP_ID
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
-import kotlin.math.abs
-import kotlin.math.ceil
 
 
 class BackupOverviewFragment : BaseFragment(),
@@ -157,6 +155,7 @@ class BackupOverviewFragment : BaseFragment(),
             adapter.setFilteredData(data)
 
             playAnimationIfApplicable(data)
+            displayNoElementsImage(data.isEmpty())
         }
 
         viewModel.currentMode.observe(viewLifecycleOwner) { mode ->
@@ -202,6 +201,10 @@ class BackupOverviewFragment : BaseFragment(),
 
             oldMode = mode
         }
+    }
+
+    private fun displayNoElementsImage(show: Boolean) {
+        backup_overview_no_entries.visibility = if(show) View.VISIBLE else View.GONE
     }
 
     private fun playAnimationIfApplicable(data: List<BackupDataStorageRepository.BackupData>) {

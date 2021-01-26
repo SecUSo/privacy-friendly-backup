@@ -1,4 +1,4 @@
-package org.secuso.privacyfriendlybackup.ui.data
+package org.secuso.privacyfriendlybackup.ui.inspection
 
 import org.secuso.privacyfriendlybackup.R
 
