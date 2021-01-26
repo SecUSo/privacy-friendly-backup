@@ -3,3 +3,6 @@ rootProject.name = "Backup"
 
 include ':BackupAPI'
 project(':BackupAPI').projectDir = new File('BackupAPI/BackupAPI')
+
+include ':jsonviewer'
+project(':jsonviewer').projectDir = new File('libs/jsonviewer')

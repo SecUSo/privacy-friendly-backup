@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/BackupAPI/BackupAPI" />
             <option value="$PROJECT_DIR$/BackupApp" />
+            <option value="$PROJECT_DIR$/libs/jsonviewer" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
