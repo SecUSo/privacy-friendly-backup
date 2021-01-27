@@ -1,0 +1,5 @@
+Privacy Friendly Backup is an application that works with other privacy friendly apps to enable backups. The app allows you to create and manage backups. This includes importing backups into the app and exporting backups to external storage media. 
+The Privacy Friendly Backup app communicates with other Privacy Friendly apps and extracts or injects data into and out of the app to enable the creation and restoration of backups.
+
+The app provides encryption via an interface to another app that provides encryption as functionality via the openpgp-api. The user is free to choose their own encryption provider via the app's settings.
+For encryption to work, the provider must be installed externally. We recommend https://www.openkeychain.org/ , as this app is available in the regular PlayStore as well as in the F-Droid Store and is completely open source.
