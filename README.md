@@ -1,3 +1,9 @@
+<img src="https://github.com/SecUSo/privacy-friendly-backup/raw/master/fastlane/metadata/android/en-US/images/icon.png"
+     alt="Privacy Friendly Backup Icon"
+     width="80px"
+     align="right"
+     style="float: right; margin-right: 10px;" />
+     
 # Privacy Friendly Backup
 
 This is the privacy friendly backup application that enables users to create and manage backups of other privacy friendly apps. It provides encryption via a crypto provider like OpenKeyChain.
