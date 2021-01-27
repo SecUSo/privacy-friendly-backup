@@ -13,14 +13,14 @@ class HelpDataDump(val context: Context) {
             general.add(context.resources.getString(R.string.help_whatis_answer))
             expandableListDetail[context.resources.getString(R.string.help_whatis)] = general
 
+            val whichApps: MutableList<String> = ArrayList()
+            whichApps.add(context.resources.getString(R.string.help_which_apps_answer1))
+            expandableListDetail[context.resources.getString(R.string.help_which_apps)] = whichApps
+
             val encryption: MutableList<String> = ArrayList()
             encryption.add(context.resources.getString(R.string.help_encryption_answer1))
             encryption.add(context.resources.getString(R.string.help_encryption_answer2))
             expandableListDetail[context.resources.getString(R.string.help_encryption)] = encryption
-
-//            val where: MutableList<String> = ArrayList()
-//            where.add(context.resources.getString(R.string.help_where_from_answer))
-//            expandableListDetail[context.resources.getString(R.string.help_where_from)] = where
 //
 //            val radius: MutableList<String> = ArrayList()
 //            radius.add(context.resources.getString(R.string.help_radius_search_text))

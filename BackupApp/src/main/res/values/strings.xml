@@ -113,5 +113,7 @@
     <string name="help_encryption">How does the encryption work?</string>
     <string name="help_encryption_answer1">The encryption is done via an external cryptographic provider. For more information you can check out the openpgp-api that is used by this application.</string>
     <string name="help_encryption_answer2">In order to use the encryption you will need to install a cryptographic provider application. We recommend the OpenKeyChain application because it is open source and available in both the Google Play Store as well as the f-Droid store.</string>
+    <string name="help_which_apps">How many and which apps are currently supported?</string>
+    <string name="help_which_apps_answer1">Currently only the Notes App is supported but we are working on adding more applications to this list.</string>
 
 </resources>

@@ -31,7 +31,7 @@ class HelpFragment : BaseFragment() {
     }
 
     override fun onBackPressed() {
-        activity?.onBackPressed()
+        activity?.finish()
     }
 
 }

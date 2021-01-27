@@ -109,4 +109,6 @@
     <string name="help_whatis_answer">Die Privacy Friendly Backup App unterstützt Anwender beim Erstellen von Backups anderer Privacy Friendly Apps. Die Apps kommunizieren untereinander, senden und empfangen Daten, um App-Daten zu sichern und wiederherzustellen.</string>
     <string name="help_encryption_answer1">Die Verschlüsselung erfolgt über einen externen Kryptographie-Anbieter. Für weitere Informationen können Sie sich die Openpgp-api ansehen, die von dieser Anwendung verwendet wird.</string>
     <string name="help_encryption_answer2">Um die Verschlüsselung nutzen zu können, müssen Sie eine Kryptoanbieter-Anwendung installieren. Wir empfehlen die OpenKeyChain-Anwendung, da sie quelloffen ist und sowohl im Google Play Store als auch im f-Droid-Store verfügbar ist.</string>
+    <string name="help_which_apps">Wie viele und welche Apps werden zur Zeit unterstützt?</string>
+    <string name="help_which_apps_answer1">Wir arbeiten stetig daran neue Apps zu unterstützten. Zur Zeit wird nur die Notizen App unterstützt.</string>
 </resources>
