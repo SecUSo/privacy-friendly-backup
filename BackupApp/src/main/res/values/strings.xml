@@ -5,8 +5,8 @@
     <string name="channel_description">Default notification channel</string>
     <string name="notification_user_interaction_required_title">Attention required</string>
     <string name="notification_user_interaction_required_content">Settings for the background encryption missing. Please click this notification to proceed.</string>
-    <string name="title_item_list">Items</string>
-    <string name="title_item_detail">Item Detail</string>
+    <string name="title_item_list" translatable="false">Items</string>
+    <string name="title_item_detail" translatable="false">Item Detail</string>
     <string name="menu_title_search">Search</string>
     <string name="menu_title_select_all">Select all</string>
     <string name="menu_title_sort">Sort</string>
@@ -26,10 +26,10 @@
     <string name="pref_encryption_select_key_summary">Click to select an encryption key</string>
     <string name="pref_encryption_crypto_provider">Choose Crypto Provider</string>
     <string name="fragment_title_encryption">Encryption Settings</string>
-    <string name="dialog_delete_confimation_message">Are you sure you want to delete the stored backups? This will permanently delete them. You will not be able to restore them.</string>
-    <string name="dialog_delete_confimation_negative">Cancel</string>
-    <string name="dialog_delete_confimation_positive">Delete</string>
-    <string name="dialog_delete_confimation_title">Delete Confirmation</string>
+    <string name="dialog_delete_confirmation_message">Are you sure you want to delete the stored backups? This will permanently delete them. You will not be able to restore them.</string>
+    <string name="dialog_delete_confirmation_negative">Cancel</string>
+    <string name="dialog_delete_confirmation_positive">Delete</string>
+    <string name="dialog_delete_confirmation_title">Delete Confirmation</string>
     <string name="menu_item_backup">Create Backup</string>
     <string name="menu_item_cancel_jobs">Cancel current jobs</string>
     <string name="menu_item_restore_most_recent_backup">Restore most recent Backup</string>
@@ -65,7 +65,7 @@
     <string name="app_import_backup">Import Backup</string>
     <string name="menu_item_export">Export</string>
     <string name="data_import_success_dialog_title">Data Import Complete</string>
-    <string name="data_import_success_dialog_message">The backup was imported successfully.\nApp: %s\nDate:\%s</string>
+    <string name="data_import_success_dialog_message">The backup was imported successfully.\nApp: %s \nDate: %s</string>
     <string name="data_import_success_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_title">Data Import Failed</string>
@@ -94,7 +94,7 @@
     <string name="about_author_names" translatable="false">Christopher Beckmann</string>
     <string name="about_author_contributors">and contributors</string>
     <string name="about_affiliation">In affiliation with</string>
-    <string name="privacy_friendly">This application belongs to the group of Privacy Friendly Apps developed by Karlsruher Institute for Technology (KIT). Sourcecode licensed under GPLv3. Images copyright KIT and Google Inc.</string>
+    <string name="privacy_friendly">This application belongs to the group of Privacy Friendly Apps developed by the SECUSO Research Group at Karlsruher Institute for Technology (KIT). Sourcecode licensed under GPLv3. Images copyright KIT and Google Inc.</string>
     <string name="more_info">More information can be found on:</string>
     <string name="github" translatable="false"><a href="https://github.com/SecUSo/privacy-friendly-backup">Github-Repo</a></string>
     <string name="url" translatable="false"><a href="https://www.secuso.org/pfa">SECUSO-Website</a></string>
@@ -102,11 +102,16 @@
     <string name="data_inspection_signature_key_id">Key ID: %s</string>
     <string name="signature_result_no_signature">No Signature</string>
     <string name="signature_result_invalid">Invalid Signature</string>
-    <string name="signature_result_valid">Signature Valid</string>
+    <string name="signature_result_valid">Valid</string>
     <string name="signature_result_key_insecure">Insecure Key</string>
     <string name="signature_result_key_expired">Key Expired</string>
     <string name="signature_result_key_revoked">Key Revoked</string>
     <string name="signature_result_key_unconfirmed">Key Unconfirmed</string>
     <string name="signature_result_key_missing">Key Missing</string>
+    <string name="help_whatis">What is the Privacy Friendly Backup App?</string>
+    <string name="help_whatis_answer">The Privacy Friendly Backup Application helps users create backups of other privacy friendly apps. They communicate, send and receive data to save and restore app data.</string>
+    <string name="help_encryption">How does the encryption work?</string>
+    <string name="help_encryption_answer1">The encryption is done via an external cryptographic provider. For more information you can check out the openpgp-api that is used by this application.</string>
+    <string name="help_encryption_answer2">In order to use the encryption you will need to install a cryptographic provider application. We recommend the OpenKeyChain application because it is open source and available in both the Google Play Store as well as the f-Droid store.</string>
 
 </resources>

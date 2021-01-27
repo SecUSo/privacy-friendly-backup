@@ -125,10 +125,10 @@ class BackupOverviewFragment : BaseFragment(),
             if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
 
                 val builder = AlertDialog.Builder(requireContext()).apply {
-                    setTitle(R.string.dialog_delete_confimation_title)
-                    setMessage(R.string.dialog_delete_confimation_message)
-                    setNegativeButton(R.string.dialog_delete_confimation_negative, null)
-                    setPositiveButton(R.string.dialog_delete_confimation_positive) { dialog, _ ->
+                    setTitle(R.string.dialog_delete_confirmation_title)
+                    setMessage(R.string.dialog_delete_confirmation_message)
+                    setNegativeButton(R.string.dialog_delete_confirmation_negative, null)
+                    setPositiveButton(R.string.dialog_delete_confirmation_positive) { dialog, _ ->
                         viewModel.deleteData(adapter.getDeleteList())
                         dialog.dismiss()
                         onDisableDeleteMode()

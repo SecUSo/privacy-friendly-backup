@@ -122,7 +122,8 @@ class ImportBackupActivity : AppCompatActivity() {
             setMessage(
                 getString(
                     R.string.data_import_success_dialog_message,
-                    arrayOf<String>(data.packageName, SimpleDateFormat.getDateTimeInstance().format(data.timestamp))
+                    data.packageName,
+                    SimpleDateFormat.getDateTimeInstance().format(data.timestamp)
                 )
             )
             setPositiveButton(R.string.data_import_success_dialog_confirm) { _, _ ->
