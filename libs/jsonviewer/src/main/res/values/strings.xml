@@ -1,4 +1,4 @@
 <resources>
-    <string name="jsonViewer_icon_plus">expand</string>
-    <string name="jsonViewer_icon_minus">collapse</string>
+    <string name="jsonViewer_icon_plus" translatable="false">expand</string>
+    <string name="jsonViewer_icon_minus" translatable="false">collapse</string>
 </resources>

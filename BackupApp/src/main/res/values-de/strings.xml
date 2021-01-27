@@ -21,7 +21,7 @@
     <string name="pref_encryption_enable_on">Verschlüsselung ist aktiviert</string>
     <string name="pref_encryption_enable_off">Daten werden unverschlüsselt gespeichert</string>
     <string name="pref_encryption_select_key_summary">Tippen um Schlüssel auszuwählen</string>
-    <string name="pref_encryption_crypto_provider">" Krypto-Anbieter auswählen"</string>
+    <string name="pref_encryption_crypto_provider">Krypto-Anbieter auswählen</string>
     <string name="fragment_title_encryption">Verschlüsselungsoptionen</string>
     <string name="dialog_delete_confirmation_message">Sind Sie sicher, dass Sie die markierten Backups löschen möchten? Diese Operation ist permanent und kann nicht wieder rückgängig gemacht werden.</string>
     <string name="dialog_delete_confirmation_negative">Abbrechen</string>
@@ -91,7 +91,7 @@
     <string name="privacy_friendly">Diese App gehört zur Gruppe der Privacy Friendly Apps entwickelt von der Forschungsgruppe SECUSO am Karlsruher Institut für Technologie (KIT). Quelltext lizenziert unter GPLv3. Bilder copyright SECUSO und Google Inc.</string>
     <string name="more_info">Mehr Informationen können gefunden werden auf:</string>
     <string name="data_inspection_signature_user_id">Signiert: %s</string>
-    <string name="data_inspection_signature_key_id">Schlüssel ID:</string>
+    <string name="data_inspection_signature_key_id">Schlüssel ID: %s</string>
     <string name="signature_result_no_signature">Keine Signatur</string>
     <string name="signature_result_valid">Gültig</string>
     <string name="signature_result_invalid">Ungültig</string>

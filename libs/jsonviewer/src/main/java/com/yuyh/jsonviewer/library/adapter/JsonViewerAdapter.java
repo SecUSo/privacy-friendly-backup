@@ -6,6 +6,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.yuyh.jsonviewer.library.utils.Utils;
@@ -35,9 +36,9 @@ public class JsonViewerAdapter extends BaseJsonViewerAdapter<JsonViewerAdapter.J
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if (object != null && object instanceof JSONObject) {
+        if (object instanceof JSONObject) {
             mJSONObject = (JSONObject) object;
-        } else if (object != null && object instanceof JSONArray) {
+        } else if (object instanceof JSONArray) {
             mJSONArray = (JSONArray) object;
         } else {
             throw new IllegalArgumentException("jsonStr is illegal.");

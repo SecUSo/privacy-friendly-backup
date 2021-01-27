@@ -81,7 +81,7 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
             }
 
             val newSelectedKeyIds = data?.getLongArrayExtra(OpenPgpApi.EXTRA_KEY_IDS)
-            if(newSelectedKeyIds != null && newSelectedKeyIds!!.isEmpty()) {
+            if(newSelectedKeyIds != null && newSelectedKeyIds.isEmpty()) {
                 selectedKeyIds = newSelectedKeyIds
                 // TODO: this might have to be changed if backup sharing is implemented
             }
