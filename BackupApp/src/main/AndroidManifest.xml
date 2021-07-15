@@ -3,7 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="org.secuso.privacyfriendlybackup">
 
-    <application
+    <queries>
+        <intent>
+            <action android:name="org.secuso.privacyfriendlybackup.api.pfa.PFAAuthService" />
+        </intent>
+    </queries>
+
+   <application
         android:name=".BackupApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
