@@ -29,7 +29,7 @@ Target SDK: 29
 ## License
 
 Privacy Friendly Backup is licensed under the GPLv3.
-Copyright (C) 2021  Christopher Beckmann
+Copyright (C) 2022  Christopher Beckmann
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -48,7 +48,9 @@ The app uses icons from [Google Design Material Icons](https://design.google.com
 
 ## Contributors
 
-Christopher Beckmann (Kamuno) <br />
+<a href="https://github.com/SecUSo/privacy-friendly-backup/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=SecUSo/privacy-friendly-backup&max=100&columns=20" />
+</a>
 
 ### App Icon
 Hangyan Chen <br />
