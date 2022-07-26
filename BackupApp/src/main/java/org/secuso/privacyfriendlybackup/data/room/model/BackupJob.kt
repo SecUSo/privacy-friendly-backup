@@ -13,7 +13,8 @@ import java.util.*
  * This table holds the Jobs for Backups.
  */
 @Parcelize
-@Entity(indices = [
+@Entity(tableName = "BackupJob",
+    indices = [
     Index(value = ["packageName", "action"], unique = true),
     Index(value = ["dataId"])
 ])

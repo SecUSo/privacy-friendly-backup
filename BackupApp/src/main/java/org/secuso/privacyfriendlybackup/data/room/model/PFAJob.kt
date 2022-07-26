@@ -10,7 +10,7 @@ import java.util.*
  * This table holds the Jobs for PFAs. If the action is RESTORE, then the dataId should be set, to provide the restore data.
  */
 @Parcelize
-@Entity(indices = [Index(value = ["packageName", "action"], unique = true)])
+@Entity(tableName = "PFAJob", indices = [Index(value = ["packageName", "action"], unique = true)])
 data class PFAJob(
     @PrimaryKey(autoGenerate = true) val _id : Int,
     val uid : Int,

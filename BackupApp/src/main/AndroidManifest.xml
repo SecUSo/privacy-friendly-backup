@@ -25,7 +25,8 @@
             tools:node="remove" />
 
         <activity android:name=".ui.importbackup.ImportBackupActivity"
-            android:theme="@style/AppTheme.TranslucentOverlay">
+            android:theme="@style/AppTheme.TranslucentOverlay"
+            android:exported="true">
             <!--
                  Capture file open requests (pathPattern is honoured) where no
                  MIME type is provided in the Intent.  An Intent with a null
@@ -102,7 +103,8 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

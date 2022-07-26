@@ -36,7 +36,7 @@ class OpenPgpAppDialogFragment : PreferenceDialogFragmentCompat() {
         return preference as OpenPgpAppPreference
     }
 
-    override fun onPrepareDialogBuilder(builder: AlertDialog.Builder?) {
+    override fun onPrepareDialogBuilder(builder: AlertDialog.Builder) {
 
         val preference = getPgpAppPreference()
 
@@ -70,7 +70,7 @@ class OpenPgpAppDialogFragment : PreferenceDialogFragmentCompat() {
                 return v
             }
         }
-        builder?.setSingleChoiceItems(adapter, preference.getIndexOfProviderList(preference.value),
+        builder.setSingleChoiceItems(adapter, preference.getIndexOfProviderList(preference.value),
             object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface, which: Int) {
                     if(which == DialogInterface.BUTTON_POSITIVE) {
@@ -106,7 +106,7 @@ class OpenPgpAppDialogFragment : PreferenceDialogFragmentCompat() {
          * The typical interaction for list-based dialogs is to have click-on-an-item dismiss the
          * dialog instead of the user having to press 'Ok'.
          */
-        builder?.setPositiveButton(null, null)
+        builder.setPositiveButton(null, null)
     }
 
 }
