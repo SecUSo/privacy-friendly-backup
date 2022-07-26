@@ -4,6 +4,21 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
+    signingConfigs {
+        'pfa-key' {
+            def pfaFile = rootProject.file('pfa.properties')
+
+            if (pfaFile.exists()) {
+                def pfa = new Properties()
+                pfa.load(new FileInputStream(pfaFile))
+
+                storePassword pfa['storePassword']
+                keyAlias pfa['keyAlias']
+                keyPassword pfa['keyPassword']
+                storeFile file(pfa['storeFile'])
+            }
+        }
+    }
     compileSdkVersion 32
 
     defaultConfig {
@@ -30,6 +45,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+            signingConfig signingConfigs.'pfa-key'
         }
     }
 

@@ -48,7 +48,7 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
 
         setTitle(R.string.fragment_title_application_overview)
 
-        viewModel = ViewModelProvider(this).get(ApplicationOverviewViewModel::class.java)
+        viewModel = ViewModelProvider(this)[ApplicationOverviewViewModel::class.java]
         adapter = ApplicationAdapter(requireContext(), this, viewLifecycleOwner)
 
         fragment_backup_overview_list.adapter = adapter
