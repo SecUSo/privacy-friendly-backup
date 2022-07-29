@@ -37,10 +37,9 @@ class DataInspectionActivity : AppCompatActivity() {
         setContentView(R.layout.data_inspection_activity)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        viewModel = ViewModelProvider(this).get(DataInspectionViewModel::class.java)
+        viewModel = ViewModelProvider(this)[DataInspectionViewModel::class.java]
 
         if (savedInstanceState == null) {
-
             val fragment = DataInspectionFragment.newInstance()
             fragment.arguments = Bundle().apply {
                 putLong(EXTRA_DATA_ID, id)
@@ -56,9 +55,5 @@ class DataInspectionActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         finish()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
     }
 }

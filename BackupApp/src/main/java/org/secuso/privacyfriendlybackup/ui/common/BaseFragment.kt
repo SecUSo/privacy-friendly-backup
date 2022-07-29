@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.ui.common
 
 import android.animation.Animator
 import android.animation.ValueAnimator
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -56,11 +57,11 @@ abstract class BaseFragment : Fragment() {
         }
     }
 
-    protected fun playColorAnimationRes(@ColorRes colorFromId: Int, @ColorRes colorToId: Int, applyAnimation : (a : ValueAnimator) -> Unit = this::defaultFadeAnimation) : Animator {
+    protected fun playColorAnimationRes(@ColorRes colorFromId: Int, @ColorRes colorToId: Int, duration : Long = 250,  applyAnimation : (a : ValueAnimator) -> Unit = this::defaultFadeAnimation) : Animator {
         val colorFrom = ContextCompat.getColor(requireContext(), colorFromId)
         val colorTo = ContextCompat.getColor(requireContext(), colorToId)
 
-        return playColorAnimation(colorFrom, colorTo, 250, applyAnimation)
+        return playColorAnimation(colorFrom, colorTo, duration, applyAnimation)
     }
 
     protected fun playColorAnimation(@ColorInt colorFrom: Int, @ColorInt colorTo: Int, duration : Long = 250, applyAnimation : (a : ValueAnimator) -> Unit = this::defaultFadeAnimation) : Animator {

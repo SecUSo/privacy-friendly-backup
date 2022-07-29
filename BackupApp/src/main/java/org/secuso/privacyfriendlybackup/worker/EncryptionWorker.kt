@@ -381,7 +381,7 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
                     context,
                     requestCode,
                     intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                 )
                 setContentIntent(pendingIntent)
             }.build()

@@ -1,5 +1,6 @@
 package org.secuso.privacyfriendlybackup.ui.inspection
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -11,13 +12,15 @@ import android.view.*
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.data_inspection_fragment.*
@@ -25,6 +28,7 @@ import kotlinx.android.synthetic.main.item_application_job.*
 import org.openintents.openpgp.OpenPgpSignatureResult
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
+import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 import java.io.FileNotFoundException
 
 
@@ -45,6 +49,8 @@ class DataInspectionFragment : Fragment() {
     }
 
     private lateinit var viewModel: DataInspectionViewModel
+
+    //private lateinit var test : ActivityResultLauncher<>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,7 +200,7 @@ class DataInspectionFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         val activity = requireActivity()
-        viewModel = ViewModelProvider(activity).get(DataInspectionViewModel::class.java)
+        viewModel = ViewModelProvider(activity)[DataInspectionViewModel::class.java]
 
         encryptionEnabled = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(PreferenceKeys.PREF_ENCRYPTION_ENABLE, false)
 
@@ -222,10 +228,10 @@ class DataInspectionFragment : Fragment() {
             data_inspection_load_status_name.setText(it.descriptionRes)
             data_inspection_load_status_image.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
             when(it) {
-                LoadStatus.UNKNOWN -> {
+                LoadStatus.UNKNOWN, null -> {
                     data_inspection_load_status.visibility = View.GONE
                 }
-                LoadStatus.ERROR -> {
+                LoadStatus.ERROR_INVALID_JSON, LoadStatus.ERROR -> {
                     data_inspection_load_status.visibility = View.VISIBLE
                 }
                 LoadStatus.LOADING -> {

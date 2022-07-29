@@ -2,6 +2,7 @@ package org.secuso.privacyfriendlybackup.data
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.PFAJob
@@ -72,11 +73,13 @@ class BackupJobManager private constructor(
             nextJob = if(isEncryptionEnabled) encryptId else storeId
         )
         db.backupJobDao().insert(pfaBackupJob)
+        (context.applicationContext as BackupApplication).schedulePeriodicWork()
     }
 
     suspend fun cancelAllJobs(packageName: String) {
         db.backupJobDao().deleteAllForPackage(packageName)
         db.pfaJobDao().deleteAllForPackage(packageName)
+        (context.applicationContext as BackupApplication).schedulePeriodicWork()
     }
 
     /**
@@ -131,5 +134,6 @@ class BackupJobManager private constructor(
             dataId = if(metadata._id != -1L) metadata._id else metadataId
         )
         db.backupJobDao().insert(loadJob)
+        (context.applicationContext as BackupApplication).schedulePeriodicWork()
     }
 }

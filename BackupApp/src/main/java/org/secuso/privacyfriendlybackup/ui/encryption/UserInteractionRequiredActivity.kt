@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.work.*
 import org.openintents.openpgp.util.OpenPgpApi
+import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_KEY
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_PASSPHRASE
 import org.secuso.privacyfriendlybackup.worker.EncryptionWorker
@@ -87,6 +88,9 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
             }
 
             edit.apply()
+
+            // restart the encryption worker
+            (applicationContext as BackupApplication).schedulePeriodicWork()
 
             // after the answer was received, there is no need to display this translucent activity
             finish()
