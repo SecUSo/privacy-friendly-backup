@@ -17,6 +17,7 @@ import org.secuso.privacyfriendlybackup.ui.main.MainActivity
  * in a [MainActivity].
  */
 class DisplayMenuItemActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_menu_item)

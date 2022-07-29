@@ -36,6 +36,8 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
         val processedJobs = jobs.filter { it.active }
         val unprocessedJobs = jobs.filter { !it.active }
 
+        val jobsToCheck = jobs.toMutableList()
+
         for(job in processedJobs) {
             val workInfoFuture = WorkManager.getInstance(context).getWorkInfosByTag(job.getWorkerTag())
             val workInfoList = workInfoFuture.get()
@@ -57,6 +59,9 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
                         // if it failed - try again
                         job.active = false
                         jobDao.update(job)
+
+                        deleteFollowingJobs(job, jobsToCheck)
+                        // TODO: Show Toast - Job Failed?
                     }
                 }
             }
@@ -126,15 +131,33 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
             }
         }
 
-
-        coroutineScope {
-            launch {
-                delay(1500L)
-                (context.applicationContext as BackupApplication).schedulePeriodicWork()
+        // continue calling the service if there are still jobs left to do
+        if(jobsToCheck.isNotEmpty()) {
+            coroutineScope {
+                launch {
+                    delay(1500L)
+                    (context.applicationContext as BackupApplication).schedulePeriodicWork()
+                }
             }
         }
 
         return Result.success()
+    }
+
+    private fun deleteFollowingJobs(job: BackupJob, jobsToCheck: MutableList<BackupJob>, jobsToDelete : MutableList<BackupJob> = mutableListOf<BackupJob>()) {
+        jobsToDelete.add(job)
+
+        if(job.nextJob == null) {
+            return
+        }
+
+        for(j in jobsToCheck) {
+            if(j._id == job.nextJob) {
+                deleteFollowingJobs(j, jobsToCheck, jobsToDelete)
+            }
+        }
+
+        jobsToCheck.removeAll(jobsToDelete)
     }
 
     private fun enqueueEncryptionWork(job : BackupJob) {

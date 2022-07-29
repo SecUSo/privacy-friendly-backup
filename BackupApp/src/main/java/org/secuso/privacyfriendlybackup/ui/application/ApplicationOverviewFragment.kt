@@ -33,6 +33,8 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
 
         setHasOptionsMenu(true)
 
+        (requireActivity().applicationContext as BackupApplication).schedulePeriodicWork()
+
         savedInstanceState ?: return
 
         val savedOldMode = savedInstanceState.getString("oldMode")
@@ -62,7 +64,7 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
 
             displayNoElementsImage(data.isEmpty())
 
-            (requireActivity().application as BackupApplication).schedulePeriodicWork()
+            //(requireActivity().application as BackupApplication).schedulePeriodicWork()
         }
     }
 

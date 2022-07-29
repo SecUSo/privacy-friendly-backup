@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
+def pfaFile = rootProject.file('pfa.properties')
+
 android {
     signingConfigs {
-        'pfa-key' {
-            def pfaFile = rootProject.file('pfa.properties')
-
-            if (pfaFile.exists()) {
+        if (pfaFile.exists()) {
+            'pfa-key' {
                 def pfa = new Properties()
                 pfa.load(new FileInputStream(pfaFile))
 
@@ -48,7 +48,9 @@ android {
         }
         debug {
             debuggable true
-            signingConfig signingConfigs.'pfa-key'
+            if (pfaFile.exists()) {
+                signingConfig signingConfigs.'pfa-key'
+            }
         }
     }
 
