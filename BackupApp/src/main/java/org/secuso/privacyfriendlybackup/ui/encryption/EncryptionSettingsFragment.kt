@@ -86,7 +86,7 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
         playColorAnimation(colorFrom, colorTo, duration = 350).start()
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
         val f : DialogFragment
         if(preference is OpenPgpAppPreference) {
             f = OpenPgpAppDialogFragment.newInstance(preference.key)
@@ -115,7 +115,7 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
                 if(it.text.isNullOrEmpty()) {
                     "No passphrase set"
                 } else {
-                    "*".repeat(it.text.length)
+                    "*".repeat(it.text!!.length)
                 }
             }
         }

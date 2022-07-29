@@ -19,13 +19,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <provider
-            android:name="androidx.work.impl.WorkManagerInitializer"
-            android:authorities="${applicationId}.workmanager-init"
-            tools:node="remove" />
+       <provider
+           android:name="androidx.startup.InitializationProvider"
+           android:authorities="${applicationId}.androidx-startup"
+           android:exported="false"
+           tools:node="merge">
+           <!-- If you are using androidx.startup to initialize other components -->
+           <meta-data
+               android:name="androidx.work.impl.WorkManagerInitializer"
+               android:value="androidx.startup"
+               tools:node="remove" />
+       </provider>
 
         <activity android:name=".ui.importbackup.ImportBackupActivity"
-            android:theme="@style/AppTheme.TranslucentOverlay">
+            android:theme="@style/AppTheme.TranslucentOverlay"
+            android:exported="true">
             <!--
                  Capture file open requests (pathPattern is honoured) where no
                  MIME type is provided in the Intent.  An Intent with a null
@@ -97,12 +105,14 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.backup.*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.inspection.DataInspectionActivity" />
+        <activity android:name=".ui.inspection.DataInspectionActivity"
+            android:parentActivityName=""/>
         <activity android:name=".ui.main.MainActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

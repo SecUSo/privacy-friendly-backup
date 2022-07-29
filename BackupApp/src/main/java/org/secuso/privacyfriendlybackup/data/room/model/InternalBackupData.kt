@@ -8,7 +8,7 @@ import kotlinx.android.parcel.Parcelize
 import java.util.*
 
 @Parcelize
-@Entity(indices = [Index(value = ["packageName"])])
+@Entity(tableName = "InternalBackupData", indices = [Index(value = ["packageName"])])
 data class InternalBackupData(
     @PrimaryKey(autoGenerate = true)
     val _id : Long = 0,

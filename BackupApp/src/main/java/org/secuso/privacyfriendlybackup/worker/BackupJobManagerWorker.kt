@@ -4,6 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.work.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
@@ -119,6 +123,14 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
                     }
                 }
                 else -> { /* DO NOTHING */ }
+            }
+        }
+
+
+        coroutineScope {
+            launch {
+                delay(1500L)
+                (context.applicationContext as BackupApplication).schedulePeriodicWork()
             }
         }
 

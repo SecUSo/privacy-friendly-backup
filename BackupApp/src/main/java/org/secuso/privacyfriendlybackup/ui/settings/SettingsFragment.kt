@@ -83,7 +83,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         playColorAnimation(colorFrom, colorTo, duration = 350).start()
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
         super.onDisplayPreferenceDialog(preference)
     }
 
