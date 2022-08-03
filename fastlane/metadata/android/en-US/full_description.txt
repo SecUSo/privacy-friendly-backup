@@ -3,3 +3,8 @@ The Privacy Friendly Backup app communicates with other Privacy Friendly apps an
 
 The app provides encryption via an interface to another app that provides encryption as functionality via the openpgp-api. The user is free to choose their own encryption provider via the app's settings.
 For encryption to work, the provider must be installed externally. We recommend https://www.openkeychain.org/ , as this app is available in the regular PlayStore as well as in the F-Droid Store and is completely open source.
+
+You can reach us via
+Twitter - @SECUSOResearch https://twitter.com/secusoresearch
+Mastodon - @SECUSO_Research@bawü.social https://xn--baw-joa.social/@SECUSO_Research/
+Job opening - https://secuso.aifb.kit.edu/english/Job_Offers_1557.php
