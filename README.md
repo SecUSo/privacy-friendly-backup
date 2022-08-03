@@ -16,12 +16,13 @@
 This is the privacy friendly backup application that enables users to create and manage backups of other privacy friendly apps. It provides encryption via a crypto provider like OpenKeyChain.
 
 ## Integrated PFAs
+- [Finance Manager](https://github.com/SecUSo/privacy-friendly-finance-manager)
 - [Notes](https://github.com/SecUSo/privacy-friendly-notes)
 - [Pain Diary](https://github.com/SecUSo/privacy-friendly-pain-diary) 
 - [Password Generator](https://github.com/SecUSo/privacy-friendly-passwordgenerator) 
 - [Pedometer](https://github.com/SecUSo/privacy-friendly-pedometer) 
 - [QR-Scanner](https://github.com/SecUSo/privacy-friendly-qr-scanner) 
-- [Weather](https://github.com/SecUSo/privacy-friendly-weather) 
+- [Weather](https://github.com/SecUSo/privacy-friendly-weather)
 
 ## Motivation
 
