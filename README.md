@@ -15,6 +15,13 @@
 
 This is the privacy friendly backup application that enables users to create and manage backups of other privacy friendly apps. It provides encryption via a crypto provider like OpenKeyChain.
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/org.secuso.privacyfriendlybackup/)
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
+     alt="Get it on Google Play"
+     height="80">](https://play.google.com/store/apps/details?id=org.secuso.privacyfriendlybackup)
+
 ## Integrated PFAs
 - [Finance Manager](https://github.com/SecUSo/privacy-friendly-finance-manager)
 - [Notes](https://github.com/SecUSo/privacy-friendly-notes)
