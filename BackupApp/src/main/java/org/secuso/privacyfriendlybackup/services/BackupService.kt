@@ -6,6 +6,7 @@ import android.os.Message
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import org.secuso.privacyfriendlybackup.api.IBackupService
@@ -189,7 +190,21 @@ class BackupService : AbstractAuthService() {
                 }
                 ACTION_SEND_ERROR -> {
                     val pfaJobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
-                    pfaJobDao.getJobsForUid(callerId).forEach {
+                    val packageName = AuthenticationHelper.getPackageName(this@BackupService, callerId)
+
+                    if(packageName.isNullOrEmpty()) {
+                        return Intent().apply {
+                            putExtra(RESULT_CODE, RESULT_CODE_ERROR)
+                            putExtra(RESULT_ERROR,
+                                PfaError(
+                                    PfaError.PfaErrorCode.ACTION_ERROR,
+                                    "Could not get package name."
+                                )
+                            )
+                        }
+                    }
+
+                    pfaJobDao.getJobsForPackage(packageName).forEach {
                         pfaJobDao.update(it.apply {
                             error = data.getIntExtra(BackupApi.EXTRA_ERROR, 0)
                         })
