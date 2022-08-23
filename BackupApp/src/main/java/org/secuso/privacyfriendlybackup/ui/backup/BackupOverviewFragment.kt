@@ -406,7 +406,7 @@ class BackupOverviewFragment : BaseFragment(),
         }
     }
 
-    override fun onDeleteCountChanged(count: Int) {
+    override fun onSelectionCountChanged(count: Int) {
         currentDeleteCount = count
         when(count) {
             0 -> selectAllIcon?.setIcon(R.drawable.ic_check_box_outline_blank_24)
@@ -415,7 +415,8 @@ class BackupOverviewFragment : BaseFragment(),
         }
     }
 
-    override fun onEnableDeleteMode() {
+    override fun onEnableMode(mode: Mode) {
+        if()
         viewModel.enableMode(Mode.DELETE)
 
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24)

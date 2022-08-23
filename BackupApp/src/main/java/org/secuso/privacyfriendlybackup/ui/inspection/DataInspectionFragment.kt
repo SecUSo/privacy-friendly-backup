@@ -293,7 +293,7 @@ class DataInspectionFragment : Fragment() {
             var statusText = ""
             var statusIcon = (ContextCompat.getDrawable(requireActivity(), R.drawable.ic_close_24))
             var color = ContextCompat.getColor(requireActivity(), R.color.red)
-            when(it.signature?.result) {
+            when(it?.signature?.result) {
                 OpenPgpSignatureResult.RESULT_NO_SIGNATURE -> {
                     // not signed
                     statusText = requireActivity().getString(R.string.signature_result_no_signature)
@@ -339,8 +339,8 @@ class DataInspectionFragment : Fragment() {
             }
             data_inspection_signature_status.setImageDrawable(statusIcon)
             data_inspection_signature_status_text.text = statusText
-            data_inspection_signature_user_id.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it.signature?.primaryUserId)
-            data_inspection_signature_key_id.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it.signature?.keyId.toString())
+            data_inspection_signature_user_id.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it?.signature?.primaryUserId)
+            data_inspection_signature_key_id.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it?.signature?.keyId.toString())
 
         }
     }

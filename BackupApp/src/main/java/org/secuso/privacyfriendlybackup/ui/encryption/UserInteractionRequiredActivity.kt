@@ -91,10 +91,6 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
 
             // restart the encryption worker
             (applicationContext as BackupApplication).schedulePeriodicWork()
-
-            // after the answer was received, there is no need to display this translucent activity
-            finish()
-
 /*
             var encryptionWorker : OneTimeWorkRequest?
 
@@ -122,6 +118,9 @@ class UserInteractionRequiredActivity : AppCompatActivity() {
             WorkManager.getInstance(this).beginUniqueWork("$callingPackageName($dataId)", ExistingWorkPolicy.REPLACE, encryptionWorker!!).enqueue()
 */
         }
+
+        // after the answer was received, there is no need to display this translucent activity
+        finish()
     }
 
 }

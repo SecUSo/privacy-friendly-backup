@@ -33,7 +33,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
 
     private val backupDataLiveData = MutableLiveData<String>()
     private val loadStatusLiveData = MediatorLiveData<LoadStatus>().apply { postValue(LoadStatus.UNKNOWN) }
-    private val decryptionMetaLiveData = MutableLiveData<DecryptionMetaData>()
+    private val decryptionMetaLiveData = MutableLiveData<DecryptionMetaData?>()
     private var dataId = -1L
     private var localLoadedDataId = -1L
     private var fileName : String = ""
@@ -56,7 +56,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
         return loadStatusLiveData
     }
 
-    fun getDecryptionMetaData() : LiveData<DecryptionMetaData> = decryptionMetaLiveData
+    fun getDecryptionMetaData() : LiveData<DecryptionMetaData?> = decryptionMetaLiveData
 
     fun loadData(dataId: Long) {
         this.dataId = dataId
