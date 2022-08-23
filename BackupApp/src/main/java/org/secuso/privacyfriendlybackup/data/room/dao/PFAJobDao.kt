@@ -24,7 +24,7 @@ interface PFAJobDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(data: PFAJob) : Long
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(data: PFAJob)
 
     @Query("DELETE FROM PFAJob WHERE uid = :uid")

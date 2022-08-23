@@ -109,17 +109,21 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
                             }
                         }
                     }
-                    else -> { /* do nothing */ }
+                    else -> { }
                 }
                 holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
             }
         }
 
         if(data.action == BackupJobAction.PFA_JOB_BACKUP || data.action == BackupJobAction.PFA_JOB_RESTORE) {
-            BackupDatabase.getInstance(context).pfaJobDao().getJobsForPackageLiveData(data.packageName).observe(lifecycleOwner) {
-                holder.mImage.setColorFilter(ContextCompat.getColor(context, R.color.red))
+            BackupDatabase.getInstance(context).pfaJobDao().getJobsForPackageLiveData(data.packageName).observe(lifecycleOwner) { list ->
+                if(list.find { it.error != null } != null) {
+                    holder.mImage.setColorFilter(ContextCompat.getColor(context, R.color.red))
+                }
             }
         }
+
+
     }
 
     class BackupJobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
