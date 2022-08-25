@@ -30,6 +30,7 @@ This is the privacy friendly backup application that enables users to create and
 - [Pedometer](https://github.com/SecUSo/privacy-friendly-pedometer) 
 - [QR-Scanner](https://github.com/SecUSo/privacy-friendly-qr-scanner) 
 - [Weather](https://github.com/SecUSo/privacy-friendly-weather)
+- [ToDo List](https://github.com/SecUSo/privacy-friendly-todo-list)
 
 ## Motivation
 
