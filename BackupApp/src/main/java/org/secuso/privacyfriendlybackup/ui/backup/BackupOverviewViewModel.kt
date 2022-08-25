@@ -101,4 +101,10 @@ class BackupOverviewViewModel(app : Application) : AndroidViewModel(app) {
             jobManager.createRestoreJobChain(backupData.packageName, backupData.id)
         }
     }
+
+    fun exportData(selectionList: Set<BackupData>) {
+        viewModelScope.launch {
+            // TODO: Export all
+        }
+    }
 }

@@ -3,6 +3,7 @@ package org.secuso.privacyfriendlybackup.ui.backup
 import android.animation.*
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -129,9 +130,22 @@ class BackupOverviewFragment : BaseFragment(),
                     setMessage(R.string.dialog_delete_confirmation_message)
                     setNegativeButton(R.string.dialog_delete_confirmation_negative, null)
                     setPositiveButton(R.string.dialog_delete_confirmation_positive) { dialog, _ ->
-                        viewModel.deleteData(adapter.getDeleteList())
+                        viewModel.deleteData(adapter.getSelectionList())
                         dialog.dismiss()
-                        onDisableDeleteMode()
+                        onDisableMode(Mode.DELETE)
+                    }
+                }
+                builder.show()
+            } else if(Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
+
+                val builder = AlertDialog.Builder(requireContext()).apply {
+                    setTitle(R.string.dialog_data_export_start_title)
+                    setMessage(R.string.dialog_data_export_start_message)
+                    setNegativeButton(R.string.dialog_data_export_start_cancel, null)
+                    setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
+                        viewModel.exportData(adapter.getSelectionList())
+                        dialog.dismiss()
+                        onDisableMode(Mode.EXPORT)
                     }
                 }
                 builder.show()
@@ -193,10 +207,39 @@ class BackupOverviewFragment : BaseFragment(),
                 searchIcon?.collapseActionView()
             }
 
-            if(Mode.DELETE.isActiveIn(mode)) {
-                onEnableDeleteMode()
-            } else {
-                onDisableDeleteMode()
+            when {
+                Mode.DELETE.isActiveIn(mode) -> {
+                    fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.red))
+                    fab.rippleColor = ContextCompat.getColor(requireContext(), R.color.lightred)
+                    fab.setImageResource(R.drawable.ic_delete_24)
+                    onEnableMode(mode)
+                    fab.show()
+                }
+                Mode.EXPORT.isActiveIn(mode) -> {
+                    fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green))
+                    fab.rippleColor = ContextCompat.getColor(requireContext(), R.color.lightgreen)
+                    fab.setImageResource(R.drawable.ic_save_alt_24)
+                    onEnableMode(mode)
+                    fab.show()
+                }
+                else -> {
+                    onDisableMode(mode)
+                    fab.hide()
+                }
+            }
+
+            if(Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
+                toolbarDeleteIcon?.isVisible = false
+                selectAllIcon?.isVisible = true
+            }
+
+            if(mode != Mode.NORMAL && mode != Mode.SEARCH) {
+                toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24)
+            }
+
+            if(mode != Mode.NORMAL && mode != Mode.SEARCH) {
+                toolbarDeleteIcon?.isVisible = false
+                selectAllIcon?.isVisible = true
             }
 
             oldMode = mode
@@ -267,7 +310,10 @@ class BackupOverviewFragment : BaseFragment(),
                     activity.pressBack()
                 }
                 Mode.DELETE.isActiveIn(currentMode) -> {
-                    onDisableDeleteMode()
+                    onDisableMode(Mode.DELETE)
+                }
+                Mode.EXPORT.isActiveIn(currentMode) -> {
+                    onDisableMode(Mode.EXPORT)
                 }
                 else -> {
                     activity.finish()
@@ -293,9 +339,9 @@ class BackupOverviewFragment : BaseFragment(),
 
 
         if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
-            onEnableDeleteMode()
+            onEnableMode(Mode.DELETE)
         } else {
-            onDisableDeleteMode()
+            onDisableMode(Mode.DELETE)
         }
 
         if(!predefinedFilter.isNullOrEmpty()) {
@@ -338,19 +384,22 @@ class BackupOverviewFragment : BaseFragment(),
         super.onDestroy()
 
         searchIcon?.collapseActionView()
-        onDisableDeleteMode()
+        onDisableMode(Mode.EXPORT)
+        onDisableMode(Mode.DELETE)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             android.R.id.home -> {
                 if (Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
-                    onDisableDeleteMode()
+                    onDisableMode(Mode.DELETE)
+                } else if (Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
+                    onDisableMode(Mode.EXPORT)
                 } else {
                     return false
                 }
             }
-            R.id.action_delete -> onEnableDeleteMode()
+            R.id.action_delete -> onEnableMode(Mode.DELETE)
             R.id.action_search -> {
                 /* nothing to do here */
                 //Toast.makeText(requireContext(), "action_search", Toast.LENGTH_SHORT).show()
@@ -416,17 +465,8 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     override fun onEnableMode(mode: Mode) {
-        if()
-        viewModel.enableMode(Mode.DELETE)
-
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24)
-
-        adapter.enableDeleteMode()
-
-        toolbarDeleteIcon?.isVisible = false
-        selectAllIcon?.isVisible = true
-
-        fab.show()
+        viewModel.enableMode(mode)
+        adapter.enableMode(mode)
     }
 
     override fun onItemClick(
@@ -443,6 +483,21 @@ class BackupOverviewFragment : BaseFragment(),
         }
         popup.show()
     }
+
+    /* override fun onItemLongClick(
+        id: Long,
+        backupData: BackupDataStorageRepository.BackupData,
+        view: View
+    ) {
+        val popup = PopupMenu(requireContext(), view)
+        popup.menuInflater.inflate(R.menu.menu_popup_backup, popup.menu)
+        popup.gravity = Gravity.END
+        popup.setOnMenuItemClickListener { item ->
+            handlePopupMenuClick(id, backupData, item.itemId)
+            return@setOnMenuItemClickListener true
+        }
+        popup.show()
+    } */
 
     private fun handlePopupMenuClick(
         id: Long,
@@ -467,18 +522,20 @@ class BackupOverviewFragment : BaseFragment(),
                 }
             }
             R.id.menu_export -> {
-                Intent(requireActivity(), DataInspectionActivity::class.java).let {
+                onEnableMode(Mode.EXPORT)
+                adapter.selectItem(backupData)
+                /*Intent(requireActivity(), DataInspectionActivity::class.java).let {
                     it.putExtra(DataInspectionActivity.EXTRA_DATA_ID, id)
                     it.putExtra(DataInspectionActivity.EXTRA_EXPORT_DATA, true)
                     startActivity(it)
-                }
+                }*/
             }
             else -> {}
         }
     }
 
-    fun onDisableDeleteMode() {
-        viewModel.disableMode(Mode.DELETE)
+    fun onDisableMode(mode: Mode) {
+        viewModel.disableMode(mode)
 
         if(!isPortrait() && isXLargeTablet()) {
             toolbar.navigationIcon = null
@@ -487,8 +544,11 @@ class BackupOverviewFragment : BaseFragment(),
         toolbarDeleteIcon?.isVisible = true
         selectAllIcon?.isVisible = false
 
-        fab?.hide()
-        adapter.disableDeleteMode()
+        adapter.disableMode(mode)
+
+        if(Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
+            adapter.deselectAll()
+        }
     }
 
     @SuppressLint("PrivateResource")

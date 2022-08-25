@@ -53,9 +53,10 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         }
     )
     private val selectionList: MutableSet<BackupData> = HashSet()
-    private var deleteMode = false
-    private var exportMode = false
     private val callback = WeakReference(adapterCallback)
+    private var mode = Mode.NORMAL
+    private val selectionActive : Boolean
+        get() = Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)
 
     init {
         setHasStableIds(true)
@@ -88,11 +89,11 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         val data = this.sortedList[position]
         val pfaInfo = PFApplicationHelper.getDataForPackageName(context, data.packageName)
 
-        holder.mCheckbox.visibility = if (deleteMode or exportMode) View.VISIBLE else View.INVISIBLE
+        holder.mCheckbox.visibility = if (selectionActive) View.VISIBLE else View.INVISIBLE
         holder.mCheckbox.isChecked = selectionList.contains(data)
 
         holder.mCard.setOnLongClickListener {
-            if (deleteMode or exportMode) {
+            if (selectionActive) {
                 if (holder.mCheckbox.isChecked) {
                     selectionList.remove(data)
                     holder.mCheckbox.isChecked = false
@@ -102,13 +103,13 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
                 }
                 notifySelectionCount()
             } else {
-                callback.get()?.onEnableMode()
+                callback.get()?.onEnableMode(Mode.DELETE)
             }
             false
         }
 
         holder.mCard.setOnClickListener {
-            if (deleteMode) {
+            if (selectionActive) {
                 if (holder.mCheckbox.isChecked) {
                     selectionList.remove(data)
                     holder.mCheckbox.isChecked = false
@@ -163,9 +164,8 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         val mStorageImage : ImageView = itemView.findViewById(R.id.storageImage)
     }
 
-    fun enableDeleteMode() {
-        selectionList.clear()
-        deleteMode = true
+    fun enableMode(_mode: Mode) {
+        mode = mode.activate(_mode)
         notifySelectionCount()
         notifyDataSetChanged()
     }
@@ -184,12 +184,19 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         notifyDataSetChanged()
     }
 
-    fun disableDeleteMode() {
-        deleteMode = false
-        selectionList.clear()
+    fun disableMode(_mode: Mode) {
+        mode = mode.deactivate(_mode)
         notifySelectionCount()
         notifyDataSetChanged()
     }
 
-    fun getDeleteList() : Set<BackupData> = selectionList
+    fun getSelectionList() : Set<BackupData> = selectionList
+
+    fun selectItem(data: BackupData) {
+        if(selectionActive) {
+            selectionList.add(data)
+            notifySelectionCount()
+            notifyDataSetChanged()
+        }
+    }
 }
