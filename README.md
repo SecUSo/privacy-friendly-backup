@@ -31,6 +31,8 @@ This is the privacy friendly backup application that enables users to create and
 - [QR-Scanner](https://github.com/SecUSo/privacy-friendly-qr-scanner) 
 - [Weather](https://github.com/SecUSo/privacy-friendly-weather)
 - [ToDo List](https://github.com/SecUSo/privacy-friendly-todo-list)
+- [Food Tracker](https://github.com/SecUSo/privacy-friendly-food-tracker)
+- [Sketching](https://github.com/SecUSo/privacy-friendly-sketching)
 
 ## Motivation
 
