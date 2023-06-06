@@ -33,6 +33,10 @@ This is the privacy friendly backup application that enables users to create and
 - [ToDo List](https://github.com/SecUSo/privacy-friendly-todo-list)
 - [Food Tracker](https://github.com/SecUSo/privacy-friendly-food-tracker)
 - [Sketching](https://github.com/SecUSo/privacy-friendly-sketching)
+- [Aktivpause](https://github.com/SecUSo/Aktivpause)
+- [Pausing Healthily](https://github.com/SecUSo/privacy-friendly-pausing-healthily)
+- [Shopping List](https://github.com/SecUSo/privacy-friendly-shopping-list)
+- [Circuit Training](https://github.com/SecUSo/privacy-friendly-circuit-training-exercises)
 
 ## Motivation
 
