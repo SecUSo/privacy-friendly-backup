@@ -12,6 +12,7 @@
             <action android:name="org.openintents.openpgp.IOpenPgpService2" />
         </intent>
     </queries>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
    <application
         android:name=".BackupApplication"
@@ -140,6 +141,7 @@
             android:enabled="true"
             android:exported="true"
             android:process=":backup"
+            android:foregroundServiceType="dataSync"
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="org.secuso.privacyfriendlybackup.services.BackupService" />
