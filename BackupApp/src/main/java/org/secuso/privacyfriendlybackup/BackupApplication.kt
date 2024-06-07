@@ -29,7 +29,7 @@ class BackupApplication : Application(), Configuration.Provider {
         Log.d(TAG, "schedulePeriodicWork()")
         val periodicJobManagerWork =
             PeriodicWorkRequestBuilder<BackupJobManagerWorker>(15, TimeUnit.MINUTES)
-                .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, WorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(

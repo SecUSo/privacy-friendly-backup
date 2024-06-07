@@ -3,7 +3,6 @@ package org.secuso.privacyfriendlybackup.data.room.model
 import android.os.Parcelable
 import androidx.recyclerview.widget.DiffUtil
 import androidx.room.*
-import androidx.room.ForeignKey.CASCADE
 import kotlinx.android.parcel.Parcelize
 import org.secuso.privacyfriendlybackup.data.BackupJobManager
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction

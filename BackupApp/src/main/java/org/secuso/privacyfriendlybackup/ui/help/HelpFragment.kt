@@ -4,18 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_help.*
-import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.databinding.FragmentHelpBinding
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 
 class HelpFragment : BaseFragment() {
+    lateinit var binding: FragmentHelpBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_help, container, false)
+        binding = FragmentHelpBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -27,7 +28,7 @@ class HelpFragment : BaseFragment() {
         val expandableListDetail = helpDataDump.dataGeneral
         val expandableListTitleGeneral: List<String> = ArrayList<String>(expandableListDetail.keys)
         expandableListAdapter = ExpandableListAdapter(requireActivity(), expandableListTitleGeneral, expandableListDetail)
-        generalExpandableListView.setAdapter(expandableListAdapter)
+        binding.generalExpandableListView.setAdapter(expandableListAdapter)
     }
 
     override fun onBackPressed() {
