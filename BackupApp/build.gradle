@@ -88,7 +88,6 @@ android {
 
 dependencies {
     implementation project(path: ':BackupAPI')
-    implementation project(path: ':jsonviewer')
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -134,6 +133,9 @@ dependencies {
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
+
+    // JSON Viewer
+    implementation 'com.yuyh.json:jsonviewer:1.0.6'
 
     // Retrofit for Google Drive Test
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
