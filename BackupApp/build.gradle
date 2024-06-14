@@ -21,7 +21,6 @@ android {
     compileSdk 34
 
     defaultConfig {
-        namespace "org.secuso.privacyfriendlybackup"
         applicationId "org.secuso.privacyfriendlybackup"
         minSdkVersion 21
         targetSdkVersion 34
@@ -72,6 +71,10 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
+    kotlin {
+        jvmToolchain(17)
     }
 
     sourceSets {
