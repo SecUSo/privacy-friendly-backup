@@ -232,22 +232,22 @@ class DataInspectionFragment : Fragment() {
             dataBinding.dataInspectionLoadStatusImage.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
             when(it) {
                 LoadStatus.UNKNOWN, null -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.GONE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.GONE
                 }
                 LoadStatus.ERROR_INVALID_JSON, LoadStatus.ERROR -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.LOADING -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DECRYPTING -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DECRYPTION_ERROR -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DONE -> {
-                    dataBinding.dataInspectionLoadStatusName.visibility = View.GONE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.GONE
 
                     encryptionEnabled = encryptionEnabled and viewModel.isEncrypted
 
