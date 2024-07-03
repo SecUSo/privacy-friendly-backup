@@ -5,8 +5,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
-import androidx.work.*
-import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
+import androidx.work.BackoffPolicy
+import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import org.secuso.privacyfriendlybackup.worker.BackupJobManagerWorker
 import java.util.concurrent.TimeUnit
 
@@ -54,8 +58,8 @@ class BackupApplication : Application(), Configuration.Provider {
         }
     }
 
-    override fun getWorkManagerConfiguration(): Configuration =
-        Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setMinimumLoggingLevel(Log.ERROR)
             .build()
 }
