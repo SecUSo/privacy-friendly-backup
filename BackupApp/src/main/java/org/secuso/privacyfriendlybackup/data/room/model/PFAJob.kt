@@ -2,7 +2,7 @@ package org.secuso.privacyfriendlybackup.data.room.model
 
 import android.os.Parcelable
 import androidx.room.*
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
 import java.util.*
 
