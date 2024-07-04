@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 

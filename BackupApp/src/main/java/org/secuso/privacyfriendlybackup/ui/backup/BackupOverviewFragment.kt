@@ -19,13 +19,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
-import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
+import org.secuso.privacyfriendlybackup.databinding.FragmentBackupOverviewBinding
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.DIALOG_SKIP_IMPORT_START
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
@@ -51,6 +51,7 @@ class BackupOverviewFragment : BaseFragment(),
 
     private lateinit var viewModel: BackupOverviewViewModel
     private lateinit var adapter : FilterableBackupAdapter
+    private lateinit var binding: FragmentBackupOverviewBinding
 
     private var toolbarDeleteIcon: MenuItem? = null
     private var searchIcon: MenuItem? = null
@@ -83,7 +84,8 @@ class BackupOverviewFragment : BaseFragment(),
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_backup_overview, container, false)
+        binding = FragmentBackupOverviewBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -98,8 +100,8 @@ class BackupOverviewFragment : BaseFragment(),
                 this
             )
 
-        fragment_backup_overview_list.adapter = adapter
-        fragment_backup_overview_list.layoutManager = when {
+        binding.fragmentBackupOverviewList.adapter = adapter
+        binding.fragmentBackupOverviewList.layoutManager = when {
             isXLargeTablet() -> {
                 GridLayoutManager(
                     context,
@@ -121,7 +123,7 @@ class BackupOverviewFragment : BaseFragment(),
             }
         }
 
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
 
                 val builder = AlertDialog.Builder(requireContext()).apply {
@@ -204,7 +206,7 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     private fun displayNoElementsImage(show: Boolean) {
-        backup_overview_no_entries.visibility = if(show) View.VISIBLE else View.GONE
+        binding.backupOverviewNoEntries.visibility = if(show) View.VISIBLE else View.GONE
     }
 
     private fun playAnimationIfApplicable(data: List<BackupDataStorageRepository.BackupData>) {
@@ -222,7 +224,7 @@ class BackupOverviewFragment : BaseFragment(),
 
                         delay(250L)
                         Log.d(TAG, "## finding viewholder for item id $highlight")
-                        val vh = fragment_backup_overview_list.findViewHolderForItemId(highlight)
+                        val vh = binding.fragmentBackupOverviewList.findViewHolderForItemId(highlight)
                         if(vh != null) {
                             (vh as FilterableBackupAdapter.ViewHolder).apply {
                                 ObjectAnimator.ofObject(
@@ -254,7 +256,7 @@ class BackupOverviewFragment : BaseFragment(),
                 }
             }
         smoothScroller.targetPosition = position
-        fragment_backup_overview_list.layoutManager?.startSmoothScroll(smoothScroller)
+        binding.fragmentBackupOverviewList.layoutManager?.startSmoothScroll(smoothScroller)
     }
 
     override fun onBackPressed() {
@@ -425,7 +427,7 @@ class BackupOverviewFragment : BaseFragment(),
         toolbarDeleteIcon?.isVisible = false
         selectAllIcon?.isVisible = true
 
-        fab.show()
+        binding.fab.show()
     }
 
     override fun onItemClick(
@@ -486,7 +488,7 @@ class BackupOverviewFragment : BaseFragment(),
         toolbarDeleteIcon?.isVisible = true
         selectAllIcon?.isVisible = false
 
-        fab?.hide()
+        binding.fab.hide()
         adapter.disableDeleteMode()
     }
 

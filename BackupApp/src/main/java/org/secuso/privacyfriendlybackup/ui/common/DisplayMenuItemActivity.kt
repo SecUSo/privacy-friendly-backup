@@ -6,8 +6,8 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import kotlinx.android.synthetic.main.activity_display_menu_item.*
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.databinding.ActivityDisplayMenuItemBinding
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity
 
 /**
@@ -18,10 +18,13 @@ import org.secuso.privacyfriendlybackup.ui.main.MainActivity
  */
 class DisplayMenuItemActivity : AppCompatActivity() {
 
+    lateinit var binding: ActivityDisplayMenuItemBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_display_menu_item)
-        setSupportActionBar(toolbar)
+        binding = ActivityDisplayMenuItemBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
