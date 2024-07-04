@@ -12,6 +12,7 @@
         </intent>
     </queries>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
    <application
         android:name=".BackupApplication"
