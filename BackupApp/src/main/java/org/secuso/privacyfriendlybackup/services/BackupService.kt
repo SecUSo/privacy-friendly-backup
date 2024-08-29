@@ -6,11 +6,13 @@ import android.os.Message
 import android.os.Messenger
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import org.secuso.privacyfriendlybackup.api.IBackupService
 import org.secuso.privacyfriendlybackup.api.common.AbstractAuthService
 import org.secuso.privacyfriendlybackup.api.common.BackupApi
+import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_ERROR
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.ACTION_SEND_MESSENGER
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_DONE
 import org.secuso.privacyfriendlybackup.api.common.BackupApi.MESSAGE_ERROR
@@ -38,7 +40,7 @@ class BackupService : AbstractAuthService() {
     var mMessengers = ConcurrentHashMap<Int, Messenger?>()
     var mActiveJobs = ConcurrentHashMap<Int, PFAJob?>()
 
-    override val SUPPORTED_API_VERSIONS = listOf(1)
+    override val SUPPORTED_API_VERSIONS = listOf(1,2)
 
     override val mBinder : IBackupService.Stub = object : IBackupService.Stub() {
 
@@ -151,12 +153,14 @@ class BackupService : AbstractAuthService() {
             }
 
             // data can not be null here else canAccess(Intent) would have returned an error
-            val resultIntent = handle(data!!, callerId)
-            Log.d(TAG, "Sent Reply: ${ApiFormatter.formatIntent(resultIntent)}")
-            return resultIntent
+            return runBlocking {
+                val resultIntent = handle(data!!, callerId)
+                Log.d(TAG, "Sent Reply: ${ApiFormatter.formatIntent(resultIntent)}")
+                return@runBlocking resultIntent
+            }
         }
 
-        private fun handle(data: Intent, callerId : Int): Intent {
+        private suspend fun handle(data: Intent, callerId : Int): Intent {
             data.setExtrasClassLoader(classLoader)
 
             return when(data.action) {
@@ -182,6 +186,32 @@ class BackupService : AbstractAuthService() {
                         Intent().apply {
                             putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
                         }
+                    }
+                }
+                ACTION_SEND_ERROR -> {
+                    val pfaJobDao = BackupDatabase.getInstance(this@BackupService).pfaJobDao()
+                    val packageName = AuthenticationHelper.getPackageName(this@BackupService, callerId)
+
+                    if(packageName.isNullOrEmpty()) {
+                        return Intent().apply {
+                            putExtra(RESULT_CODE, RESULT_CODE_ERROR)
+                            putExtra(RESULT_ERROR,
+                                PfaError(
+                                    PfaError.PfaErrorCode.ACTION_ERROR,
+                                    "Could not get package name."
+                                )
+                            )
+                        }
+                    }
+
+                    pfaJobDao.getJobsForPackage(packageName).forEach {
+                        pfaJobDao.update(it.apply {
+                            error = data.getIntExtra(BackupApi.EXTRA_ERROR, 0)
+                        })
+                    }
+
+                    Intent().apply {
+                        putExtra(RESULT_CODE, RESULT_CODE_SUCCESS)
                     }
                 }
                 else -> Intent().apply {

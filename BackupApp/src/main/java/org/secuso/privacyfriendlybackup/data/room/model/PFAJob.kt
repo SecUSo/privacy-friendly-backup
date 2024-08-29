@@ -2,7 +2,7 @@ package org.secuso.privacyfriendlybackup.data.room.model
 
 import android.os.Parcelable
 import androidx.room.*
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.secuso.privacyfriendlybackup.data.room.model.enums.PFAJobAction
 import java.util.*
 
@@ -17,5 +17,6 @@ data class PFAJob(
     @ColumnInfo(name = "packageName") val packageName : String,
     val timestamp : Date,
     @ColumnInfo(name = "action") val action : PFAJobAction,
-    @ColumnInfo(name = "dataId") var dataId : Long? = null
+    @ColumnInfo(name = "dataId") var dataId : Long? = null,
+    @ColumnInfo(name = "error") var error : Int? = null
 ) : Parcelable

@@ -8,10 +8,10 @@ import android.view.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_backup_overview.*
 import org.secuso.privacyfriendlybackup.BackupApplication
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
+import org.secuso.privacyfriendlybackup.databinding.FragmentBackupOverviewBinding
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity
@@ -27,6 +27,7 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
     private lateinit var adapter : ApplicationAdapter
 
     private var oldMode : Mode = Mode.NORMAL
+    lateinit var binding: FragmentBackupOverviewBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +43,8 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_backup_overview, container, false)
+        binding = FragmentBackupOverviewBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -53,11 +55,11 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
         viewModel = ViewModelProvider(this)[ApplicationOverviewViewModel::class.java]
         adapter = ApplicationAdapter(requireContext(), this, viewLifecycleOwner)
 
-        fragment_backup_overview_list.adapter = adapter
-        fragment_backup_overview_list.layoutManager =
+        binding.fragmentBackupOverviewList.adapter = adapter
+        binding.fragmentBackupOverviewList.layoutManager =
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        backup_overview_no_entries_name.setText(R.string.application_overview_no_entries_text)
+        binding.backupOverviewNoEntriesName.setText(R.string.application_overview_no_entries_text)
 
         viewModel.appLiveData.observe(viewLifecycleOwner) { data ->
             adapter.setData(data)
@@ -119,6 +121,6 @@ class ApplicationOverviewFragment : BaseFragment(), ApplicationAdapter.ManageLis
     }
 
     private fun displayNoElementsImage(show: Boolean) {
-        backup_overview_no_entries.visibility = if(show) View.VISIBLE else View.GONE
+        binding.backupOverviewNoEntries.visibility = if(show) View.VISIBLE else View.GONE
     }
 }

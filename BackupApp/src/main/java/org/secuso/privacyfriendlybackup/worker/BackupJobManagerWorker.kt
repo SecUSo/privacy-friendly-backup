@@ -50,6 +50,11 @@ class BackupJobManagerWorker(val context: Context, params: WorkerParameters) : C
                         // this is okay if it is a PFA job because they will be handled by the service
                         if(job.action != BackupJobAction.PFA_JOB_BACKUP && job.action != BackupJobAction.PFA_JOB_RESTORE) {
                             jobDao.deleteForId(job._id)
+                        } else {
+                            // check if it gave an error
+                            if(db.pfaJobDao().getJobsForPackage(job.packageName).find { it.error != null } != null) {
+                                deleteFollowingJobs(job, jobsToCheck)
+                            }
                         }
                     }
                     WorkInfo.State.BLOCKED -> { /* DO NOTHING */ }

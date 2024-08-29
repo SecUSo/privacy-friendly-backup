@@ -2,14 +2,16 @@ package org.secuso.privacyfriendlybackup.ui.encryption
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_display_menu_item.*
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.databinding.ActivityDisplayMenuItemBinding
 import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 
 class EncryptionSettingsActivity : AppCompatActivity(){
+    lateinit var binding: ActivityDisplayMenuItemBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_display_menu_item)
+        binding = ActivityDisplayMenuItemBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initResources()
 
@@ -24,7 +26,7 @@ class EncryptionSettingsActivity : AppCompatActivity(){
     }
 
     private fun initResources() {
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setTitle(R.string.app_name)
     }

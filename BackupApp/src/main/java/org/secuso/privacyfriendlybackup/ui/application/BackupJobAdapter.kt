@@ -17,7 +17,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.bumptech.glide.Glide
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.api.common.BackupApi
+import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import java.lang.ref.WeakReference
@@ -73,18 +79,19 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
 
         Glide.with(context).load(data.action.image).into(holder.mImage)
 
-        val colorId = if(data.active) {
+        var colorId = if(data.active) {
             R.color.colorAccent
         } else {
             R.color.middlegrey
         }
+
         holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
 
         WorkManager.getInstance(context).getWorkInfosByTagLiveData(data.getWorkerTag()).observe(lifecycleOwner) {
             workInfoList ->
             if(workInfoList.isNotEmpty()) {
                 val workInfo = workInfoList[0]
-                val colorId : Int = when (workInfo.state) {
+                var colorId : Int = when (workInfo.state) {
                     WorkInfo.State.RUNNING -> R.color.colorAccent
                     WorkInfo.State.SUCCEEDED -> R.color.green
                     WorkInfo.State.BLOCKED -> R.color.darkgrey
@@ -92,9 +99,31 @@ class BackupJobAdapter(val context: Context, callback: ManageListAdapterCallback
                     WorkInfo.State.ENQUEUED -> R.color.middlegrey
                     WorkInfo.State.FAILED -> R.color.red
                 }
+                when (workInfo.state) {
+                    WorkInfo.State.SUCCEEDED, WorkInfo.State.RUNNING -> {
+                        runBlocking(IO) {
+                            if (data.action == BackupJobAction.PFA_JOB_BACKUP || data.action == BackupJobAction.PFA_JOB_RESTORE) {
+                                if(BackupDatabase.getInstance(context).pfaJobDao().getJobsForPackage(data.packageName).find { it.error != null } != null) {
+                                    colorId = R.color.red
+                                }
+                            }
+                        }
+                    }
+                    else -> { }
+                }
                 holder.mImage.setColorFilter(ContextCompat.getColor(context, colorId))
             }
         }
+
+        if(data.action == BackupJobAction.PFA_JOB_BACKUP || data.action == BackupJobAction.PFA_JOB_RESTORE) {
+            BackupDatabase.getInstance(context).pfaJobDao().getJobsForPackageLiveData(data.packageName).observe(lifecycleOwner) { list ->
+                if(list.find { it.error != null } != null) {
+                    holder.mImage.setColorFilter(ContextCompat.getColor(context, R.color.red))
+                }
+            }
+        }
+
+
     }
 
     class BackupJobViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -1,34 +1,31 @@
 package org.secuso.privacyfriendlybackup.ui.inspection
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.data_inspection_fragment.*
-import kotlinx.android.synthetic.main.item_application_job.*
 import org.openintents.openpgp.OpenPgpSignatureResult
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.databinding.DataInspectionFragmentBinding
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
-import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 import java.io.FileNotFoundException
 
 
@@ -40,6 +37,8 @@ class DataInspectionFragment : Fragment() {
     private var exportEncrypted : Boolean = false
     private var encryptionEnabled : Boolean = false
     private var showSigInfo: Boolean = false
+
+    lateinit var dataBinding: DataInspectionFragmentBinding
 
     companion object {
         fun newInstance() = DataInspectionFragment()
@@ -58,7 +57,8 @@ class DataInspectionFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.data_inspection_fragment, container, false)
+        dataBinding = DataInspectionFragmentBinding.inflate(layoutInflater)
+        return dataBinding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -105,9 +105,9 @@ class DataInspectionFragment : Fragment() {
         showSigInfo = !showSigInfo
 
         val set = ConstraintSet()
-        set.clone(data_inspection)
+        set.clone(dataBinding.dataInspection)
         set.setVisibility(R.id.data_inspection_encryption_details, if(showSigInfo) View.VISIBLE else View.GONE)
-        set.applyTo(data_inspection)
+        set.applyTo(dataBinding.dataInspection)
     }
 
     private fun handleExportClicked() {
@@ -224,27 +224,27 @@ class DataInspectionFragment : Fragment() {
 
         viewModel.getLoadStatus().observe(viewLifecycleOwner) {
             Log.d("TEST", "## Load Status Updated To ${it.name}")
-            Glide.with(requireActivity()).load(it.imageRes).into(data_inspection_load_status_image)
-            data_inspection_load_status_name.setText(it.descriptionRes)
-            data_inspection_load_status_image.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
+            Glide.with(requireActivity()).load(it.imageRes).into(dataBinding.dataInspectionSignatureStatus)
+            dataBinding.dataInspectionLoadStatusName.setText(it.descriptionRes)
+            dataBinding.dataInspectionLoadStatusImage.setColorFilter(ContextCompat.getColor(requireActivity(), it.colorRes))
             when(it) {
                 LoadStatus.UNKNOWN, null -> {
-                    data_inspection_load_status.visibility = View.GONE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.GONE
                 }
                 LoadStatus.ERROR_INVALID_JSON, LoadStatus.ERROR -> {
-                    data_inspection_load_status.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.LOADING -> {
-                    data_inspection_load_status.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DECRYPTING -> {
-                    data_inspection_load_status.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DECRYPTION_ERROR -> {
-                    data_inspection_load_status.visibility = View.VISIBLE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.VISIBLE
                 }
                 LoadStatus.DONE -> {
-                    data_inspection_load_status.visibility = View.GONE
+                    dataBinding.dataInspectionLoadStatus.visibility = View.GONE
 
                     encryptionEnabled = encryptionEnabled and viewModel.isEncrypted
 
@@ -259,31 +259,31 @@ class DataInspectionFragment : Fragment() {
         }
 
         viewModel.getData().observe(viewLifecycleOwner) {
-            data_inspection_json_list.bindJson(it)
+            dataBinding.dataInspectionJsonList.bindJson(it)
         }
 
         // Color
-        data_inspection_json_list.setKeyColor(
+        dataBinding.dataInspectionJsonList.setKeyColor(
             ContextCompat.getColor(
                 activity,
                 R.color.colorPrimary
             )
         )
-        data_inspection_json_list.setValueTextColor(ContextCompat.getColor(activity, R.color.green))
-        data_inspection_json_list.setValueNumberColor(
+        dataBinding.dataInspectionJsonList.setValueTextColor(ContextCompat.getColor(activity, R.color.green))
+        dataBinding.dataInspectionJsonList.setValueNumberColor(
             ContextCompat.getColor(
                 activity,
                 R.color.colorAccent
             )
         )
-        data_inspection_json_list.setValueUrlColor(ContextCompat.getColor(activity, R.color.red))
-        data_inspection_json_list.setValueNullColor(
+        dataBinding.dataInspectionJsonList.setValueUrlColor(ContextCompat.getColor(activity, R.color.red))
+        dataBinding.dataInspectionJsonList.setValueNullColor(
             ContextCompat.getColor(
                 activity,
                 R.color.orange
             )
         )
-        data_inspection_json_list.setBracesColor(ContextCompat.getColor(activity, R.color.black))
+        dataBinding.dataInspectionJsonList.setBracesColor(ContextCompat.getColor(activity, R.color.black))
         //data_inspection_json_list.setTextSize()
 
         viewModel.getDecryptionMetaData().observe(requireActivity()) {
@@ -297,8 +297,8 @@ class DataInspectionFragment : Fragment() {
                 OpenPgpSignatureResult.RESULT_NO_SIGNATURE -> {
                     // not signed
                     statusText = requireActivity().getString(R.string.signature_result_no_signature)
-                    data_inspection_signature_user_id.visibility = View.GONE
-                    data_inspection_signature_key_id.visibility = View.GONE
+                    dataBinding.dataInspectionSignatureUserId.visibility = View.GONE
+                    dataBinding.dataInspectionSignatureKeyId.visibility = View.GONE
                 }
                 OpenPgpSignatureResult.RESULT_INVALID_SIGNATURE -> {
                     // invalid signature
@@ -337,10 +337,10 @@ class DataInspectionFragment : Fragment() {
                 mutate()
                 setTint(color)
             }
-            data_inspection_signature_status.setImageDrawable(statusIcon)
-            data_inspection_signature_status_text.text = statusText
-            data_inspection_signature_user_id.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it?.signature?.primaryUserId)
-            data_inspection_signature_key_id.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it?.signature?.keyId.toString())
+            dataBinding.dataInspectionSignatureStatus.setImageDrawable(statusIcon)
+            dataBinding.dataInspectionSignatureStatusText.text = statusText
+            dataBinding.dataInspectionSignatureUserId.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it?.signature?.primaryUserId)
+            dataBinding.dataInspectionSignatureKeyId.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it?.signature?.keyId.toString())
 
         }
     }
