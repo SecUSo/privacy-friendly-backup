@@ -1,11 +1,37 @@
+# Built application files
+/*/build/
+build/*
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Gradle generated files
+.gradle/
+
+# Signing files
+.signing/
+
+# User-specific configurations
+.idea/*
 *.iml
-.gradle
-/local.properties
-.idea/
-misc.xml
+
+# OS-specific files
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Documents
+*.pdf
+*.doc
+*.docx
+*.odt
+
+# APKs
+*.apk
 /pfa.properties
+/.idea/
+/BackupApp/release

@@ -27,14 +27,7 @@
        <provider
            android:name="androidx.startup.InitializationProvider"
            android:authorities="${applicationId}.androidx-startup"
-           android:exported="false"
-           tools:node="merge">
-           <!-- If you are using androidx.startup to initialize other components -->
-           <meta-data
-               android:name="androidx.work.impl.WorkManagerInitializer"
-               android:value="androidx.startup"
-               tools:node="remove" />
-       </provider>
+           tools:node="remove" />
 
         <activity android:name=".ui.importbackup.ImportBackupActivity"
             android:theme="@style/AppTheme.TranslucentOverlay"

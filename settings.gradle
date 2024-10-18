@@ -3,3 +3,6 @@ rootProject.name = "Backup"
 
 include ':BackupAPI'
 project(':BackupAPI').projectDir = new File('BackupAPI/BackupAPI')
+
+include ':openpgp-api'
+project(':openpgp-api').projectDir = new File('openpgp-api/openpgp-api')

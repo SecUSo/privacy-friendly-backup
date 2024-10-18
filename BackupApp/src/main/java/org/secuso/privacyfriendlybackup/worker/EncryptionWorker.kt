@@ -1,9 +1,12 @@
 package org.secuso.privacyfriendlybackup.worker
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -387,7 +390,9 @@ class EncryptionWorker(val context: Context, params: WorkerParameters) : Corouti
             }.build()
 
             with(NotificationManagerCompat.from(context)) {
-                notify(NOTIFICATION_ID, notification)
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                    notify(NOTIFICATION_ID, notification)
+                }
             }
 
             // end this worker and wait for user interaction

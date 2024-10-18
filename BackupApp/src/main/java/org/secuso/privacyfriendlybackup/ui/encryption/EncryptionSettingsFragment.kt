@@ -1,5 +1,6 @@
 package org.secuso.privacyfriendlybackup.ui.encryption
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.os.Bundle
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.preference.EditTextPreference
@@ -16,6 +18,7 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.google.android.material.appbar.AppBarLayout
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_CRYPTO_PROVIDER
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_ENABLE
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.PREF_ENCRYPTION_KEY
@@ -28,6 +31,7 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
     companion object {
         // TODO: Add Dialog or warning box that tells the user to tur encryption on
         const val DIALOG_FRAGMENT_TAG = "EncryptionSettingsFragment.DIALOG_FRAGMENT_TAG"
+        const val REQUEST_CODE_POST_NOTIFICATION = 1
 
         fun newInstance() : EncryptionSettingsFragment {
             return EncryptionSettingsFragment()
@@ -145,6 +149,14 @@ class EncryptionSettingsFragment : PreferenceFragmentCompat() {
 //                true
 //            }
 //        }
+
+        val encryptionEnabled : SwitchPreferenceCompat? = findPreference(PREF_ENCRYPTION_ENABLE)
+        encryptionEnabled?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue.equals(true)) {
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE_POST_NOTIFICATION)
+            }
+            return@setOnPreferenceChangeListener true
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
