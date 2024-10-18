@@ -83,7 +83,7 @@ GNU General Public License for more details.<br />
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.<br />
 
-The app uses icons from [Google Design Material Icons](https://design.google.com/icons/index.html) licensed under Apache License Version 2.0. All other images (the logo of Privacy Friendly Apps, the SECUSO logo) copyright [SECUSO](www.secuso.org) (2021).
+The app uses icons from [Google Design Material Icons](https://design.google.com/icons/index.html) licensed under Apache License Version 2.0. All other images (the logo of Privacy Friendly Apps, the SECUSO logo) copyright [SECUSO](https://www.secuso.org) (2021).
 
 ## Contributors
 
