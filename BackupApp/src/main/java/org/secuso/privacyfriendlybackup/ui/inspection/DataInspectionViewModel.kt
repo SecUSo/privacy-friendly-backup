@@ -5,7 +5,11 @@ import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
@@ -26,7 +30,6 @@ import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.worker.BackupJobManagerWorker
-import java.util.*
 
 class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     val TAG : String = "DataInspectionViewModel"
@@ -147,9 +150,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
     }
 
     private fun setDecryptionMetaData(decryptionMetaData: DecryptionMetaData?) {
-        decryptionMetaData ?: return
-
-        decryptionMetaLiveData.postValue(decryptionMetaData)
+        decryptionMetaData?.let { decryptionMetaLiveData.postValue(it) }
     }
 
     private fun getUnencryptedFilename(filename: String) =
