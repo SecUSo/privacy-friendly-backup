@@ -142,7 +142,7 @@ class BackupOverviewFragment : BaseFragment(),
 
                 val builder = AlertDialog.Builder(requireContext()).apply {
                     setTitle(R.string.dialog_data_export_start_title)
-                    setMessage(R.string.dialog_data_export_start_message)
+                    setMessage(resources.getQuantityString(R.plurals.dialog_data_export_start_message, adapter.getSelectionList().size, adapter.getSelectionList().size))
                     setNegativeButton(R.string.dialog_data_export_start_cancel, null)
                     setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
                         viewModel.exportData(adapter.getSelectionList())
@@ -430,11 +430,11 @@ class BackupOverviewFragment : BaseFragment(),
             startImport()
         } else {
             AlertDialog.Builder(requireActivity()).apply {
-                setTitle(R.string.dialog_data_export_start_title)
-                setMessage(R.string.dialog_data_export_start_message)
+                setTitle(R.string.dialog_data_import_start_title)
+                setMessage(R.string.dialog_data_import_start_message)
                 val view = requireActivity().layoutInflater.inflate(R.layout.dialog_checkbox, null)
                 setView(view)
-                setPositiveButton(R.string.dialog_data_export_start_confirm) { d, _ ->
+                setPositiveButton(R.string.dialog_data_import_start_confirm) { d, _ ->
                     val checkBox = view.findViewById<CheckBox>(R.id.dialog_checkbox)
 
                     if (checkBox.isChecked) {
@@ -445,7 +445,7 @@ class BackupOverviewFragment : BaseFragment(),
                     startImport()
                     d.dismiss()
                 }
-                setNegativeButton(R.string.dialog_data_export_start_cancel, null)
+                setNegativeButton(R.string.dialog_data_import_start_cancel, null)
             }.create().show()
         }
     }

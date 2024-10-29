@@ -80,8 +80,11 @@
     <string name="data_inspection_load_status_error_invalid_json">Dieses Backup scheint beschädigt zu sein. Versuchen Sie, ein neues Backup zu erstellen, oder versuchen Sie, es erneut zu importieren.</string>
     <string name="dialog_data_export_start_confirm">Ja</string>
     <string name="dialog_data_export_start_cancel">Nein</string>
-    <string name="dialog_data_export_start_title">Importieren des Backups</string>
-    <string name="dialog_data_export_start_message">Möchten Sie ein Backup importieren?</string>
+    <string name="dialog_data_export_start_title">Backup Export</string>
+    <string name="dialog_data_import_start_confirm">Ja</string>
+    <string name="dialog_data_import_start_cancel">Nein</string>
+    <string name="dialog_data_import_start_title">Backup Importieren</string>
+    <string name="dialog_data_import_start_message">Möchten Sie ein Backup importieren?</string>
     <string name="dialog_dont_show_again">Nicht mehr anzeigen.</string>
     <string name="menu_title_encryption_info">Verschlüsselungsinformationen</string>
     <string name="version_number">Version: %s</string>
