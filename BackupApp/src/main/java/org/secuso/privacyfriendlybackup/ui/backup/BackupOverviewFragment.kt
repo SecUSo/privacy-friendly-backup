@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.*
 import android.widget.CheckBox
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
@@ -26,6 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
+import org.secuso.privacyfriendlybackup.data.exporter.DataExporter
 import org.secuso.privacyfriendlybackup.databinding.FragmentBackupOverviewBinding
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.DIALOG_SKIP_IMPORT_START
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
@@ -35,6 +37,7 @@ import org.secuso.privacyfriendlybackup.ui.inspection.DataInspectionActivity
 import org.secuso.privacyfriendlybackup.ui.importbackup.ImportBackupActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.BACKUP_ID
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
+import java.io.FileNotFoundException
 
 
 class BackupOverviewFragment : BaseFragment(),
@@ -43,6 +46,7 @@ class BackupOverviewFragment : BaseFragment(),
 
     companion object {
         const val TAG = "PFA BackupFragment"
+        const val REQUEST_CODE_CREATE_DOCUMENT : Int = 251
 
         fun newInstance() =
             BackupOverviewFragment()
@@ -58,6 +62,7 @@ class BackupOverviewFragment : BaseFragment(),
     private var searchIcon: MenuItem? = null
     private var selectAllIcon: MenuItem? = null
     private var oldMode : Mode = Mode.NORMAL
+    private var exportEncrypted : Boolean = true
 
     var predefinedFilter : String? = null
     var highlightSpecificBackup : Long = -1L
@@ -145,9 +150,26 @@ class BackupOverviewFragment : BaseFragment(),
                     setMessage(resources.getQuantityString(R.plurals.dialog_data_export_start_message, adapter.getSelectionList().size, adapter.getSelectionList().size))
                     setNegativeButton(R.string.dialog_data_export_start_cancel, null)
                     setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
-                        viewModel.exportData(adapter.getSelectionList())
+                        if (adapter.getSelectionList().isEmpty()) {
+                            dialog.dismiss()
+                            return@setPositiveButton
+                        }
+                        if (adapter.getSelectionList().any {it.encrypted}) {
+                            //TODO Ask if encryption should be kept
+                        }
+
+                        exportEncrypted = false
+                        exportEncrypted = true
+
+                        val filename = if (adapter.getSelectionList().size > 1) DataExporter.getMultipleExportFileName(exportEncrypted) else DataExporter.getSingleExportFileName(adapter.getSelectionList().first(), exportEncrypted)
+
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            type = "*/*"
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            putExtra(Intent.EXTRA_TITLE, filename)
+                            startActivityForResult(Intent.createChooser(this, ""), REQUEST_CODE_CREATE_DOCUMENT)
+                        }
                         dialog.dismiss()
-                        onDisableMode(Mode.EXPORT)
                     }
                 }
                 builder.show()
@@ -245,6 +267,28 @@ class BackupOverviewFragment : BaseFragment(),
             }
 
             oldMode = mode
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_CODE_CREATE_DOCUMENT) {
+            when(resultCode) {
+                AppCompatActivity.RESULT_OK -> {
+                    if(data != null && data.data != null) {
+                        try {
+                            viewModel.exportData(data.data, HashSet(adapter.getSelectionList()), exportEncrypted)
+                            onDisableMode(Mode.EXPORT)
+                        } catch (e : FileNotFoundException) {
+                            Log.e(TAG, e.message, e)
+                        }
+                    }
+                }
+                AppCompatActivity.RESULT_CANCELED -> {
+                    /* canceled */
+                }
+            }
         }
     }
 
