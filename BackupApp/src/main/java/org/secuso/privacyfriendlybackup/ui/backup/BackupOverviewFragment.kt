@@ -1,19 +1,32 @@
 package org.secuso.privacyfriendlybackup.ui.backup
 
-import android.animation.*
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewAnimationUtils
+import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.preference.PreferenceManager
@@ -33,8 +46,8 @@ import org.secuso.privacyfriendlybackup.preference.PreferenceKeys.DIALOG_SKIP_IM
 import org.secuso.privacyfriendlybackup.ui.common.BaseFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
 import org.secuso.privacyfriendlybackup.ui.common.Mode
-import org.secuso.privacyfriendlybackup.ui.inspection.DataInspectionActivity
 import org.secuso.privacyfriendlybackup.ui.importbackup.ImportBackupActivity
+import org.secuso.privacyfriendlybackup.ui.inspection.DataInspectionActivity
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.BACKUP_ID
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity.Companion.FILTER
 import java.io.FileNotFoundException
@@ -46,7 +59,7 @@ class BackupOverviewFragment : BaseFragment(),
 
     companion object {
         const val TAG = "PFA BackupFragment"
-        const val REQUEST_CODE_CREATE_DOCUMENT : Int = 251
+        const val REQUEST_CODE_CREATE_DOCUMENT: Int = 251
 
         fun newInstance() =
             BackupOverviewFragment()
@@ -55,17 +68,18 @@ class BackupOverviewFragment : BaseFragment(),
     private var currentDeleteCount: Int = 0
 
     private lateinit var viewModel: BackupOverviewViewModel
-    private lateinit var adapter : FilterableBackupAdapter
+    private lateinit var adapter: FilterableBackupAdapter
     private lateinit var binding: FragmentBackupOverviewBinding
 
     private var toolbarDeleteIcon: MenuItem? = null
     private var searchIcon: MenuItem? = null
     private var selectAllIcon: MenuItem? = null
-    private var oldMode : Mode = Mode.NORMAL
-    private var exportEncrypted : Boolean = true
+    private var oldMode: Mode = Mode.NORMAL
+    private var exportEncrypted: Boolean = true
+    private var lastToastTime: Long = 0
 
-    var predefinedFilter : String? = null
-    var highlightSpecificBackup : Long = -1L
+    var predefinedFilter: String? = null
+    var highlightSpecificBackup: Long = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +94,7 @@ class BackupOverviewFragment : BaseFragment(),
         savedInstanceState ?: return
 
         val savedOldMode = savedInstanceState.getString("oldMode")
-        oldMode = if(savedOldMode != null) Mode.valueOf(savedOldMode) else oldMode
+        oldMode = if (savedOldMode != null) Mode.valueOf(savedOldMode) else oldMode
 
         currentDeleteCount = savedInstanceState.getInt("currentDeleteCount")
     }
@@ -116,6 +130,7 @@ class BackupOverviewFragment : BaseFragment(),
                     false
                 )
             }
+
             isLargeTablet() -> {
                 GridLayoutManager(
                     context,
@@ -124,13 +139,14 @@ class BackupOverviewFragment : BaseFragment(),
                     false
                 )
             }
+
             else -> {
                 LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             }
         }
 
         binding.fab.setOnClickListener {
-            if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
+            if (Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
 
                 val builder = AlertDialog.Builder(requireContext()).apply {
                     setTitle(R.string.dialog_delete_confirmation_title)
@@ -143,7 +159,7 @@ class BackupOverviewFragment : BaseFragment(),
                     }
                 }
                 builder.show()
-            } else if(Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
+            } else if (Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
 
                 val builder = AlertDialog.Builder(requireContext()).apply {
                     setTitle(R.string.dialog_data_export_start_title)
@@ -154,14 +170,18 @@ class BackupOverviewFragment : BaseFragment(),
                             dialog.dismiss()
                             return@setPositiveButton
                         }
-                        if (adapter.getSelectionList().any {it.encrypted}) {
+                        if (adapter.getSelectionList().any { it.encrypted }) {
                             //TODO Ask if encryption should be kept
                         }
 
                         exportEncrypted = false
                         exportEncrypted = true
 
-                        val filename = if (adapter.getSelectionList().size > 1) DataExporter.getMultipleExportFileName(exportEncrypted) else DataExporter.getSingleExportFileName(adapter.getSelectionList().first(), exportEncrypted)
+                        val filename =
+                            if (adapter.getSelectionList().size > 1) DataExporter.getMultipleExportFileName(exportEncrypted) else DataExporter.getSingleExportFileName(
+                                adapter.getSelectionList().first(),
+                                exportEncrypted
+                            )
 
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             type = "*/*"
@@ -181,7 +201,7 @@ class BackupOverviewFragment : BaseFragment(),
         highlightSpecificBackup = arguments?.getLong(BACKUP_ID) ?: -1L
         Log.d(TAG, "predefinedFilter = $predefinedFilter")
 
-        if(!predefinedFilter.isNullOrEmpty()) {
+        if (!predefinedFilter.isNullOrEmpty()) {
             viewModel.setFilterText(predefinedFilter)
         }
 
@@ -201,7 +221,7 @@ class BackupOverviewFragment : BaseFragment(),
             val colorTo = ContextCompat.getColor(requireContext(), mode.color)
 
             // enabled search
-            if(!Mode.SEARCH.isActiveIn(oldMode) && Mode.SEARCH.isActiveIn(mode)) {
+            if (!Mode.SEARCH.isActiveIn(oldMode) && Mode.SEARCH.isActiveIn(mode)) {
                 val searchRevealOpen = animateSearchToolbar(42, false, true)
                 val colorFade = playColorAnimation(colorFrom, colorTo) {
                     activity?.window?.statusBarColor = it.animatedValue as Int
@@ -211,7 +231,7 @@ class BackupOverviewFragment : BaseFragment(),
                 set.start()
 
                 // disable search
-            } else if(Mode.SEARCH.isActiveIn(oldMode) && !Mode.SEARCH.isActiveIn(mode)) {
+            } else if (Mode.SEARCH.isActiveIn(oldMode) && !Mode.SEARCH.isActiveIn(mode)) {
                 val searchToolbarClose = animateSearchToolbar(2, false, false)
                 val colorFade = playColorAnimation(colorFrom, colorTo) {
                     activity?.window?.statusBarColor = it.animatedValue as Int
@@ -225,7 +245,7 @@ class BackupOverviewFragment : BaseFragment(),
                 playColorAnimation(colorFrom, colorTo).start()
             }
 
-            if(Mode.SEARCH.isActiveIn(mode)) {
+            if (Mode.SEARCH.isActiveIn(mode)) {
                 searchIcon?.expandActionView()
             } else {
                 searchIcon?.collapseActionView()
@@ -239,6 +259,7 @@ class BackupOverviewFragment : BaseFragment(),
                     onEnableMode(mode)
                     binding.fab.show()
                 }
+
                 Mode.EXPORT.isActiveIn(mode) -> {
                     binding.fab.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.green))
                     binding.fab.rippleColor = ContextCompat.getColor(requireContext(), R.color.lightgreen)
@@ -246,45 +267,68 @@ class BackupOverviewFragment : BaseFragment(),
                     onEnableMode(mode)
                     binding.fab.show()
                 }
+
                 else -> {
                     onDisableMode(mode)
                     binding.fab.hide()
                 }
             }
 
-            if(Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
+            if (Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
                 toolbarDeleteIcon?.isVisible = false
                 selectAllIcon?.isVisible = true
             }
 
-            if(mode != Mode.NORMAL && mode != Mode.SEARCH) {
+            if (mode != Mode.NORMAL && mode != Mode.SEARCH) {
                 toolbar.setNavigationIcon(R.drawable.ic_arrow_back_24)
             }
 
-            if(mode != Mode.NORMAL && mode != Mode.SEARCH) {
+            if (mode != Mode.NORMAL && mode != Mode.SEARCH) {
                 toolbarDeleteIcon?.isVisible = false
                 selectAllIcon?.isVisible = true
             }
 
             oldMode = mode
         }
+
+        viewModel.exportStatus.observe(viewLifecycleOwner, Observer { status ->
+            when (status.status) {
+                BackupOverviewViewModel.ExportStatus.Status.UNKNOWN -> {}
+                BackupOverviewViewModel.ExportStatus.Status.LOADING -> {
+                    if (System.currentTimeMillis() > lastToastTime + 1000) {
+                        Toast.makeText(context, "Loading ${status.completed}/${status.total}...", Toast.LENGTH_SHORT).show()
+                        lastToastTime = System.currentTimeMillis()
+                    }
+                }
+
+                BackupOverviewViewModel.ExportStatus.Status.WRITING ->
+                    Toast.makeText(context, "Writing file...", Toast.LENGTH_SHORT).show()
+
+                BackupOverviewViewModel.ExportStatus.Status.ERROR ->
+                    Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
+
+                BackupOverviewViewModel.ExportStatus.Status.COMPLETE ->
+                    Toast.makeText(context, "saved file", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == REQUEST_CODE_CREATE_DOCUMENT) {
-            when(resultCode) {
+            when (resultCode) {
                 AppCompatActivity.RESULT_OK -> {
-                    if(data != null && data.data != null) {
+                    if (data != null && data.data != null) {
                         try {
                             viewModel.exportData(data.data, HashSet(adapter.getSelectionList()), exportEncrypted)
                             onDisableMode(Mode.EXPORT)
-                        } catch (e : FileNotFoundException) {
+                        } catch (e: FileNotFoundException) {
                             Log.e(TAG, e.message, e)
                         }
                     }
                 }
+
                 AppCompatActivity.RESULT_CANCELED -> {
                     /* canceled */
                 }
@@ -293,13 +337,13 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     private fun displayNoElementsImage(show: Boolean) {
-        binding.backupOverviewNoEntries.visibility = if(show) View.VISIBLE else View.GONE
+        binding.backupOverviewNoEntries.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun playAnimationIfApplicable(data: List<BackupDataStorageRepository.BackupData>) {
-        if(data.isNotEmpty() && highlightSpecificBackup != -1L) {
+        if (data.isNotEmpty() && highlightSpecificBackup != -1L) {
             for (i in data.indices) {
-                if(data[i].id == highlightSpecificBackup) {
+                if (data[i].id == highlightSpecificBackup) {
                     Log.d(TAG, "## found backup in recyclerView at position $i")
                     val highlight = highlightSpecificBackup
                     highlightSpecificBackup = -1L
@@ -312,7 +356,7 @@ class BackupOverviewFragment : BaseFragment(),
                         delay(250L)
                         Log.d(TAG, "## finding viewholder for item id $highlight")
                         val vh = binding.fragmentBackupOverviewList.findViewHolderForItemId(highlight)
-                        if(vh != null) {
+                        if (vh != null) {
                             (vh as FilterableBackupAdapter.ViewHolder).apply {
                                 ObjectAnimator.ofObject(
                                     mCard,
@@ -350,17 +394,20 @@ class BackupOverviewFragment : BaseFragment(),
         val currentMode = viewModel.getCurrentMode()
         val activity = activity
 
-        if(activity != null && activity is DisplayMenuItemActivity) {
+        if (activity != null && activity is DisplayMenuItemActivity) {
             when {
                 Mode.SEARCH.isActiveIn(currentMode) -> {
                     activity.pressBack()
                 }
+
                 Mode.DELETE.isActiveIn(currentMode) -> {
                     onDisableMode(Mode.DELETE)
                 }
+
                 Mode.EXPORT.isActiveIn(currentMode) -> {
                     onDisableMode(Mode.EXPORT)
                 }
+
                 else -> {
                     activity.finish()
                 }
@@ -384,13 +431,13 @@ class BackupOverviewFragment : BaseFragment(),
         selectAllIcon = menu.findItem(R.id.action_select_all)
 
 
-        if(Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
+        if (Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
             onEnableMode(Mode.DELETE)
         } else {
             onDisableMode(Mode.DELETE)
         }
 
-        if(!predefinedFilter.isNullOrEmpty()) {
+        if (!predefinedFilter.isNullOrEmpty()) {
             searchIcon?.isVisible = false
             return
         }
@@ -413,7 +460,7 @@ class BackupOverviewFragment : BaseFragment(),
             }
         })
 
-        if(Mode.SEARCH.isActiveIn(viewModel.getCurrentMode())) {
+        if (Mode.SEARCH.isActiveIn(viewModel.getCurrentMode())) {
             searchIcon?.expandActionView()
         } else {
             searchIcon?.collapseActionView()
@@ -435,7 +482,7 @@ class BackupOverviewFragment : BaseFragment(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        when (item.itemId) {
             android.R.id.home -> {
                 if (Mode.DELETE.isActiveIn(viewModel.getCurrentMode())) {
                     onDisableMode(Mode.DELETE)
@@ -445,11 +492,13 @@ class BackupOverviewFragment : BaseFragment(),
                     return false
                 }
             }
+
             R.id.action_delete -> onEnableMode(Mode.DELETE)
             R.id.action_search -> {
                 /* nothing to do here */
                 //Toast.makeText(requireContext(), "action_search", Toast.LENGTH_SHORT).show()
             }
+
             R.id.action_select_all -> {
                 if (currentDeleteCount > 0) {
                     adapter.deselectAll()
@@ -457,20 +506,23 @@ class BackupOverviewFragment : BaseFragment(),
                     adapter.selectAll()
                 }
             }
+
             R.id.action_add -> {
                 showImportStartDialog()
             }
+
             R.id.action_sort -> {
                 // viewModel.insertTestData()
                 // TODO: to implement sorting - just swap the comparator :)
             }
+
             else -> return false
         }
         return true
     }
 
     private fun showImportStartDialog() {
-        if(PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(DIALOG_SKIP_IMPORT_START, false)) {
+        if (PreferenceManager.getDefaultSharedPreferences(requireActivity()).getBoolean(DIALOG_SKIP_IMPORT_START, false)) {
             startImport()
         } else {
             AlertDialog.Builder(requireActivity()).apply {
@@ -503,7 +555,7 @@ class BackupOverviewFragment : BaseFragment(),
 
     override fun onSelectionCountChanged(count: Int) {
         currentDeleteCount = count
-        when(count) {
+        when (count) {
             0 -> selectAllIcon?.setIcon(R.drawable.ic_check_box_outline_blank_24)
             adapter.completeData.size -> selectAllIcon?.setIcon(R.drawable.ic_check_box_24)
             else -> selectAllIcon?.setIcon(R.drawable.ic_indeterminate_check_box_24)
@@ -550,7 +602,7 @@ class BackupOverviewFragment : BaseFragment(),
         backupData: BackupDataStorageRepository.BackupData,
         itemId: Int
     ) {
-        when(itemId) {
+        when (itemId) {
             R.id.menu_restore -> {
                 val builder = AlertDialog.Builder(requireContext())
                 builder.setPositiveButton(R.string.restore) { _, _ ->
@@ -561,12 +613,14 @@ class BackupOverviewFragment : BaseFragment(),
                 builder.setTitle(R.string.dialog_restore_confirmation_title)
                 builder.create().show()
             }
+
             R.id.menu_inspect -> {
                 Intent(requireActivity(), DataInspectionActivity::class.java).let {
                     it.putExtra(DataInspectionActivity.EXTRA_DATA_ID, id)
                     startActivity(it)
                 }
             }
+
             R.id.menu_export -> {
                 onEnableMode(Mode.EXPORT)
                 adapter.selectItem(backupData)
@@ -576,6 +630,7 @@ class BackupOverviewFragment : BaseFragment(),
                     startActivity(it)
                 }*/
             }
+
             else -> {}
         }
     }
@@ -583,7 +638,7 @@ class BackupOverviewFragment : BaseFragment(),
     fun onDisableMode(mode: Mode) {
         viewModel.disableMode(mode)
 
-        if(!isPortrait() && isXLargeTablet()) {
+        if (!isPortrait() && isXLargeTablet()) {
             toolbar.navigationIcon = null
         }
 
@@ -592,7 +647,7 @@ class BackupOverviewFragment : BaseFragment(),
 
         adapter.disableMode(mode)
 
-        if(Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
+        if (Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)) {
             adapter.deselectAll()
         }
     }
@@ -602,7 +657,7 @@ class BackupOverviewFragment : BaseFragment(),
         numberOfMenuIcon: Int,
         containsOverflow: Boolean,
         show: Boolean
-    ) : Animator {
+    ): Animator {
         //appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), viewModel.getCurrentMode().color))
 
         if (show) {
@@ -628,7 +683,7 @@ class BackupOverviewFragment : BaseFragment(),
 
         createCircularReveal.duration = 250
 
-        if(!show) {
+        if (!show) {
             createCircularReveal.addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
                     super.onAnimationEnd(animation)

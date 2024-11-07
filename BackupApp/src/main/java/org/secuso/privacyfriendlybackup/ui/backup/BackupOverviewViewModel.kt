@@ -31,6 +31,15 @@ class BackupOverviewViewModel(app: Application) : AndroidViewModel(app) {
     val filterLiveData: LiveData<String> = MutableLiveData("")
     val filteredBackupLiveData: LiveData<List<BackupData>> = MutableLiveData(emptyList())
     val currentMode: LiveData<Mode> = MutableLiveData<Mode>(Mode.NORMAL)
+    private val _exportStatus = MutableLiveData(ExportStatus(ExportStatus.Status.UNKNOWN, 0, 0))
+    val exportStatus: LiveData<ExportStatus>
+        get() = _exportStatus
+
+    class ExportStatus(val status: ExportStatus.Status, val completed: Int, val total: Int) {
+        enum class Status {
+            UNKNOWN, LOADING, WRITING, ERROR, COMPLETE
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -113,11 +122,13 @@ class BackupOverviewViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun exportData(uri: Uri?, selectionList: Set<BackupData>, exportEncrypted: Boolean) {
+        _exportStatus.postValue(ExportStatus(ExportStatus.Status.UNKNOWN, 0, selectionList.size))
         val write = viewModelScope.async(IO) {
             val storageRepository = BackupDataStorageRepository.getInstance(getApplication())
             return@async uri?.let {
                 //Create BackupData objects to export
                 val exportBackupData = ArraySet<BackupData>()
+                _exportStatus.postValue(ExportStatus(ExportStatus.Status.LOADING, 0, selectionList.size))
                 for (backupData in selectionList) {
                     val encrypted = exportEncrypted && backupData.encrypted
 
@@ -137,16 +148,18 @@ class BackupOverviewViewModel(app: Application) : AndroidViewModel(app) {
                         storageType = StorageType.EXTERNAL
                     )
                     exportBackupData.add(exportData)
+                    _exportStatus.postValue(ExportStatus(ExportStatus.Status.LOADING, exportBackupData.size, selectionList.size))
                 }
+                _exportStatus.postValue(ExportStatus(ExportStatus.Status.WRITING, 0, selectionList.size))
                 return@let DataExporter.exportDataZip(getApplication(), uri, exportBackupData)
             }
         }
 
         viewModelScope.launch(Main) {
             if (write.await() == true) {
-                Toast.makeText(getApplication(), "saved file", Toast.LENGTH_SHORT).show()
+                _exportStatus.postValue(ExportStatus(ExportStatus.Status.COMPLETE, selectionList.size, selectionList.size))
             } else {
-                Toast.makeText(getApplication(), "something went wrong", Toast.LENGTH_SHORT).show()
+                _exportStatus.postValue(ExportStatus(ExportStatus.Status.ERROR, selectionList.size, selectionList.size))
             }
         }
     }
