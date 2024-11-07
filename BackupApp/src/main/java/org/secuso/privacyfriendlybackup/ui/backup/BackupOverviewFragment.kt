@@ -295,20 +295,20 @@ class BackupOverviewFragment : BaseFragment(),
             when (status.status) {
                 BackupOverviewViewModel.ExportStatus.Status.UNKNOWN -> {}
                 BackupOverviewViewModel.ExportStatus.Status.LOADING -> {
-                    if (System.currentTimeMillis() > lastToastTime + 1000) {
-                        Toast.makeText(context, "Loading ${status.completed}/${status.total}...", Toast.LENGTH_SHORT).show()
+                    if (System.currentTimeMillis() > lastToastTime + 2000) {
+                        Toast.makeText(context, getString(R.string.data_export_toast_loading, status.completed, status.total), Toast.LENGTH_SHORT).show()
                         lastToastTime = System.currentTimeMillis()
                     }
                 }
 
                 BackupOverviewViewModel.ExportStatus.Status.WRITING ->
-                    Toast.makeText(context, "Writing file...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.data_export_toast_writing), Toast.LENGTH_SHORT).show()
 
                 BackupOverviewViewModel.ExportStatus.Status.ERROR ->
-                    Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.data_export_toast_export_error), Toast.LENGTH_LONG).show()
 
                 BackupOverviewViewModel.ExportStatus.Status.COMPLETE ->
-                    Toast.makeText(context, "saved file", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, getString(R.string.data_export_toast_export_successful), Toast.LENGTH_LONG).show()
             }
         })
     }

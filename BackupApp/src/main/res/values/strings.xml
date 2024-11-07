@@ -94,6 +94,10 @@
         <item quantity="one">Do you want to export the selected backup?</item>
         <item quantity="other">Do you want to export the %1$d selected backups?</item>
     </plurals>
+    <string name="data_export_toast_loading">Loading Backups %d/%d…</string>
+    <string name="data_export_toast_writing">Writing to file…</string>
+    <string name="data_export_toast_export_successful">Export complete</string>
+    <string name="data_export_toast_export_error">Something went wrong</string>
     <string name="dialog_dont_show_again">Do not show this again.</string>
     <string name="menu_title_encryption_info">Encryption Info</string>
     <string name="backup_overview_no_entries_text">There is currently no backup. Either create or import new backups to see them in this list.</string>
