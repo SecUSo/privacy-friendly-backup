@@ -66,6 +66,8 @@
     <string name="menu_item_export">Export</string>
     <string name="data_import_success_dialog_title">Data Import Complete</string>
     <string name="data_import_success_dialog_message">The backup was imported successfully.\nApp: %s \nDate: %s</string>
+    <string name="data_import_success_message">The backup was imported successfully.</string>
+    <string name="data_import_multiple_imported_message">%d out of %d backups imported.</string>
     <string name="data_import_success_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_title">Data Import Failed</string>
