@@ -86,7 +86,7 @@ class DataExporter {
         /**
          * Filename for export containing multiple backups (.zip)
          */
-        fun getMultipleExportFileName(encrypted: Boolean): String {
+        fun getMultipleExportFileName(): String {
             val sb = StringBuffer()
             sb.append("PfaBackup_")
             val sdf = SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.getDefault())

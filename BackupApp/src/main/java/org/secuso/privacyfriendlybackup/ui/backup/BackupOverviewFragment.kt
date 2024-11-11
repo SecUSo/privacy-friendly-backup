@@ -162,44 +162,60 @@ class BackupOverviewFragment : BaseFragment(),
                 builder.show()
             } else if (Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
 
-                val view = layoutInflater.inflate(R.layout.dialog_data_export_confirmation_multiple, null)
-
-                val builder = AlertDialog.Builder(requireContext()).apply {
-                    setTitle(R.string.dialog_data_export_start_title)
-                    if (adapter.getSelectionList().any { it.encrypted }) {
-                        setView(view)
-                        view.findViewById<TextView>(R.id.dialog_data_export_encrypted_information).text =
-                            resources.getQuantityString(R.plurals.dialog_data_export_multiple_encrypted, adapter.getSelectionList().count { it.encrypted }, adapter.getSelectionList().count { it.encrypted })
-                        view.findViewById<TextView>(R.id.dialog_data_export_encrypted_warning).text =
-                            resources.getString(R.string.dialog_data_export_multiple_encrypted_warning, getString(R.string.menu_item_inspect))
+                if (adapter.getSelectionList().size == 1) {
+                    val id = adapter.getSelectionList().first().id
+                    onDisableMode(Mode.EXPORT)
+                    Intent(requireActivity(), DataInspectionActivity::class.java).let {
+                        it.putExtra(DataInspectionActivity.EXTRA_DATA_ID, id)
+                        it.putExtra(DataInspectionActivity.EXTRA_EXPORT_DATA, true)
+                        startActivity(it)
                     }
-                    setMessage(resources.getQuantityString(R.plurals.dialog_data_export_start_message, adapter.getSelectionList().size, adapter.getSelectionList().size))
-                    setNegativeButton(R.string.dialog_data_export_start_cancel, null)
-                    setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
-                        if (adapter.getSelectionList().isEmpty()) {
-                            dialog.dismiss()
-                            return@setPositiveButton
+                } else {
+
+                    val view = layoutInflater.inflate(R.layout.dialog_data_export_confirmation_multiple, null)
+
+                    val builder = AlertDialog.Builder(requireContext()).apply {
+                        setTitle(R.string.dialog_data_export_start_title)
+                        if (adapter.getSelectionList().any { it.encrypted }) {
+                            setView(view)
+                            view.findViewById<TextView>(R.id.dialog_data_export_encrypted_information).text =
+                                resources.getQuantityString(
+                                    R.plurals.dialog_data_export_multiple_encrypted,
+                                    adapter.getSelectionList().count { it.encrypted },
+                                    adapter.getSelectionList().count { it.encrypted })
+                            view.findViewById<TextView>(R.id.dialog_data_export_encrypted_warning).text =
+                                resources.getString(R.string.dialog_data_export_multiple_encrypted_warning, getString(R.string.menu_item_inspect))
                         }
-
-                        exportEncrypted = false
-                        exportEncrypted = true
-
-                        val filename =
-                            if (adapter.getSelectionList().size > 1) DataExporter.getMultipleExportFileName(exportEncrypted) else DataExporter.getSingleExportFileName(
-                                adapter.getSelectionList().first(),
-                                exportEncrypted
+                        setMessage(
+                            resources.getQuantityString(
+                                R.plurals.dialog_data_export_start_message,
+                                adapter.getSelectionList().size,
+                                adapter.getSelectionList().size
                             )
+                        )
+                        setNegativeButton(R.string.dialog_data_export_start_cancel, null)
+                        setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
+                            if (adapter.getSelectionList().isEmpty()) {
+                                dialog.dismiss()
+                                return@setPositiveButton
+                            }
 
-                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                            type = "*/*"
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                            putExtra(Intent.EXTRA_TITLE, filename)
-                            startActivityForResult(Intent.createChooser(this, ""), REQUEST_CODE_CREATE_DOCUMENT)
+                            exportEncrypted = false
+                            exportEncrypted = true
+
+                            val filename = DataExporter.getMultipleExportFileName()
+
+                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                                type = "*/*"
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                putExtra(Intent.EXTRA_TITLE, filename)
+                                startActivityForResult(Intent.createChooser(this, ""), REQUEST_CODE_CREATE_DOCUMENT)
+                            }
+                            dialog.dismiss()
                         }
-                        dialog.dismiss()
                     }
+                    builder.show()
                 }
-                builder.show()
             }
         }
 
