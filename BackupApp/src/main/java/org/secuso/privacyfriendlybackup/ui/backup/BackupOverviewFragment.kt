@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -161,17 +162,23 @@ class BackupOverviewFragment : BaseFragment(),
                 builder.show()
             } else if (Mode.EXPORT.isActiveIn(viewModel.getCurrentMode())) {
 
+                val view = layoutInflater.inflate(R.layout.dialog_data_export_confirmation_multiple, null)
+
                 val builder = AlertDialog.Builder(requireContext()).apply {
                     setTitle(R.string.dialog_data_export_start_title)
+                    if (adapter.getSelectionList().any { it.encrypted }) {
+                        setView(view)
+                        view.findViewById<TextView>(R.id.dialog_data_export_encrypted_information).text =
+                            resources.getQuantityString(R.plurals.dialog_data_export_multiple_encrypted, adapter.getSelectionList().count { it.encrypted }, adapter.getSelectionList().count { it.encrypted })
+                        view.findViewById<TextView>(R.id.dialog_data_export_encrypted_warning).text =
+                            resources.getString(R.string.dialog_data_export_multiple_encrypted_warning, getString(R.string.menu_item_inspect))
+                    }
                     setMessage(resources.getQuantityString(R.plurals.dialog_data_export_start_message, adapter.getSelectionList().size, adapter.getSelectionList().size))
                     setNegativeButton(R.string.dialog_data_export_start_cancel, null)
                     setPositiveButton(R.string.dialog_data_export_start_confirm) { dialog, _ ->
                         if (adapter.getSelectionList().isEmpty()) {
                             dialog.dismiss()
                             return@setPositiveButton
-                        }
-                        if (adapter.getSelectionList().any { it.encrypted }) {
-                            //TODO Ask if encryption should be kept
                         }
 
                         exportEncrypted = false
