@@ -63,6 +63,8 @@
     <string name="menu_item_export">Exportieren</string>
     <string name="data_import_success_dialog_title">Datenimport abgeschlossen</string>
     <string name="data_import_success_dialog_message">Das Backup wurde erfolgreich importiert.\n App: %s \n Datum: %s</string>
+    <string name="data_import_success_message">Das Backup wurde erfolgreich importiert.</string>
+    <string name="data_import_multiple_imported_message">%d von %d Backups wurden importiert.</string>
     <string name="data_import_success_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_title">Datenimport fehlgeschlagen</string>
@@ -85,6 +87,14 @@
     <string name="dialog_data_import_start_cancel">Nein</string>
     <string name="dialog_data_import_start_title">Backup Importieren</string>
     <string name="dialog_data_import_start_message">Möchten Sie ein Backup importieren?</string>
+    <string name="data_export_toast_loading">Lade Backups %d/%d…</string>
+    <string name="data_export_toast_writing">Datei wird geschrieben…</string>
+    <string name="data_export_toast_export_successful">Export abgeschlossen</string>
+    <string name="data_export_toast_export_error">Etwas ist schief gelaufen</string>
+    <plurals name="dialog_data_export_start_message">
+        <item quantity="one">Möchten Sie das ausgewählte Backup exportieren?</item>
+        <item quantity="other">Möchten Sie die %1$d ausgewählten Backups exportieren?</item>
+    </plurals>
     <string name="dialog_dont_show_again">Nicht mehr anzeigen.</string>
     <string name="menu_title_encryption_info">Verschlüsselungsinformationen</string>
     <string name="version_number">Version: %s</string>
