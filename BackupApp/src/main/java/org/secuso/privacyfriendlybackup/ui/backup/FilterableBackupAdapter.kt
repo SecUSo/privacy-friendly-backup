@@ -1,7 +1,6 @@
 package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.content.Context
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +16,7 @@ import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository.BackupData
 import org.secuso.privacyfriendlybackup.data.apps.PFApplicationHelper
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
+import org.secuso.privacyfriendlybackup.ui.common.Mode
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.*
@@ -24,8 +24,8 @@ import java.util.*
 class FilterableBackupAdapter(val context : Context, adapterCallback : ManageListAdapterCallback) : RecyclerView.Adapter<FilterableBackupAdapter.ViewHolder>() {
 
     interface ManageListAdapterCallback {
-        fun onDeleteCountChanged(count: Int)
-        fun onEnableDeleteMode()
+        fun onSelectionCountChanged(count: Int)
+        fun onEnableMode(mode: Mode)
         fun onItemClick(id : Long, backupData: BackupData, view: View)
     }
 
@@ -52,9 +52,11 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
             override fun areItemsTheSame(a: BackupData, b: BackupData): Boolean = a.id == b.id
         }
     )
-    private val deleteList: MutableSet<BackupData> = HashSet()
-    private var deleteMode = false
+    private val selectionList: MutableSet<BackupData> = HashSet()
     private val callback = WeakReference(adapterCallback)
+    private var mode = Mode.NORMAL
+    private val selectionActive : Boolean
+        get() = Mode.DELETE.isActiveIn(mode) or Mode.EXPORT.isActiveIn(mode)
 
     init {
         setHasStableIds(true)
@@ -87,35 +89,35 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         val data = this.sortedList[position]
         val pfaInfo = PFApplicationHelper.getDataForPackageName(context, data.packageName)
 
-        holder.mCheckbox.visibility = if (deleteMode) View.VISIBLE else View.INVISIBLE
-        holder.mCheckbox.isChecked = deleteList.contains(data)
+        holder.mCheckbox.visibility = if (selectionActive) View.VISIBLE else View.INVISIBLE
+        holder.mCheckbox.isChecked = selectionList.contains(data)
 
         holder.mCard.setOnLongClickListener {
-            if (deleteMode) {
+            if (selectionActive) {
                 if (holder.mCheckbox.isChecked) {
-                    deleteList.remove(data)
+                    selectionList.remove(data)
                     holder.mCheckbox.isChecked = false
                 } else {
-                    deleteList.add(data)
+                    selectionList.add(data)
                     holder.mCheckbox.isChecked = true
                 }
-                notifyDeleteCount()
+                notifySelectionCount()
             } else {
-                callback.get()?.onEnableDeleteMode()
+                callback.get()?.onEnableMode(Mode.DELETE)
             }
             false
         }
 
         holder.mCard.setOnClickListener {
-            if (deleteMode) {
+            if (selectionActive) {
                 if (holder.mCheckbox.isChecked) {
-                    deleteList.remove(data)
+                    selectionList.remove(data)
                     holder.mCheckbox.isChecked = false
                 } else {
-                    deleteList.add(data)
+                    selectionList.add(data)
                     holder.mCheckbox.isChecked = true
                 }
-                notifyDeleteCount()
+                notifySelectionCount()
             } else {
                 callback.get()?.onItemClick(data.id, data, it)
             }
@@ -149,8 +151,8 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         }
     }
 
-    private fun notifyDeleteCount() {
-        callback.get()?.onDeleteCountChanged(deleteList.size)
+    private fun notifySelectionCount() {
+        callback.get()?.onSelectionCountChanged(selectionList.size)
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -162,33 +164,39 @@ class FilterableBackupAdapter(val context : Context, adapterCallback : ManageLis
         val mStorageImage : ImageView = itemView.findViewById(R.id.storageImage)
     }
 
-    fun enableDeleteMode() {
-        deleteList.clear()
-        deleteMode = true
-        notifyDeleteCount()
+    fun enableMode(_mode: Mode) {
+        mode = mode.activate(_mode)
+        notifySelectionCount()
         notifyDataSetChanged()
     }
 
     fun selectAll() {
         for (i in 0 until sortedList.size()) {
-            deleteList.add(sortedList[i])
+            selectionList.add(sortedList[i])
         }
-        notifyDeleteCount()
+        notifySelectionCount()
         notifyDataSetChanged()
     }
 
     fun deselectAll() {
-        deleteList.clear()
-        notifyDeleteCount()
+        selectionList.clear()
+        notifySelectionCount()
         notifyDataSetChanged()
     }
 
-    fun disableDeleteMode() {
-        deleteMode = false
-        deleteList.clear()
-        notifyDeleteCount()
+    fun disableMode(_mode: Mode) {
+        mode = mode.deactivate(_mode)
+        notifySelectionCount()
         notifyDataSetChanged()
     }
 
-    fun getDeleteList() : Set<BackupData> = deleteList
+    fun getSelectionList() : Set<BackupData> = selectionList
+
+    fun selectItem(data: BackupData) {
+        if(selectionActive) {
+            selectionList.add(data)
+            notifySelectionCount()
+            notifyDataSetChanged()
+        }
+    }
 }

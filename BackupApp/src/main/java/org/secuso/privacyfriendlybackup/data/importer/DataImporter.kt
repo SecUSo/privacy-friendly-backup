@@ -15,15 +15,66 @@ import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.io.IOException
 import java.io.InputStreamReader
-import java.util.*
+import java.util.Date
+import java.util.LinkedList
+import java.util.zip.ZipInputStream
 
 
 class DataImporter {
 
     companion object {
-        suspend fun importData(context: Context, uri: Uri) : Pair<Boolean, BackupDataStorageRepository.BackupData?> {
+        suspend fun importDataZip(context: Context, uri: Uri): List<Pair<Boolean, Long?>>? {
             return withContext(IO) {
-                var backupData : BackupDataStorageRepository.BackupData? = null
+                val descriptor = context.contentResolver.openFileDescriptor(uri, "r")
+                val inStream = ParcelFileDescriptor.AutoCloseInputStream(descriptor)
+                val zipInStream = ZipInputStream(inStream)
+                val result: MutableList<Pair<Boolean, Long?>> = LinkedList()
+
+                try {
+                    zipInStream.use { zipInputStream ->
+                        generateSequence { zipInputStream.nextEntry }
+                            .filterNot { it.isDirectory }
+                            .forEach { _ ->
+                                var backupData: BackupDataStorageRepository.BackupData? = null
+                                val isr = InputStreamReader(zipInputStream, Charsets.UTF_8)
+                                val jr = JsonReader(isr)
+                                jr.let { reader ->
+                                    reader.beginObject()
+                                    backupData = readData(reader)
+                                    reader.endObject()
+                                }
+                                if (backupData != null) {
+
+                                    if (!backupData!!.encrypted) {
+                                        // short validation check if the json is valid
+                                        if (!isValidJSON(String(backupData!!.data!!))) {
+                                            result.add(false to null)
+                                        }
+                                    }
+
+                                    result.add(
+                                        BackupDataStorageRepository.getInstance(context).storeFile(
+                                            context,
+                                            backupData!!
+                                        )
+                                    )
+                                } else {
+                                    result.add(false to null)
+                                }
+                            }
+                    }
+                } catch (e: MalformedJsonException) {
+                    return@withContext null
+                } catch (e: IOException) {
+                    return@withContext null
+                }
+                return@withContext result
+            }
+        }
+
+        suspend fun importData(context: Context, uri: Uri): Pair<Boolean, BackupDataStorageRepository.BackupData?> {
+            return withContext(IO) {
+                var backupData: BackupDataStorageRepository.BackupData? = null
 
                 val descriptor = context.contentResolver.openFileDescriptor(uri, "r")
                 val inStream = ParcelFileDescriptor.AutoCloseInputStream(descriptor)
@@ -40,13 +91,13 @@ class DataImporter {
                     return@withContext false to null
                 }
 
-                val result : Pair<Boolean, Long>
+                val result: Pair<Boolean, Long>
 
-                if(backupData != null) {
+                if (backupData != null) {
 
-                    if(!backupData!!.encrypted) {
+                    if (!backupData!!.encrypted) {
                         // short validation check if the json is valid
-                        if(!isValidJSON(String(backupData!!.data!!))) {
+                        if (!isValidJSON(String(backupData!!.data!!))) {
                             return@withContext false to null
                         }
                     }
@@ -75,17 +126,17 @@ class DataImporter {
             }
         }
 
-        private fun readData(reader: JsonReader) : BackupDataStorageRepository.BackupData? {
-            var filename : String? = null
-            var packageName : String? = null
-            var timestamp : Long? = null
-            var encrypted : Boolean? = null
-            var data : String? = null
+        private fun readData(reader: JsonReader): BackupDataStorageRepository.BackupData? {
+            var filename: String? = null
+            var packageName: String? = null
+            var timestamp: Long? = null
+            var encrypted: Boolean? = null
+            var data: String? = null
 
             while (reader.hasNext()) {
                 val nextName = reader.nextName()
 
-                when(nextName) {
+                when (nextName) {
                     "filename" -> filename = reader.nextString()
                     "packageName" -> packageName = reader.nextString()
                     "timestamp" -> timestamp = reader.nextLong()
@@ -95,11 +146,12 @@ class DataImporter {
                 }
             }
 
-            if(TextUtils.isEmpty(filename)
+            if (TextUtils.isEmpty(filename)
                 || TextUtils.isEmpty(packageName)
                 || TextUtils.isEmpty(data)
                 || timestamp == null
-                || encrypted == null) {
+                || encrypted == null
+            ) {
                 return null
             }
 

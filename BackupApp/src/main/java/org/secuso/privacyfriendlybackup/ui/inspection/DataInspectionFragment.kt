@@ -1,34 +1,31 @@
 package org.secuso.privacyfriendlybackup.ui.inspection
 
-import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.bumptech.glide.Glide
 import org.openintents.openpgp.OpenPgpSignatureResult
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.databinding.DataInspectionFragmentBinding
-import org.secuso.privacyfriendlybackup.databinding.ItemApplicationJobBinding
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
-import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 import java.io.FileNotFoundException
 
 
@@ -296,7 +293,7 @@ class DataInspectionFragment : Fragment() {
             var statusText = ""
             var statusIcon = (ContextCompat.getDrawable(requireActivity(), R.drawable.ic_close_24))
             var color = ContextCompat.getColor(requireActivity(), R.color.red)
-            when(it.signature?.result) {
+            when(it?.signature?.result) {
                 OpenPgpSignatureResult.RESULT_NO_SIGNATURE -> {
                     // not signed
                     statusText = requireActivity().getString(R.string.signature_result_no_signature)
@@ -342,8 +339,8 @@ class DataInspectionFragment : Fragment() {
             }
             dataBinding.dataInspectionSignatureStatus.setImageDrawable(statusIcon)
             dataBinding.dataInspectionSignatureStatusText.text = statusText
-            dataBinding.dataInspectionSignatureUserId.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it.signature?.primaryUserId)
-            dataBinding.dataInspectionSignatureKeyId.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it.signature?.keyId.toString())
+            dataBinding.dataInspectionSignatureUserId.text = requireActivity().getString(R.string.data_inspection_signature_user_id, it?.signature?.primaryUserId)
+            dataBinding.dataInspectionSignatureKeyId.text = requireActivity().getString(R.string.data_inspection_signature_key_id, it?.signature?.keyId.toString())
 
         }
     }

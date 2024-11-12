@@ -3,6 +3,7 @@ package org.secuso.privacyfriendlybackup.ui.importbackup
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.webkit.MimeTypeMap
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,29 +22,31 @@ class ImportBackupActivity : AppCompatActivity() {
 
     companion object {
         const val ACTION_OPEN_FILE = "ImportBackupActivity.ACTION_OPEN_FILE"
-        const val REQUEST_CODE_OPEN_DOCUMENT : Int = 362
+        const val REQUEST_CODE_OPEN_DOCUMENT: Int = 362
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_import_backup)
 
-        when(intent?.action ) {
+        when (intent?.action) {
             ACTION_OPEN_FILE -> {
                 sendOpenIntent()
             }
+
             Intent.ACTION_VIEW -> {
                 intent.data?.also { uri ->
                     showImportConfirmationDialog(uri)
                 }
             }
+
             else -> {
                 finish()
             }
         }
     }
 
-    private fun showImportConfirmationDialog(uri : Uri) {
+    private fun showImportConfirmationDialog(uri: Uri) {
         AlertDialog.Builder(this).apply {
             setTitle(R.string.data_import_confirmation_dialog_title)
             setIcon(ContextCompat.getDrawable(this@ImportBackupActivity, R.drawable.ic_outline_info_24)?.apply {
@@ -83,13 +86,27 @@ class ImportBackupActivity : AppCompatActivity() {
 
     fun import(uri: Uri) {
         GlobalScope.launch(IO) {
-            val (success, data) = DataImporter.importData(this@ImportBackupActivity, uri)
-
-            withContext(Main) {
-                if(success) {
-                    showSuccessDialog(data!!)
-                } else {
-                    showErrorDialog()
+            if (MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri)).equals("zip")) {
+                val result = DataImporter.importDataZip(this@ImportBackupActivity, uri)
+                withContext(Main) {
+                    if (result == null) {
+                        showResultDialogZip(0, 0)
+                    } else {
+                        val completed = result.count {
+                            val (success, _) = it
+                            return@count success
+                        }
+                        showResultDialogZip(completed, result.size)
+                    }
+                }
+            } else {
+                val (success, data) = DataImporter.importData(this@ImportBackupActivity, uri)
+                withContext(Main) {
+                    if (success) {
+                        showSuccessDialog(data!!)
+                    } else {
+                        showErrorDialog()
+                    }
                 }
             }
         }
@@ -102,7 +119,56 @@ class ImportBackupActivity : AppCompatActivity() {
                 this.setTint(ContextCompat.getColor(this@ImportBackupActivity, R.color.red))
             })
             setMessage(R.string.data_import_error_dialog_message)
-            setPositiveButton(R.string.data_import_error_dialog_confirm) { _,_ ->
+            setPositiveButton(R.string.data_import_error_dialog_confirm) { _, _ ->
+                Intent(this@ImportBackupActivity, MainActivity::class.java).apply {
+                    //flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(MainActivity.SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.name)
+                    startActivity(this)
+                }
+                this@ImportBackupActivity.finish()
+            }
+        }.create().show()
+    }
+
+    private fun showResultDialogZip(completed: Int, total: Int) {
+        val success = completed == total && total != 0
+        val partial = completed != total && total != 0
+        AlertDialog.Builder(this).apply {
+            if (success) {
+                setTitle(R.string.data_import_success_dialog_title)
+                setIcon(ContextCompat.getDrawable(this@ImportBackupActivity, R.drawable.ic_check_box_24)?.apply {
+                    this.setTint(ContextCompat.getColor(this@ImportBackupActivity, R.color.green))
+                })
+            } else {
+                setTitle(R.string.data_import_error_dialog_title)
+                setIcon(ContextCompat.getDrawable(this@ImportBackupActivity, R.drawable.ic_baseline_error_outline_24)?.apply {
+                    this.setTint(ContextCompat.getColor(this@ImportBackupActivity, R.color.red))
+                })
+            }
+            if (success) {
+                setMessage(
+                    getString(R.string.data_import_success_message)
+                            + "\n" +
+                            getString(
+                                R.string.data_import_multiple_imported_message,
+                                completed,
+                                total
+                            )
+                )
+            } else if (partial) {
+                setMessage(
+                    getString(R.string.data_import_error_dialog_message)
+                            + "\n" +
+                            getString(
+                                R.string.data_import_multiple_imported_message,
+                                completed,
+                                total
+                            )
+                )
+            } else {
+                setMessage(getString(R.string.data_import_error_dialog_message))
+            }
+            setPositiveButton(R.string.data_import_error_dialog_confirm) { _, _ ->
                 Intent(this@ImportBackupActivity, MainActivity::class.java).apply {
                     //flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     putExtra(MainActivity.SELECTED_MENU_ITEM, MainActivity.MenuItem.MENU_MAIN_BACKUP_OVERVIEW.name)
