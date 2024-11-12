@@ -11,6 +11,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
+import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -36,10 +37,9 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
 
     private val backupDataLiveData = MutableLiveData<String>()
     private val loadStatusLiveData = MediatorLiveData<LoadStatus>().apply { postValue(LoadStatus.UNKNOWN) }
-    private val decryptionMetaLiveData = MutableLiveData<DecryptionMetaData>()
+    private val decryptionMetaLiveData = MutableLiveData<DecryptionMetaData?>()
     private var dataId = -1L
     private var localLoadedDataId = -1L
-    private var fileName : String = ""
     private var encryptedFileName : String = ""
     private var backupMetaData : BackupDataStorageRepository.BackupData? = null
     var isEncrypted : Boolean = false
@@ -47,19 +47,11 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
 
     private var backupData : String = ""
 
-    fun getFileName(encrypted: Boolean) : String {
-        return if(backupMetaData?.encrypted == true && encrypted) {
-            getEncryptedFilename(fileName)
-        } else {
-            getUnencryptedFilename(fileName)
-        }
-    }
-
     fun getLoadStatus() : LiveData<LoadStatus> {
         return loadStatusLiveData
     }
 
-    fun getDecryptionMetaData() : LiveData<DecryptionMetaData> = decryptionMetaLiveData
+    fun getDecryptionMetaData() : LiveData<DecryptionMetaData?> = decryptionMetaLiveData
 
     fun loadData(dataId: Long) {
         this.dataId = dataId
@@ -74,13 +66,11 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
                 return@launch
             }
 
-            fileName = data.filename
-
             if(data.encrypted) {
                 isEncrypted = true
                 val internalDataId = InternalBackupDataStoreHelper.storeData(getApplication(), data.packageName, data.data.inputStream(), data.timestamp, data.encrypted)
                 encryptedFileName = InternalBackupDataStoreHelper.getInternalDataFileName(getApplication(), internalDataId)
-                val fileName = getUnencryptedFilename(encryptedFileName)
+                val fileName = encryptedFileName.replace("_encrypted.backup", ".backup")
 
                 val job = BackupJob(
                     packageName = data.packageName,
@@ -153,19 +143,6 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
         decryptionMetaData?.let { decryptionMetaLiveData.postValue(it) }
     }
 
-    private fun getUnencryptedFilename(filename: String) =
-        filename.replace("_encrypted.backup", ".backup")
-
-    private fun getEncryptedFilename(filename: String) : String {
-        return if(filename.contains("_encrypted.backup", true)) {
-            filename
-        } else {
-            filename.replace(".backup", "_encrypted.backup", true)
-        }
-    }
-
-
-
     private fun setBackupData(backupDataString: String) {
         backupData = backupDataString
 
@@ -205,7 +182,7 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
                 val encrypted = exportEncrypted && backupMetaData!!.encrypted
 
                 val backupData = BackupDataStorageRepository.BackupData(
-                    filename = getFileName(exportEncrypted),
+                    filename = DataExporter.getSingleExportFileName(backupMetaData!!, exportEncrypted),
                     encrypted = encrypted,
                     timestamp = backupMetaData!!.timestamp,
                     packageName = backupMetaData!!.packageName,
@@ -225,5 +202,11 @@ class DataInspectionViewModel(app : Application) : AndroidViewModel(app) {
                 Toast.makeText(getApplication(), "something went wrong", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    fun getFileName(exportEncrypted: Boolean): String {
+        return backupMetaData?.let {
+            DataExporter.getSingleExportFileName(backupMetaData!!, exportEncrypted)
+        } ?: ""
     }
 }

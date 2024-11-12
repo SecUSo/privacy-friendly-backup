@@ -66,6 +66,8 @@
     <string name="menu_item_export">Export</string>
     <string name="data_import_success_dialog_title">Data Import Complete</string>
     <string name="data_import_success_dialog_message">The backup was imported successfully.\nApp: %s \nDate: %s</string>
+    <string name="data_import_success_message">The backup was imported successfully.</string>
+    <string name="data_import_multiple_imported_message">%d out of %d backups imported.</string>
     <string name="data_import_success_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_confirm">Okay</string>
     <string name="data_import_error_dialog_title">Data Import Failed</string>
@@ -74,6 +76,10 @@
     <string name="data_import_confirmation_dialog_message">Do you want to import this backup into the list of backups?</string>
     <string name="data_import_confirmation_dialog_title">Backup Import</string>
     <string name="data_import_confirmation_dialog_cacncel">Cancel</string>
+    <string name="dialog_data_import_start_confirm">Yes</string>
+    <string name="dialog_data_import_start_cancel">No</string>
+    <string name="dialog_data_import_start_title">Backup Import</string>
+    <string name="dialog_data_import_start_message">Do you want to import a backup file?</string>
     <string name="data_export_confirmation_dialog_cancel">Cancel</string>
     <string name="data_export_confirmation_dialog_confirm">Export</string>
     <string name="data_export_confirmation_dialog_title">Backup Export</string>
@@ -83,8 +89,20 @@
     <string name="data_inspection_load_status_error_invalid_json">The backup seems to be corrupted. Try creating a new backup or retry importing the backup.</string>
     <string name="dialog_data_export_start_confirm">Yes</string>
     <string name="dialog_data_export_start_cancel">No</string>
-    <string name="dialog_data_export_start_title">Backup Import</string>
-    <string name="dialog_data_export_start_message">Do you want to import a backup file?</string>
+    <string name="dialog_data_export_start_title">Backup Export</string>
+    <plurals name="dialog_data_export_start_message">
+        <item quantity="one">Do you want to export the selected backup?</item>
+        <item quantity="other">Do you want to export the %1$d selected backups?</item>
+    </plurals>
+    <plurals name="dialog_data_export_multiple_encrypted">
+        <item quantity="one">Your selection contains %d encrypted backup.</item>
+        <item quantity="other">Your selection contains %d encrypted backups.</item>
+    </plurals>
+    <string name="dialog_data_export_multiple_encrypted_warning">Important: Encrypted backups will stay encrypted. If you want to export a backup without encryption use \"%s\" on a backup and use the export function there.</string>
+    <string name="data_export_toast_loading">Loading Backups %d/%d…</string>
+    <string name="data_export_toast_writing">Writing to file…</string>
+    <string name="data_export_toast_export_successful">Export complete</string>
+    <string name="data_export_toast_export_error">Something went wrong</string>
     <string name="dialog_dont_show_again">Do not show this again.</string>
     <string name="menu_title_encryption_info">Encryption Info</string>
     <string name="backup_overview_no_entries_text">There is currently no backup. Either create or import new backups to see them in this list.</string>
