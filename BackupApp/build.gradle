@@ -82,7 +82,7 @@ android {
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
     lint {
-        abortOnError false
+        lintConfig = file("lint.xml")
     }
     namespace 'org.secuso.privacyfriendlybackup'
 }
