@@ -13,6 +13,7 @@
     </queries>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" android:maxSdkVersion="22"/>
 
    <application
         android:name=".BackupApplication"
