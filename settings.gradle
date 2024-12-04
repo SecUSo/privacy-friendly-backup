@@ -1,8 +1,8 @@
-include ':BackupApp'
+include ':app'
 rootProject.name = "Backup"
 
 include ':BackupAPI'
-project(':BackupAPI').projectDir = new File('BackupAPI/BackupAPI')
+project(':BackupAPI').projectDir = new File('libs/privacy-friendly-backup-api/BackupAPI')
 
 include ':openpgp-api'
-project(':openpgp-api').projectDir = new File('openpgp-api/openpgp-api')
+project(':openpgp-api').projectDir = new File('libs/openpgp-api/openpgp-api')
