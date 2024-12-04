@@ -34,4 +34,4 @@ Thumbs.db
 *.apk
 /pfa.properties
 /.idea/
-/BackupApp/release
+/app/release

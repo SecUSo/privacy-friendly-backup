@@ -1,6 +1,6 @@
 [submodule "BackupAPI"]
-	path = BackupAPI
+	path = libs/privacy-friendly-backup-api
 	url = https://github.com/SecUSo/privacy-friendly-backup-api.git
 [submodule "openpgp-api"]
-	path = openpgp-api
+	path = libs/openpgp-api
 	url = https://github.com/open-keychain/openpgp-api
