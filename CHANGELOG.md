@@ -1,12 +1,22 @@
 # Changelog
 
+<a id="v1.3.3"></a>
+## [Backup (Privacy Friendly) v1.3.3](https://github.com/SecUSo/privacy-friendly-backup/releases/tag/v1.3.3) - 2024-11-12
+
+## What's Changed
+* Feature: Export and import multiple backups at once by [@udenr](https://github.com/udenr) in [#31](https://github.com/SecUSo/privacy-friendly-backup/pull/31)
+
+**Full Changelog**: https://github.com/SecUSo/privacy-friendly-backup/compare/v1.3.2...v1.3.3
+
+[Changes][v1.3.3]
+
+
 <a id="v1.3.2"></a>
 ## [Backup (Privacy Friendly) v1.3.2](https://github.com/SecUSo/privacy-friendly-backup/releases/tag/v1.3.2) - 2024-10-21
 
 ## What's Changed
 * Fix minor spelling and grammar mistakes in German strings.xml by [@realpixelcode](https://github.com/realpixelcode) in [#27](https://github.com/SecUSo/privacy-friendly-backup/pull/27)
 * documentation: Fixed incorrect weblink by [@jahway603](https://github.com/jahway603) in [#21](https://github.com/SecUSo/privacy-friendly-backup/pull/21)
-* Update to version 1.3.2 by [@udenr](https://github.com/udenr) in [#29](https://github.com/SecUSo/privacy-friendly-backup/pull/29)
 
 ## New Contributors
 * [@realpixelcode](https://github.com/realpixelcode) made their first contribution in [#27](https://github.com/SecUSo/privacy-friendly-backup/pull/27)
@@ -76,6 +86,7 @@ For encryption to work, the provider must be installed externally. We recommend 
 [Changes][v1.0]
 
 
+[v1.3.3]: https://github.com/SecUSo/privacy-friendly-backup/compare/v1.3.2...v1.3.3
 [v1.3.2]: https://github.com/SecUSo/privacy-friendly-backup/compare/v1.3.1...v1.3.2
 [v1.3.1]: https://github.com/SecUSo/privacy-friendly-backup/compare/v1.3...v1.3.1
 [v1.3]: https://github.com/SecUSo/privacy-friendly-backup/compare/v1.2...v1.3
