@@ -24,8 +24,8 @@ android {
         applicationId "org.secuso.privacyfriendlybackup"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 7
-        versionName "1.3.3"
+        versionCode 8
+        versionName "1.3.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -41,7 +41,7 @@ android {
     }
 
     android.applicationVariants.configureEach { variant ->
-        variant.outputs.all {
+        variant.outputs.configureEach {
             def appName = "pfa-backup"
             outputFileName = appName + "-${variant.name}-v${variant.versionName}.apk"
         }
