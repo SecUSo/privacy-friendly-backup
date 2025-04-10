@@ -3,6 +3,6 @@ Privacy Friendly Backup ist eine Applikation, die mit anderen Privacy Friendly A
 Die App bietet Verschlüsselung über eine Schnittstelle zu einer anderen App, die Verschlüsselung als Funktionalität über die openpgp-api bereit stellt. Dem Nutzer steht es frei eigene Verschlüsselungsprovider über die Einstellungen der App zu wählen. Damit die Verschlüsselung funktioniert muss der Provider extern installiert werden. Wir empfehlen https://www.openkeychain.org/ , da diese App im regulären PlayStore sowie im F-Droid Store verfügbar ist und vollkommen open source ist.
 
 Kontaktieren Sie uns gerne über:
-Twitter - @SECUSOResearch https://twitter.com/secusoresearc)
+Bluesky - @secusoresearch.bsky.social https://bsky.app/profile/secusoresearch.bsky.social
 Mastodon - @SECUSO_Research@bawü.social https://xn--baw-joa.social/@SECUSO_Research/
-Offene Stellen - https://secuso.aifb.kit.edu/83_1557.php
+Offene Stellen - https://secuso.aifb.kit.edu/83.php

@@ -124,7 +124,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/center"
         app:layout_constraintTop_toBottomOf="@+id/textFieldAffiliation"
-        app:srcCompat="@drawable/secuso_logo_blau_blau" />
+        app:srcCompat="?attr/secusoLogoDrawable" />
 
     <TextView
         android:id="@+id/textView"
