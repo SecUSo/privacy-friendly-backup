@@ -108,7 +108,7 @@
     <string name="help_encryption">Как работает шифрование?</string>
     <string name="help_whatis_answer">Приложение для резервного копирования помогает пользователям создавать резервные копии других приложений из группы Privacy Friendly Apps (PFA). Они общаются, отправляют и получают данные для сохранения и восстановления данных приложений.</string>
     <string name="signature_result_key_missing">Отсутствующий ключ</string>
-    <string name="more_info">Подробнее читайте на:</string>
+    <string name="more_info">Подробнее можно узнать на:</string>
     <string name="about_author_contributors">и со-авторы</string>
     <string name="dialog_data_export_multiple_encrypted_warning">Важно: зашифрованные резервные копии останутся зашифрованными. Если вы хотите экспортировать резервную копию без шифрования, используйте «%s» при копировании и используйте там функцию экспорта.</string>
     <string name="data_export_toast_writing">Запись в файл…</string>
@@ -131,4 +131,5 @@
     <string name="data_inspection_signature_key_id">ID ключа: %s</string>
     <string name="signature_result_no_signature">Без подписи</string>
     <string name="help_encryption_answer2">Чтобы использовать шифрование вам нужно будет установить приложение криптографического провайдера. Мы рекомендуем приложение OpenKeyChain потому что оно является свободным и доступно как в Google Play Store так и в магазине F-Droid.</string>
+    <string name="about_affiliation">Вместе с</string>
 </resources>
