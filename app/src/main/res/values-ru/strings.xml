@@ -132,4 +132,5 @@
     <string name="signature_result_no_signature">Без подписи</string>
     <string name="help_encryption_answer2">Чтобы использовать шифрование вам нужно будет установить приложение криптографического провайдера. Мы рекомендуем приложение OpenKeyChain потому что оно является свободным и доступно как в Google Play Store так и в магазине F-Droid.</string>
     <string name="about_affiliation">Вместе с</string>
+    <string name="about_author">Авторы：</string>
 </resources>
