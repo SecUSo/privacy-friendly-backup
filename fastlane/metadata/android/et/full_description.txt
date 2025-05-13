@@ -1,0 +1,10 @@
+Privaatsusõbralik varundus on mõeldud teiste sama arendaja privaatsusõbralike rakenduste varukoopiate tegemiseks ning nende haldamiseks.
+Sealhulgas võimalus varukoopiad rakendusse importida ning välisele andmekandjale eksportida.
+
+Rakenduses kasutatav krüptimine on tagatud välise rakenduse abil, mis kasutab standardset openpgp-api liidestust. Konkreetse rakenduse valik ja seadistamine on kasutaja otsustada.
+Et krüptimine toimiks, peab vastav rakendus olema eraldi paigaldatud. Arendajad soovitavad https://www.openkeychain.org/ kasutamist, sest ta on saadaval Nii Google Play, kui F-Droidi rakendustepoodides ja põhineb avatud lähtekoodil.
+
+Meid võid leida:
+BlueSky - @secusoresearch.bsky.social https://bsky.app/profile/secusoresearch.bsky.social
+Mastodon - @SECUSO_Research@bawü.social https://xn--baw-joa.social/@SECUSO_Research/
+Tööpakkumised - https://secuso.aifb.kit.edu/english/Job_Offers.php
