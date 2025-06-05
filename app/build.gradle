@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
+}
 def pfaFile = rootProject.file('pfa.properties')
 
 android {
@@ -37,6 +40,10 @@ android {
                         "room.expandProjection": "true"
                 ]
             }
+        }
+
+        ksp {
+            arg('room.schemaLocation', "$projectDir/schemas")
         }
     }
 
@@ -119,7 +126,7 @@ dependencies {
     def roomVersion = "2.6.1"
     implementation "androidx.room:room-runtime:$roomVersion"
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
-    kapt "androidx.room:room-compiler:$roomVersion"
+    ksp "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
 
     // Lifecycle
