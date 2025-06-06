@@ -19,9 +19,6 @@ This is the privacy friendly backup application that enables users to create and
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"
      height="80">](https://f-droid.org/packages/org.secuso.privacyfriendlybackup/)
-[<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=org.secuso.privacyfriendlybackup)
 
 ## Integrated PFAs
 These apps support backups with the Privacy Friendly Backup app.
