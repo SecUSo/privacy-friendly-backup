@@ -129,4 +129,10 @@
     <string name="help_encryption_answer2">Um die Verschlüsselung nutzen zu können, müssen Sie eine Kryptoanbieter-Anwendung installieren. Wir empfehlen die OpenKeyChain-Anwendung, da sie quelloffen ist und sowohl im Google Play Store als auch im F-Droid-Store verfügbar ist.</string>
     <string name="help_which_apps">Wie viele und welche Apps werden zur Zeit unterstützt?</string>
     <string name="help_which_apps_answer1">Wir arbeiten stetig daran neue Apps zu unterstützen. Zurzeit wird nur die Notizen-App unterstützt.</string>
+	<string name="dialog_goodbye_google_title">Wir verlassen Google Play __</string>
+	<string name="dialog_goodbye_google_desc">Unsere Apps m_ssen sich leider von Google Play verabschieden. Sie k_nnen die App weiterhin nutzen, erhalten jedoch keine Updates mehr.
+Weitere Informationen zu den Gr_nden und warum das nicht das Ende der Privacy Friendly Apps ist, finden Sie auf unserer Website:
+
+<a href="https://secuso.aifb.kit.edu/2809.php">Hier klicken, um mehr zu erfahren</a></string>
+	<string name="dialog_goodbye_google_deactivate_notice">Zeige diese Mitteilung nicht nochmal</string>
 </resources>
