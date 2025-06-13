@@ -21,6 +21,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import org.secuso.privacyfriendlybackup.R
+import org.secuso.privacyfriendlybackup.checkGoodbyeGoogle
 import org.secuso.privacyfriendlybackup.ui.application.ApplicationOverviewFragment
 import org.secuso.privacyfriendlybackup.ui.backup.BackupOverviewFragment
 import org.secuso.privacyfriendlybackup.ui.common.DisplayMenuItemActivity
@@ -119,6 +120,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView(findViewById(R.id.item_list))
 
         navigateFromIntent(intent)
+        checkGoodbyeGoogle(this, layoutInflater)
     }
 
     private fun navigateFromIntent(intent : Intent?) {
