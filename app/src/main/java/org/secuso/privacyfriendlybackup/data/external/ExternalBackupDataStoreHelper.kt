@@ -106,7 +106,7 @@ object ExternalBackupDataStoreHelper {
 
     suspend fun listAvailableData(context: Context) : List<String> {
         return withContext(Dispatchers.IO) {
-            val files = File(context.getExternalFilesDir(null), BACKUP_DIR).listFiles { _, name -> name.toLowerCase(Locale.ENGLISH).endsWith(".backup") }
+            val files = File(context.getExternalFilesDir(null), BACKUP_DIR).listFiles { _, name -> name.lowercase(Locale.ENGLISH).endsWith(".backup") }
             files?.map { it.name } ?: emptyList()
         }
     }

@@ -5,20 +5,20 @@
         app:title="@string/pref_category_storage">
 
         <ListPreference
-            app:defaultValue="External"
+            app:defaultValue="Internal"
             app:key="pref_storage_type"
             app:title="@string/pref_storage_type"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
+    <!-- <PreferenceCategory
         app:title="@string/pref_category_automatic_backup">
 
         <SwitchPreference
             app:key="pref_test"
             android:defaultValue="false"
-            app:title="Test" />
+            app:title="Test" /> -->
 
         <!-- <ListPreference
             app:defaultValue="External"
@@ -57,6 +57,6 @@
                 app:summaryOn="@string/attachment_summary_on"
                 app:title="@string/attachment_title" /> -->
 
-    </PreferenceCategory>
+<!--    </PreferenceCategory>-->
 
 </PreferenceScreen>

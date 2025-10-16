@@ -93,6 +93,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
         storageTypePref = findPreference(PREF_STORAGE_TYPE)
 
         storageTypePref?.apply {
+            if (value == null) {
+                value = StorageType.EXTERNAL.toString()
+            }
             entryValues = StorageType.getStorageOptions().map { it.name }.toTypedArray()
             entries = StorageType.getStorageOptions().map { requireContext().getString(it.nameResId) }.toTypedArray()
         }

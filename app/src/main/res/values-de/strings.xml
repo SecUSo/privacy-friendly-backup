@@ -49,6 +49,7 @@
     <string name="pref_storage_type">Speichertyp</string>
     <string name="pref_category_automatic_backup">Automatische Backups</string>
     <string name="storage_type_external">Externer Speicher</string>
+    <string name="storage_type_internal">Interner Speicher</string>
     <string name="menu_item_restore">Wiederherstellen</string>
     <string name="activity_data_inspection_error_id_not_valid">Fehler: ID ist nicht korrekt</string>
     <string name="menu_title_export">Exportieren</string>
