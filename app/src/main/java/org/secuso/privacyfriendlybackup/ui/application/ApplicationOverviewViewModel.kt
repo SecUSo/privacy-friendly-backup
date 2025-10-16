@@ -79,7 +79,7 @@ class ApplicationOverviewViewModel(app : Application) : AndroidViewModel(app) {
     fun createBackupForPackage(packageName: String) {
         viewModelScope.launch {
             val jobManager = BackupJobManager.getInstance(getApplication())
-            val storageName = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString(PreferenceKeys.PREF_STORAGE_TYPE, StorageType.EXTERNAL.name)
+            val storageName = PreferenceManager.getDefaultSharedPreferences(getApplication()).getString(PreferenceKeys.PREF_STORAGE_TYPE, StorageType.INTERNAL.name)
             val storageType = StorageType.valueOf(storageName!!)
             jobManager.createBackupJobChain(packageName, storageType)
         }

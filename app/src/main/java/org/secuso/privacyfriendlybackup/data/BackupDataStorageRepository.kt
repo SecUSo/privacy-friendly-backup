@@ -4,18 +4,13 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.room.ColumnInfo
-import androidx.room.PrimaryKey
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.external.ExternalBackupDataStoreHelper
-import org.secuso.privacyfriendlybackup.data.room.model.BackupJob
-import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
+import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import java.util.*
 
@@ -64,6 +59,7 @@ class BackupDataStorageRepository private constructor(
     suspend fun storeFile(context: Context, packageName: String, dataId : Long, storageType: StorageType = StorageType.EXTERNAL) {
         when(storageType) {
             StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.storeData(context, packageName, dataId)
+            StorageType.INTERNAL -> InternalBackupDataStoreHelper.storeData(context, packageName, dataId)
             StorageType.CLOUD -> webserviceProvider.storeData(context, packageName, dataId)
         }
     }
@@ -83,6 +79,9 @@ class BackupDataStorageRepository private constructor(
                     StorageType.EXTERNAL -> {
                         data.postValue(ExternalBackupDataStoreHelper.getData(context,metadata))
                     }
+                    StorageType.INTERNAL -> {
+                        data.postValue(InternalBackupDataStoreHelper.getData(context,metadata))
+                    }
                     StorageType.CLOUD -> {
                         data.postValue( TODO() )
                     }
@@ -99,6 +98,7 @@ class BackupDataStorageRepository private constructor(
 
         return when (metadata.storageService) {
             StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.getData(context, metadata)
+            StorageType.INTERNAL -> InternalBackupDataStoreHelper.getData(context, metadata)
             StorageType.CLOUD -> webserviceProvider.getData(context, metadata)
         }
     }
@@ -112,10 +112,25 @@ class BackupDataStorageRepository private constructor(
 
             runBlocking {
                 val externalFilenames = ExternalBackupDataStoreHelper.listAvailableData(context)
+                val internalFilenames = InternalBackupDataStoreHelper.listAvailableData(context)
                 for(meta in metalist) {
                     when(meta.storageService) {
                         StorageType.EXTERNAL -> {
                             val available = externalFilenames.contains(meta.filename)
+                            val backupDataInfo = BackupData(
+                                id = meta._id,
+                                filename = meta.filename,
+                                packageName = meta.packageName,
+                                timestamp = meta.timestamp,
+                                data = null,
+                                encrypted  = meta.encrypted,
+                                storageType = meta.storageService,
+                                available = available
+                            )
+                            result.add(backupDataInfo)
+                        }
+                        StorageType.INTERNAL -> {
+                            val available = internalFilenames.contains(meta.filename)
                             val backupDataInfo = BackupData(
                                 id = meta._id,
                                 filename = meta.filename,
@@ -148,6 +163,9 @@ class BackupDataStorageRepository private constructor(
                 when (metaData.storageService) {
                     StorageType.EXTERNAL -> {
                         ExternalBackupDataStoreHelper.deleteData(context, metaData)
+                    }
+                    StorageType.INTERNAL -> {
+                        InternalBackupDataStoreHelper.deleteData(context, metaData)
                     }
                     StorageType.CLOUD -> {
                         webserviceProvider.deleteData(context, metaData)
