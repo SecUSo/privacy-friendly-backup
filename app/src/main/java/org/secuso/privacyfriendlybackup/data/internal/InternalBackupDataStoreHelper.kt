@@ -86,6 +86,27 @@ object InternalBackupDataStoreHelper {
         }
     }
 
+    suspend fun storeData(context: Context, data: BackupDataStorageRepository.BackupData) : Pair<Boolean, Long> {
+        return withContext(Dispatchers.IO) {
+            val path = File(context.filesDir, INTERNAL_BACKUP_DIR)
+            path.mkdirs()
+            val file = File(path, data.filename)
+
+            file.copyInputStreamToFile(ByteArrayInputStream(data.data))
+            val hash = data.data!!.hash("SHA-1").toHex()
+
+            val id = BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
+                packageName = data.packageName,
+                timestamp = data.timestamp,
+                storageService = StorageType.INTERNAL,
+                filename = data.filename,
+                encrypted = data.encrypted,
+                hash = hash
+            ))
+            return@withContext true to id
+        }
+    }
+
     suspend fun storeData(context: Context, packageName: String, inputStream: InputStream, date: Date, encrypted : Boolean = false) : Long {
         val path = File(context.filesDir, BACKUP_DIR)
         path.mkdirs()
@@ -124,6 +145,19 @@ object InternalBackupDataStoreHelper {
     }
 
     suspend fun getInternalData(context: Context, dataId: Long): Pair<InputStream?, InternalBackupData?> {
+        val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
+            ?: return Pair(null, null)
+
+//        if(data.packageName != callingPackageName && data.uid == callingUid) {
+//            Log.d(TAG, "[No Restore Data found.]")
+//            return null
+//        }
+
+        val path = File(context.filesDir, BACKUP_DIR)
+        return File(path, data.file).inputStream() to data
+    }
+
+    suspend fun getInternalStoredData(context: Context, dataId: Long): Pair<InputStream?, InternalBackupData?> {
         val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
             ?: return Pair(null, null)
 
