@@ -51,6 +51,7 @@ class BackupDataStorageRepository private constructor(
     suspend fun storeFile(context: Context, backupData: BackupData) : Pair<Boolean, Long> {
         return when(backupData.storageType) {
             StorageType.EXTERNAL -> ExternalBackupDataStoreHelper.storeData(context, backupData)
+            StorageType.INTERNAL -> InternalBackupDataStoreHelper.storeData(context, backupData)
             else -> { false to 0 }
             //StorageType.CLOUD -> webserviceProvider.storeData(context, packageName, dataId)
         }

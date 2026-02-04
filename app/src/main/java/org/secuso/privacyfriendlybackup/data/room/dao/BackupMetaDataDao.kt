@@ -3,6 +3,7 @@ package org.secuso.privacyfriendlybackup.data.room.dao
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 
 @Dao
 interface BackupMetaDataDao {
@@ -32,4 +33,7 @@ interface BackupMetaDataDao {
 
     @Query("DELETE FROM StoredBackupMetaData WHERE _id IN (:ids)")
     suspend fun deleteForIds(ids: List<Long>)
+
+    @Query("SELECT * FROM StoredBackupMetaData WHERE storageService != :storageType")
+    suspend fun getAllOfOtherStorageType(storageType: StorageType): List<StoredBackupMetaData>
 }

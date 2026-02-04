@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
-import org.secuso.privacyfriendlybackup.data.cloud.WebserviceProvider
 import org.secuso.privacyfriendlybackup.data.internal.InternalBackupDataStoreHelper
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.BackupJob

@@ -2,7 +2,6 @@ package org.secuso.privacyfriendlybackup.ui.backup
 
 import android.app.Application
 import android.net.Uri
-import android.widget.Toast
 import androidx.collection.ArraySet
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
