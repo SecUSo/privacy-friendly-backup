@@ -5,12 +5,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
+import androidx.core.content.edit
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.work.BackoffPolicy
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import kotlinx.coroutines.launch
+import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.worker.BackupJobManagerWorker
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +31,28 @@ class BackupApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+
+        if (applicationContext != null) {
+            with(ProcessLifecycleOwner.get()) {
+                lifecycleScope.launch {
+                    PreferenceManager.getDefaultSharedPreferences(applicationContext).apply{
+                        val current = getString("pref_storage_type", null)
+                        if (current == null) {
+                            val total = BackupDatabase.getInstance(applicationContext)
+                                .backupMetaDataDao()
+                                .getTotal()
+                            edit(commit = true) {
+                                putString("pref_storage_type", if (total > 0) {
+                                    StorageType.EXTERNAL.toString()
+                                } else {
+                                    StorageType.INTERNAL.toString()
+                                })
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         createNotificationChannel()
         schedulePeriodicWork()
