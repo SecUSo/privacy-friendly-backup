@@ -47,6 +47,12 @@
     <string name="storage_type_drive">Google Drive</string>
     <string name="pref_category_storage">Speichereinstellungen</string>
     <string name="pref_storage_type">Speichertyp</string>
+    <string name="pref_storage_type_summary">
+Wählen Sie explizit aus, an welcher Stelle die Backup-Daten und -Metadaten gespeichert werden soll.\n
+<b>Achtung</b>: Der externe Speicher ermöglicht anderen Apps, Diensten und Nutzern diese auszulesen oder zu verändern. Nutzen Sie diese Option nur, wenn die Verschlüsselung der Backups eingerichtet ist und verwendet wird. \n
+\n
+Aktueller Speicherort: %s
+    </string>
     <string name="pref_category_automatic_backup">Automatische Backups</string>
     <string name="storage_type_external">Externer Speicher</string>
     <string name="storage_type_internal">Interner Speicher</string>

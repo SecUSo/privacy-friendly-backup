@@ -36,4 +36,7 @@ interface BackupMetaDataDao {
 
     @Query("SELECT * FROM StoredBackupMetaData WHERE storageService != :storageType")
     suspend fun getAllOfOtherStorageType(storageType: StorageType): List<StoredBackupMetaData>
+
+    @Query("SELECT COUNT(*) FROM StoredBackupMetaData")
+    suspend fun getTotal(): Long
 }

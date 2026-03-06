@@ -5,10 +5,9 @@
         app:title="@string/pref_category_storage">
 
         <ListPreference
-            app:defaultValue="Internal"
             app:key="pref_storage_type"
             app:title="@string/pref_storage_type"
-            app:useSimpleSummaryProvider="true" />
+            app:summary="@string/pref_storage_type_summary" />
 
     </PreferenceCategory>
 
