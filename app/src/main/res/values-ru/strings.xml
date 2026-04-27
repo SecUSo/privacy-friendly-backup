@@ -45,7 +45,7 @@
     <string name="job_action_store">Сохранить</string>
     <string name="job_action_load">Загрузить</string>
     <string name="fragment_title_backup_overview">Обзор бэкапов</string>
-    <string name="cancel">Отмена</string>
+    <string name="cancel">Отменить</string>
     <string name="dialog_restore_confirmation_title">Восстановить данные</string>
     <string name="pref_category_storage">Настройки хранилища</string>
     <string name="pref_storage_type">Тип хранилища</string>
