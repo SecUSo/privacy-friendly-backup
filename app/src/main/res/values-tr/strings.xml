@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="channel_name">Varsayılan</string>
+    <string name="menu_title_search">Ara</string>
+    <string name="menu_main_help">Yardım</string>
+    <string name="menu_main_about">Hakkında</string>
+    <string name="dialog_delete_confirmation_positive">Sil</string>
+    <string name="dialog_delete_confirmation_negative">İptal</string>
+    <string name="menu_item_backup">Yedek Oluştur</string>
+    <string name="job_action_load">Yükle</string>
+    <string name="menu_item_manage_backups">Yedeklemeleri Yönet</string>
+    <string name="cancel">İptal</string>
+    <string name="job_action_pfa_restore">Onar</string>
+    <string name="menu_item_restore">Onar</string>
+    <string name="activity_data_inspection_error_id_not_valid">Hata: Kimlik geçerli değil</string>
+    <string name="storage_type_drive">Google Drive</string>
+    <string name="data_inspection_load_status_unknown">Bilinmeyen</string>
+    <string name="data_inspection_load_status_loading">Yükleniyor…</string>
+    <string name="data_inspection_load_status_done">Bitti</string>
+    <string name="menu_title_add">Yedeği içe aktar</string>
+    <string name="app_import_backup">Yedeği İçe Aktar</string>
+    <string name="dialog_data_import_start_confirm">Evet</string>
+    <string name="dialog_data_import_start_cancel">Hayır</string>
+    <string name="about_author">Yazarlar:</string>
+    <string name="version_number">Sürüm: %s</string>
+    <string name="about_affiliation">ile bağlantılı olarak</string>
+    <string name="about_author_contributors">ve katkıda bulunanlar</string>
+    <string name="data_import_confirmation_dialog_cacncel">İptal</string>
+    <string name="menu_title_delete">Sil</string>
+    <string name="data_import_success_dialog_confirm">Tamam</string>
+    <string name="dialog_data_export_start_cancel">Hayır</string>
+    <string name="data_export_confirmation_dialog_confirm">Dışa aktar</string>
+    <string name="job_action_store">Mağaza</string>
+    <string name="data_export_confirmation_dialog_cancel">İptal</string>
+    <string name="dialog_data_export_start_confirm">Evet</string>
+    <string name="menu_title_export">Dışa aktar</string>
+    <string name="menu_item_export">Dışa aktar</string>
+    <string name="job_action_pfa_backup">Yedekle</string>
+    <string name="data_import_error_dialog_confirm">Tamam</string>
+    <string name="restore">Onar</string>
+    <string name="app_name">Yedekle</string>
+    <string name="channel_description">Varsayılan bildirim kanalı</string>
+</resources>
