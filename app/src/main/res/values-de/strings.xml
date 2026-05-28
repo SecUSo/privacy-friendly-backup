@@ -99,7 +99,7 @@
         <item quantity="one">Ihre Auswahl enthält %d verschlüsseltes Backup.</item>
         <item quantity="other">Ihre Auswahl enthält %d verschlüsselte Backups.</item>
     </plurals>
-    <string name="dialog_data_export_multiple_encrypted_warning">Wichtig: Verschlüsselte Backups bleiben verschlüsselt. Falls Sie ein Backup unverschlüsselt exportieren möchten, drücken sie auf \"%s\" auf dem Backup und nutzen die dortige Export-Funktion.</string>
+    <string name="dialog_data_export_multiple_encrypted_warning">Wichtig: Verschlüsselte Backups bleiben verschlüsselt. Wenn Sie ein Backup ohne Verschlüsselung exportieren möchten, verwenden Sie \"%s\" auf einem Backup und benutzen Sie dort die Exportfunktion.</string>
     <string name="dialog_dont_show_again">Nicht mehr anzeigen.</string>
     <string name="menu_title_encryption_info">Verschlüsselungsinformationen</string>
     <string name="version_number">Version: %s</string>

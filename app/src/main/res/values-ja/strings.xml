@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">バックアップ</string>
+    <string name="channel_name">デフォルト</string>
+    <string name="menu_title_search">検索</string>
+    <string name="menu_title_select_all">全て選択</string>
+    <string name="menu_main_apps">バックアップ可能なアプリ一覧</string>
+    <string name="menu_main_backup">バックアップの一覧</string>
+    <string name="menu_main_encryption">暗号化の設定</string>
+    <string name="menu_main_settings">バックアップの設定</string>
+    <string name="menu_main_help">Q&amp;A</string>
+    <string name="menu_main_about">アプリについて</string>
+    <string name="pref_encryption_passphrase">パスワード</string>
+    <string name="pref_encryption_enable_off">データは暗号化されずに保存されます</string>
+    <string name="dialog_delete_confirmation_message">保存したバックアップを削除してもよろしいですか？これらは永久に削除され、復元することはできません。</string>
+    <string name="dialog_delete_confirmation_negative">キャンセル</string>
+    <string name="dialog_delete_confirmation_positive">削除</string>
+    <string name="menu_item_backup">バックアップを作成</string>
+    <string name="menu_item_cancel_jobs">実行中の処理を中止</string>
+    <string name="menu_item_restore_most_recent_backup">最新のバックアップを復元</string>
+    <string name="menu_item_manage_backups">バックアップの管理</string>
+</resources>
