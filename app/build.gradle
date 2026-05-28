@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-parcelize")
+    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
+}
 def pfaFile = rootProject.file('pfa.properties')
 
 android {
@@ -24,8 +27,8 @@ android {
         applicationId "org.secuso.privacyfriendlybackup"
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 9
-        versionName "1.3.5"
+        versionCode 10
+        versionName "1.4.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -37,6 +40,10 @@ android {
                         "room.expandProjection": "true"
                 ]
             }
+        }
+
+        ksp {
+            arg('room.schemaLocation', "$projectDir/schemas")
         }
     }
 
@@ -100,6 +107,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
@@ -116,10 +124,10 @@ dependencies {
     testImplementation "androidx.work:work-testing:$work_version"
 
     // Room Database
-    def roomVersion = "2.6.1"
+    def roomVersion = "2.7.0"
     implementation "androidx.room:room-runtime:$roomVersion"
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
-    kapt "androidx.room:room-compiler:$roomVersion"
+    ksp "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
 
     // Lifecycle

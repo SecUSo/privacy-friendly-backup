@@ -48,8 +48,15 @@
     <string name="dialog_restore_confirmation_title">Restore data</string>
     <string name="pref_category_storage">Storage Settings</string>
     <string name="pref_storage_type">Storage Type</string>
+    <string name="pref_storage_type_summary">
+Specify the storage location used to store the backup data and metadata. \n
+<b>Warning</b>: Using the external storage makes the backup data available to other apps and users. Only use the external storage if encryption is properly setup and enabled. \n
+\n
+Current storage location: %s
+    </string>
     <string name="pref_category_automatic_backup">Automatic Backups</string>
     <string name="storage_type_external">External Storage</string>
+    <string name="storage_type_internal">Internal Storage</string>
     <string name="storage_type_drive">Google Drive</string>
     <string name="menu_item_inspect">Inspect</string>
     <string name="menu_item_restore">Restore</string>
@@ -133,5 +140,8 @@
     <string name="help_encryption_answer2">In order to use the encryption you will need to install a cryptographic provider application. We recommend the OpenKeyChain application because it is open source and available in both the Google Play Store as well as the f-Droid store.</string>
     <string name="help_which_apps">How many and which apps are currently supported?</string>
     <string name="help_which_apps_answer1">Currently only the Notes App is supported but we are working on adding more applications to this list.</string>
+    <string name="storage_location_move_all_to_new_title">Move all backups to new location</string>
+    <string name="storage_location_move_all_to_new_desc">Do you want to move all backups made to the just selected storage location?</string>
+    <string name="move">Relocate</string>
 
 </resources>

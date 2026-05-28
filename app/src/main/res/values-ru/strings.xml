@@ -90,7 +90,7 @@
     <string name="dialog_data_export_start_cancel">Нет</string>
     <string name="dialog_data_export_start_title">Экспорт Бэкапа</string>
     <plurals name="dialog_data_export_start_message">
-        <item quantity="one">Вы хотите экспортировать выбранный бэкап?</item>
+        <item quantity="one">Вы хотите экспортировать %d выбранный бэкап?</item>
         <item quantity="few">Вы хотите экспортировать %1$d выбранных бэкапа?</item>
         <item quantity="many">Вы хотите экспортировать %1$d выбранных бэкапов?</item>
         <item quantity="other">Вы хотите экспортировать %1$d выбранных бэкапов?</item>

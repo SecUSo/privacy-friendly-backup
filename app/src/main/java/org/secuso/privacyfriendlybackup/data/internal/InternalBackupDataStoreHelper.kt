@@ -1,13 +1,20 @@
 package org.secuso.privacyfriendlybackup.data.internal
 
 import android.content.Context
-import android.text.TextUtils
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.secuso.privacyfriendlybackup.api.util.copyInputStreamToFile
+import org.secuso.privacyfriendlybackup.api.util.hash
+import org.secuso.privacyfriendlybackup.api.util.toHex
+import org.secuso.privacyfriendlybackup.data.BackupDataStorageRepository
 import org.secuso.privacyfriendlybackup.data.room.BackupDatabase
 import org.secuso.privacyfriendlybackup.data.room.model.enums.BackupJobAction
 import org.secuso.privacyfriendlybackup.data.room.model.InternalBackupData
+import org.secuso.privacyfriendlybackup.data.room.model.StoredBackupMetaData
+import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.util.BackupDataUtil.getFileName
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -17,6 +24,7 @@ object InternalBackupDataStoreHelper {
     const val TAG = "PFA Internal"
 
     const val BACKUP_DIR = "tempData"
+    const val INTERNAL_BACKUP_DIR = "backupData"
 
     suspend fun storeBackupData(context: Context, packageName: String, inputStream: InputStream, date: Date, encrypted: Boolean = false) : Long {
         val dataId = storeData(context, packageName, inputStream, date, encrypted)
@@ -42,6 +50,63 @@ object InternalBackupDataStoreHelper {
         return dataId
     }
 
+    suspend fun storeData(context: Context, packageName: String, dataId: Long) : Long {
+        return withContext(Dispatchers.IO) {
+            val path = File(context.filesDir, INTERNAL_BACKUP_DIR)
+            path.mkdirs()
+
+            val date = Date()
+
+            val (inputStream, data) = getInternalData(context, dataId)
+            val fileName = getFileName(date, packageName, data?.encrypted == true)
+            val file = File(path, fileName)
+
+            Log.d(TAG, file.toString())
+
+            val dataBytes = inputStream?.use {
+                return@use inputStream.readBytes()
+            }
+            file.copyInputStreamToFile(ByteArrayInputStream(dataBytes))
+
+            if (data != null) {
+                val hash = dataBytes!!.hash("SHA-1").toHex()
+                BackupDatabase.getInstance(context).backupMetaDataDao().insert(
+                    StoredBackupMetaData(
+                        packageName = data.packageName,
+                        timestamp = date,
+                        storageService = StorageType.INTERNAL,
+                        filename = fileName,
+                        encrypted = data.encrypted,
+                        hash = hash
+                    )
+                )
+            } else {
+                -1L
+            }
+        }
+    }
+
+    suspend fun storeData(context: Context, data: BackupDataStorageRepository.BackupData) : Pair<Boolean, Long> {
+        return withContext(Dispatchers.IO) {
+            val path = File(context.filesDir, INTERNAL_BACKUP_DIR)
+            path.mkdirs()
+            val file = File(path, data.filename)
+
+            file.copyInputStreamToFile(ByteArrayInputStream(data.data))
+            val hash = data.data!!.hash("SHA-1").toHex()
+
+            val id = BackupDatabase.getInstance(context).backupMetaDataDao().insert(StoredBackupMetaData(
+                packageName = data.packageName,
+                timestamp = data.timestamp,
+                storageService = StorageType.INTERNAL,
+                filename = data.filename,
+                encrypted = data.encrypted,
+                hash = hash
+            ))
+            return@withContext true to id
+        }
+    }
+
     suspend fun storeData(context: Context, packageName: String, inputStream: InputStream, date: Date, encrypted : Boolean = false) : Long {
         val path = File(context.filesDir, BACKUP_DIR)
         path.mkdirs()
@@ -61,7 +126,38 @@ object InternalBackupDataStoreHelper {
         return BackupDatabase.getInstance(context).internalBackupDataDao().insert(data)
     }
 
+    suspend fun getData(context: Context, metadata : StoredBackupMetaData) : BackupDataStorageRepository.BackupData? {
+        return withContext(Dispatchers.IO) {
+            val path = File(context.filesDir, INTERNAL_BACKUP_DIR)
+            val file = File(path, metadata.filename)
+
+            return@withContext BackupDataStorageRepository.BackupData(
+                metadata._id,
+                metadata.filename,
+                metadata.packageName,
+                metadata.timestamp,
+                file.inputStream().readBytes(),
+                metadata.encrypted,
+                StorageType.INTERNAL,
+                true
+            )
+        }
+    }
+
     suspend fun getInternalData(context: Context, dataId: Long): Pair<InputStream?, InternalBackupData?> {
+        val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
+            ?: return Pair(null, null)
+
+//        if(data.packageName != callingPackageName && data.uid == callingUid) {
+//            Log.d(TAG, "[No Restore Data found.]")
+//            return null
+//        }
+
+        val path = File(context.filesDir, BACKUP_DIR)
+        return File(path, data.file).inputStream() to data
+    }
+
+    suspend fun getInternalStoredData(context: Context, dataId: Long): Pair<InputStream?, InternalBackupData?> {
         val data = BackupDatabase.getInstance(context).internalBackupDataDao().getById(dataId)
             ?: return Pair(null, null)
 
@@ -114,6 +210,23 @@ object InternalBackupDataStoreHelper {
             Log.d(TAG, "File(${file.absolutePath}) deleted.")
         } catch (e : IOException) {
             e.printStackTrace()
+        }
+    }
+
+    suspend fun deleteData(context: Context, metadata : StoredBackupMetaData) {
+        withContext(Dispatchers.IO) {
+            val path = File(context.filesDir, INTERNAL_BACKUP_DIR)
+            val file = File(path, metadata.filename)
+            file.delete()
+        }
+    }
+
+    suspend fun listAvailableData(context: Context) : List<String> {
+        return withContext(Dispatchers.IO) {
+            val files = File(context.filesDir, INTERNAL_BACKUP_DIR).listFiles { _, name ->
+                name.lowercase(Locale.ENGLISH).endsWith(".backup")
+            }
+            files?.map { it.name } ?: emptyList()
         }
     }
 

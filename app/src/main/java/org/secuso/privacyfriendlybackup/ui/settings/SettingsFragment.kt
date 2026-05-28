@@ -9,11 +9,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.*
 import com.google.android.material.appbar.AppBarLayout
+import kotlinx.coroutines.launch
 import org.secuso.privacyfriendlybackup.R
 import org.secuso.privacyfriendlybackup.data.room.model.enums.StorageType
 import org.secuso.privacyfriendlybackup.preference.PreferenceKeys
@@ -24,6 +28,8 @@ import org.secuso.privacyfriendlybackup.ui.encryption.OpenPgpKeyPreference
 import org.secuso.privacyfriendlybackup.ui.main.MainActivity
 
 class SettingsFragment : PreferenceFragmentCompat() {
+
+    private val viewModel by lazy { ViewModelProvider(this)[SettingsViewmodel::class.java] }
 
     companion object {
         const val DIALOG_FRAGMENT_TAG = "SettingsFragment.DIALOG_FRAGMENT_TAG"
@@ -93,8 +99,25 @@ class SettingsFragment : PreferenceFragmentCompat() {
         storageTypePref = findPreference(PREF_STORAGE_TYPE)
 
         storageTypePref?.apply {
+            if (value == null) {
+                value = StorageType.EXTERNAL.toString()
+            }
             entryValues = StorageType.getStorageOptions().map { it.name }.toTypedArray()
             entries = StorageType.getStorageOptions().map { requireContext().getString(it.nameResId) }.toTypedArray()
+            onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
+                AlertDialog.Builder(requireContext()).apply {
+                    setTitle(R.string.storage_location_move_all_to_new_title)
+                    setMessage(R.string.storage_location_move_all_to_new_desc)
+                    setNegativeButton(R.string.cancel, null)
+                    setPositiveButton(R.string.move) { _,_ ->
+                        val storageName = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString(PreferenceKeys.PREF_STORAGE_TYPE, StorageType.INTERNAL.name)
+                        val storageType = StorageType.valueOf(storageName!!)
+                        viewModel.moveBackups(storageType)
+                    }
+                    show()
+                }
+                return@OnPreferenceChangeListener true
+            }
         }
 
         val test : SwitchPreference? = findPreference("pref_test")

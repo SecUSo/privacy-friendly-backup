@@ -47,8 +47,15 @@
     <string name="storage_type_drive">Google Drive</string>
     <string name="pref_category_storage">Speichereinstellungen</string>
     <string name="pref_storage_type">Speichertyp</string>
+    <string name="pref_storage_type_summary">
+Wählen Sie explizit aus, an welcher Stelle die Backup-Daten und -Metadaten gespeichert werden soll.\n
+<b>Achtung</b>: Der externe Speicher ermöglicht anderen Apps, Diensten und Nutzern diese auszulesen oder zu verändern. Nutzen Sie diese Option nur, wenn die Verschlüsselung der Backups eingerichtet ist und verwendet wird. \n
+\n
+Aktueller Speicherort: %s
+    </string>
     <string name="pref_category_automatic_backup">Automatische Backups</string>
     <string name="storage_type_external">Externer Speicher</string>
+    <string name="storage_type_internal">Interner Speicher</string>
     <string name="menu_item_restore">Wiederherstellen</string>
     <string name="activity_data_inspection_error_id_not_valid">Fehler: ID ist nicht korrekt</string>
     <string name="menu_title_export">Exportieren</string>
@@ -129,4 +136,7 @@
     <string name="help_encryption_answer2">Um die Verschlüsselung nutzen zu können, müssen Sie eine Kryptoanbieter-Anwendung installieren. Wir empfehlen die OpenKeyChain-Anwendung, da sie quelloffen ist und sowohl im Google Play Store als auch im F-Droid-Store verfügbar ist.</string>
     <string name="help_which_apps">Wie viele und welche Apps werden zur Zeit unterstützt?</string>
     <string name="help_which_apps_answer1">Wir arbeiten stetig daran neue Apps zu unterstützen. Zurzeit wird nur die Notizen-App unterstützt.</string>
+    <string name="storage_location_move_all_to_new_desc">Sollen alle Backups zu dem gerade ausgewählten Speicherort verschoben werden?</string>
+    <string name="move">Verschieben</string>
+    <string name="storage_location_move_all_to_new_title">Alle Backups verschieben</string>
 </resources>
