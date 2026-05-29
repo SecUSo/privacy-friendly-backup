@@ -7,4 +7,4 @@ Damit die Verschlüsselung funktioniert muss der Provider extern installiert wer
 Kontaktieren Sie uns gerne über:
 Bluesky - @secusoresearch.bsky.social https://bsky.app/profile/secusoresearch.bsky.social
 Mastodon - @SECUSO_Research@bawü.social https://xn--baw-joa.social/@SECUSO_Research/
-Job opening - https://secuso.aifb.kit.edu/english/Job_Offers.php
+Offene Stellen - https://secuso.aifb.kit.edu/83.php
