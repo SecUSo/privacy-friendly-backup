@@ -127,7 +127,6 @@
     <string name="help_whatis_answer">L’application respectueuse de la vie privée Sauvegarde aide les utilisateurs à créer des sauvegardes des autres applications du groupe Privacy Friendly Apps. Elles communiquent, envoient et reçoivent afin de sauvegarder et restaurer les données des applications.</string>
     <string name="help_encryption">Comment fonctionne le chiffrement ?</string>
     <string name="help_encryption_answer1">Le chiffrement est réalisé par un fournisseur externe de cryptographie. Pour plus d’informations, vous pouvez regarder l’openpgp-api qui est utilisé par cette application.</string>
-    <string name="help_encryption_answer2"></string>
     <string name="help_which_apps">Combien et quelles applications sont actuellement compatibles ?</string>
     <string name="storage_location_move_all_to_new_title">Déplacer toutes les sauvegardes vers un nouvel emplacement</string>
     <string name="storage_location_move_all_to_new_desc">Voulez-vous déplacer toutes les sauvegardes existantes vers l’espace de stockage que vous venez de sélectionner ?</string>
