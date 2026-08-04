@@ -129,4 +129,9 @@
     <string name="application_overview_no_entries_text">Hetkel pole paigaldatud ühtegi rakendust, mis toetaks seda varundusprotokolli.</string>
     <string name="menu_title_encryption_info">Krüptimise teave</string>
     <string name="backup_overview_no_entries_text">Hetkel ei leidu ühtegi varukoopiat. Et siin loendis leiduks sisu, siis loo uus varukoopia või impordi olemasolev varukoopia.</string>
+    <string name="pref_storage_type_summary">Määratle andmeruum varukoopia ja metaandmete salvestamiseks. \n <b>Hoiatus</b>: Välise andmeruumi kasutamine muutab varukoopia kasutatavaks teiste rakenduste ja kasutajate poolt. Kasuta välist andmeruumi vaid siis, kui krüptimine on korrektselt seadistatud ja sisse lülitatud. \n \n Hetkel kasutatav andmeruum: %s</string>
+    <string name="storage_type_internal">Sisemine andmeruum</string>
+    <string name="storage_location_move_all_to_new_title">Tõsta kõik varukoopiad uude asukohta</string>
+    <string name="storage_location_move_all_to_new_desc">Kas sa soovid kõiki varukoopiad tõsta äsjavalitud asukohta?</string>
+    <string name="move">Tõsta ümber</string>
 </resources>
