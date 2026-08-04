@@ -134,4 +134,5 @@
     <string name="signature_result_key_insecure">Clé peu sécurisée</string>
     <string name="pref_encryption_crypto_provider">Sélectionner le fournisseur de cryptographie</string>
     <string name="data_inspection_load_status_decryption_error">Une erreur de déchiffrement inconnue s\'est produite. Vérifiez si le bon fournisseur de cryptographie était sélectionné dans les paramètres de chiffrement et si la bonne clé de déchiffrement est toujours disponible chez le fournisseur de cryptographie.</string>
+    <string name="help_encryption_answer2">Afin d’utiliser le chiffrement, vous aurez besoin d’installer une application fournisseuse de cryptographie. Nous recommandons l’application OpenKeyChain parce qu’elle est open source et disponible à la fois dans le Google Play Store et dans le magasin d’applications F-Droid.</string>
 </resources>
